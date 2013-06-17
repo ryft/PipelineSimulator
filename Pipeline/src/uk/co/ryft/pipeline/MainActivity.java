@@ -17,7 +17,7 @@ public class MainActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        setPipelineView((PipelineGLSurfaceView) findViewById(R.id.mysurface));
+        mPipelineView = (PipelineGLSurfaceView) findViewById(R.id.mysurface);
     }
 
     @Override
