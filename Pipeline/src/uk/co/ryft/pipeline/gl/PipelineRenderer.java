@@ -1,5 +1,5 @@
 
-package uk.co.ryft.pipeline;
+package uk.co.ryft.pipeline.gl;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
@@ -25,6 +25,8 @@ public class PipelineRenderer implements Renderer {
     private final float[] mProjMatrix = new float[16];
     private final float[] mVMatrix = new float[16];
     private final float[] mIdentityMatrix = new float[16];
+    
+    public volatile int zoomLevel = 2;
 
     // Declare as volatile because we are updating it from another thread
     public volatile float mAngle;
@@ -41,7 +43,7 @@ public class PipelineRenderer implements Renderer {
                 0.5f, 0.0f, 0.0f
         };
         float colour[] = {
-                0.22265625f, 0.63671875f, 0.76953125f, 1.0f
+                0.92265625f, 0.23671875f, 0.26953125f, 1.0f
         };
         mFace = new Face(triCoords, colour);
 
@@ -58,7 +60,7 @@ public class PipelineRenderer implements Renderer {
         Matrix.setIdentityM(mIdentityMatrix, 0);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, zoomLevel, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         // Params: matrix, offset, eye(x, y, z), focus(x, y, z), up(x, y, z).
 
         // Calculate the projection and view transformation
