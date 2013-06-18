@@ -1,23 +1,25 @@
 
-package uk.co.ryft.pipeline;
+package uk.co.ryft.pipeline.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.action.ActionBarActivity;
-import uk.co.ryft.pipeline.gl.PipelineGLSurfaceView;
+import uk.co.ryft.pipeline.gl.PipelineSurface;
 
 public class MainActivity extends ActionBarActivity {
     
-    private PipelineGLSurfaceView mPipelineView;
+    private PipelineSurface mPipelineView;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mPipelineView = (PipelineGLSurfaceView) findViewById(R.id.mysurface);
+        mPipelineView = (PipelineSurface) findViewById(R.id.pipelineSurface);
     }
 
     @Override
@@ -34,19 +36,11 @@ public class MainActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Toast.makeText(this, "Tapped home", Toast.LENGTH_SHORT).show();
                 break;
 
-            case R.id.menu_refresh:
-                Toast.makeText(this, "Fake refreshing...", Toast.LENGTH_SHORT).show();
-                getActionBarHelper().setRefreshActionItemState(true);
-                getWindow().getDecorView().postDelayed(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                getActionBarHelper().setRefreshActionItemState(false);
-                            }
-                        }, 1000);
+            case R.id.menu_edit_scene:
+                Intent intent = new Intent(this, SceneActivity.class);
+                startActivity(intent);
                 break;
 
             case R.id.menu_search:
@@ -54,17 +48,28 @@ public class MainActivity extends ActionBarActivity {
                 break;
 
             case R.id.menu_share:
-                Toast.makeText(this, "Tapped share", Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPipelineView.onPause();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPipelineView.onResume();
+    }
 
-    public PipelineGLSurfaceView getPipelineView() {
+    public PipelineSurface getPipelineView() {
         return mPipelineView;
     }
 
-    public void setPipelineView(PipelineGLSurfaceView mPipelineView) {
+    public void setPipelineView(PipelineSurface mPipelineView) {
         this.mPipelineView = mPipelineView;
     }
 

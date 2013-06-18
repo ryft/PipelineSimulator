@@ -20,12 +20,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-
-import uk.co.ryft.pipeline.R;
 
 /**
  * An extension of {@link ActionBarHelper} that provides Android 3.0-specific functionality for
@@ -34,7 +29,7 @@ import uk.co.ryft.pipeline.R;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ActionBarHelperHoneycomb extends ActionBarHelper {
     private Menu mOptionsMenu;
-    private View mRefreshIndeterminateProgressView = null;
+//    private View mRefreshIndeterminateProgressView = null;
 
     protected ActionBarHelperHoneycomb(Activity activity) {
         super(activity);
@@ -54,22 +49,22 @@ public class ActionBarHelperHoneycomb extends ActionBarHelper {
             return;
         }
 
-        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
-        if (refreshItem != null) {
-            if (refreshing) {
-                if (mRefreshIndeterminateProgressView == null) {
-                    LayoutInflater inflater = (LayoutInflater)
-                            getActionBarThemedContext().getSystemService(
-                                    Context.LAYOUT_INFLATER_SERVICE);
-                    mRefreshIndeterminateProgressView = inflater.inflate(
-                            R.layout.actionbar_indeterminate_progress, null);
-                }
-
-                refreshItem.setActionView(mRefreshIndeterminateProgressView);
-            } else {
-                refreshItem.setActionView(null);
-            }
-        }
+//        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.menu_refresh);
+//        if (refreshItem != null) {
+//            if (refreshing) {
+//                if (mRefreshIndeterminateProgressView == null) {
+//                    LayoutInflater inflater = (LayoutInflater)
+//                            getActionBarThemedContext().getSystemService(
+//                                    Context.LAYOUT_INFLATER_SERVICE);
+//                    mRefreshIndeterminateProgressView = inflater.inflate(
+//                            R.layout.actionbar_indeterminate_progress, null);
+//                }
+//
+//                refreshItem.setActionView(mRefreshIndeterminateProgressView);
+//            } else {
+//                refreshItem.setActionView(null);
+//            }
+//        }
     }
 
     /**
