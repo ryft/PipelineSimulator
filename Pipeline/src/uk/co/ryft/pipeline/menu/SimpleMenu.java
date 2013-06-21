@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.co.ryft.pipeline.action;
+package uk.co.ryft.pipeline.menu;
 
 import android.content.ComponentName;
 import android.content.Context;

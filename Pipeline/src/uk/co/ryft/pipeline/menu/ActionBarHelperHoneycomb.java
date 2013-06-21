@@ -14,25 +14,41 @@
  * limitations under the License.
  */
 
-package uk.co.ryft.pipeline.action;
+package uk.co.ryft.pipeline.menu;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
+import android.view.Menu;
 
 /**
- * An extension of {@link uk.co.ryft.pipeline.action.example.android.actionbarcompat.ActionBarHelper} that provides Android
- * 4.0-specific functionality for IceCreamSandwich devices. It thus requires API level 14.
+ * An extension of {@link ActionBarHelper} that provides Android 3.0-specific
+ * functionality for Honeycomb tablets. It thus requires API level 11.
  */
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class ActionBarHelperICS extends ActionBarHelperHoneycomb {
-    protected ActionBarHelperICS(Activity activity) {
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+public class ActionBarHelperHoneycomb extends ActionBarHelper {
+
+    protected ActionBarHelperHoneycomb(Activity activity) {
         super(activity);
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void setRefreshActionItemState(boolean refreshing) {
+        // Refresh button removed.
+    }
+
+    /**
+     * Returns a {@link Context} suitable for inflating layouts for the action
+     * bar. The implementation for this method in {@link ActionBarHelperICS}
+     * asks the action bar for a themed context.
+     */
     protected Context getActionBarThemedContext() {
-        return mActivity.getActionBar().getThemedContext();
+        return mActivity;
     }
 }

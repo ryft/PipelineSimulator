@@ -3,23 +3,32 @@ package uk.co.ryft.pipeline.model;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 
 public class Model implements Iterable<Element> {
     
-    protected List<Listener> listeners;
-    protected List<Element> elements;
+    protected List<ModelListener> mListeners;
+    protected TreeSet<Element> mElements;
     
     public Model() {
-        listeners = new LinkedList<Listener>();
-        elements = new LinkedList<Element>();
+        mListeners = new LinkedList<ModelListener>();
+        mElements = new TreeSet<Element>();
+    }
+    
+    public TreeSet<Element> getAllElements() {
+        return mElements;
     }
     
     public void addSceneElement(Element elem) {
-        elements.add(elem);
+        mElements.add(elem);
     }
     
-    public void registerListener(Listener l) {
-        listeners.add(l);
+    public void updateSceneElement(Element elem) {
+        // TODO: This.
+    }
+    
+    public void registerListener(ModelListener l) {
+        mListeners.add(l);
     }
     
     public void setUpdated() {
@@ -27,13 +36,12 @@ public class Model implements Iterable<Element> {
     }
     
     protected void notifyListeners() {
-        for (Listener l : listeners)
-            l.elementsChanged(elements);
+        for (ModelListener l : mListeners) l.elementsChanged(mElements);
     }
 
     @Override
     public Iterator<Element> iterator() {
-        return elements.iterator();
+        return mElements.iterator();
     }
 
 }

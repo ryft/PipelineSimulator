@@ -19,7 +19,7 @@
     android:layout_height="fill_parent" >
 
     <uk.co.ryft.pipeline.gl.PipelineSurface
-        android:id="@+id/pipelineSurface"
+        android:id="@+id/pipeline_surface"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 

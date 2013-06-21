@@ -3,6 +3,7 @@ package uk.co.ryft.pipeline.gl.shapes;
 
 import android.opengl.GLES20;
 
+import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 
 import java.nio.ByteBuffer;
@@ -10,7 +11,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-public abstract class Polygon {
+public class Polygon {
 
     protected final int COORDS_PER_VERTEX = 3;
 
@@ -51,6 +52,20 @@ public abstract class Polygon {
     protected final int mVertexCount;
     
     protected short mDrawOrder[];
+    
+    public static Polygon getRegularPolygon(int N, FloatPoint centre, double radius, double rotation, float[] colour) {       
+        
+        float coords[] = new float[N*3];
+        
+        for (int i = 0; i < N; i++) {
+            int j = i * 3;
+            coords[j] = (float) (radius * Math.cos(2 * Math.PI * ((double) i / N) + rotation) + centre.getX());
+            coords[j+1] = (float) (radius * Math.sin(2 * Math.PI * ((double) i / N) + rotation) + centre.getY());
+            coords[j+2] = centre.getZ();
+        }
+        
+        return new Polygon(coords, colour, N);
+    }
 
     public Polygon(float[] coords, float[] colour, int vertexCount) {
 

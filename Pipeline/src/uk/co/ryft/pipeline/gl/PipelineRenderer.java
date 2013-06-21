@@ -6,7 +6,7 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import uk.co.ryft.pipeline.gl.shapes.Triangle;
+import uk.co.ryft.pipeline.gl.shapes.Polygon;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -19,35 +19,29 @@ import javax.microedition.khronos.opengles.GL10;
 public class PipelineRenderer implements Renderer {
 
     private static final String TAG = "PipelineRenderer";
-    // private Cube mCube;
-    // private Pentagon mPentagon;
-    private Triangle mFace;
+    private Polygon mShape;
 
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjMatrix = new float[16];
     private final float[] mVMatrix = new float[16];
+    private final float[] mRotationMatrix = new float[16];
     private final float[] mIdentityMatrix = new float[16];
-    
-    public volatile int zoomLevel = 2;
 
-    // Declare as volatile because we are updating it from another thread
-    public volatile float mAngle;
+    public volatile int zoomLevel = 5;
+
+    // Declare these variable as volatile because we may update them from another thread
+    public volatile float mAngle = (float) Math.PI / 4;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame colour
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
 
-        float triCoords[] = {
-                -0.5f, 0.5f, 0.0f,
-                -0.5f, -0.5f, 0.0f,
-                0.5f, 0.0f, 0.0f
-        };
-        float colour[] = {
-                0.92265625f, 0.23671875f, 0.26953125f, 1.0f
-        };
-        mFace = new Triangle(triCoords, colour);
+        float green[] = new Colour(0, 255, 0).getColour();
+
+        mShape = Polygon
+                .getRegularPolygon(3, new FloatPoint(0f, 0f, 5f), 0.5, 0, green);
     }
 
     @Override
@@ -66,10 +60,16 @@ public class PipelineRenderer implements Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
 
-        // Draw objects in the scene
-        // mPentagon.draw(mMVPMatrix);
-        mFace.draw(mMVPMatrix);
-        // mCube.draw(mMVPMatrix);
+        // Set up rotation matrix
+        Matrix.setRotateM(mRotationMatrix, 0, 90f, 0, 0, 1.0f);
+        // Params: matrix, offset, angle, scale factor (x, y, z)
+        // Angle is in degrees for some odd reason.
+
+        // Combine the rotation matrix with the projection and camera view
+        Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
+
+        // Draw object in the scene
+        mShape.draw(mMVPMatrix);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class PipelineRenderer implements Renderer {
 
     public static int loadShader(int type, String shaderCode) {
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // Create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader(type);
 
@@ -257,4 +257,3 @@ class Cube {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 }
-

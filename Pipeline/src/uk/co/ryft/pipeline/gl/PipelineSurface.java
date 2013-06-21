@@ -5,12 +5,7 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Listener;
-
-import java.util.List;
-
-public class PipelineSurface extends GLSurfaceView implements Listener {
+public class PipelineSurface extends GLSurfaceView {
 
     private final PipelineRenderer mRenderer = new PipelineRenderer();
     
@@ -46,11 +41,6 @@ public class PipelineSurface extends GLSurfaceView implements Listener {
         mRenderer.zoomLevel++;
         requestRender();
         return mRenderer.zoomLevel;
-    }
-
-    @Override
-    public void elementsChanged(List<Element> elems) {
-        // TODO Auto-generated method stub
     }
 
 }
