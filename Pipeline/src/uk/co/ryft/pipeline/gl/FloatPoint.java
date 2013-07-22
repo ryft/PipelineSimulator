@@ -1,6 +1,10 @@
 package uk.co.ryft.pipeline.gl;
 
-public class FloatPoint {
+import java.io.Serializable;
+
+public class FloatPoint implements Serializable {
+    
+    private static final long serialVersionUID = -4166884951552173806L;
     
     private float x;
     private float y;
@@ -31,7 +35,5 @@ public class FloatPoint {
     public void setZ(float z) {
         this.z = z;
     }
-    
-    
 
 }

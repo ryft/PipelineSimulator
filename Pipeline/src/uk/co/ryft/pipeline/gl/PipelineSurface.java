@@ -5,6 +5,10 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import uk.co.ryft.pipeline.model.Element;
+
+import java.util.List;
+
 public class PipelineSurface extends GLSurfaceView {
 
     private final PipelineRenderer mRenderer = new PipelineRenderer();
@@ -25,11 +29,17 @@ public class PipelineSurface extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
+        this.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
         setRenderer(mRenderer);
 
         // Render the view only when there is a change in the drawing data
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         
+    }
+    
+    public void updateScene(List<Element> elements) {
+        mRenderer.updateScene(elements);
+        requestRender();
     }
 
     @Override

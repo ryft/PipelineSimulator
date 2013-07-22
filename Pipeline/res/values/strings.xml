@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
 
     <string name="app_name">Pipeline Simulator</string>
-    <string name="menu_edit_scene">Edit Scene</string>
-    <string name="menu_search">Search</string>
-    <string name="menu_share">Share</string>
-    <string name="menu_add">Add</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_save">Save</string>
-    <string name="title_activity_scene">Create Scene</string>
-    <string name="title_activity_element">Create Element</string>
-    <string name="element_icon">Element Icon</string>
-    <string name="element_edit">Edit Element</string>
+    <string name="action_scene">Edit scene</string>
+    <string name="action_element">New Element</string>
+    <string name="action_clear">Clear</string>
+    <string name="title_activity_scene">Edit Scene</string>
+    <string name="title_activity_element">Edit Element</string>
+    <string name="desc_element_icon">Element Icon</string>
+    <string name="desc_element_edit">Edit Element</string>
+    <string name="button_scene_save">Save Scene</string>
+    <string name="button_element_save">Save</string>
+    <string name="button_element_delete">Delete</string>
+    <string name="message_clear">Scene cleared</string>
+    <string name="message_element_added">Element added</string>
+    <string name="message_element_updated">Element updated</string>
+    <string name="message_element_deleted">Element deleted</string>
+    <string name="message_element_discarded">Element discarded</string>
+    <string name="message_changes_discarded">Changes discarded</string>
 
 </resources>

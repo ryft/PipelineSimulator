@@ -1,15 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     
-    <item android:id="@+id/menu_add"
-        android:title="@string/menu_add"
-        android:icon="@drawable/ic_add"
-        android:orderInCategory="0"
-        android:showAsAction="always" />
+    <item
+        android:id="@+id/action_element"
+        android:title="@string/action_element"
+        android:icon="@drawable/ic_action_element"
+        android:showAsAction="always|withText" />
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:id="@+id/action_clear"
+        android:title="@string/action_clear"
+        android:icon="@drawable/ic_action_clear"
+        android:showAsAction="never" />
 
 </menu>

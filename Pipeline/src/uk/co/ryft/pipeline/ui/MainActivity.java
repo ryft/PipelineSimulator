@@ -1,60 +1,77 @@
 
 package uk.co.ryft.pipeline.ui;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineSurface;
-import uk.co.ryft.pipeline.menu.ActionBarActivity;
+import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Element.Type;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     protected PipelineSurface mPipelineView;
     protected ArrayList<Element> mElements;
 
     protected static final int EDIT_SCENE_REQUEST = 1;
 
+    @SuppressWarnings("unchecked")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        setupActionBar();
+
         mPipelineView = (PipelineSurface) findViewById(R.id.pipeline_surface);
-        mElements = new ArrayList<Element>();
 
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.TRIANGLE_FAN, null));
-        mElements.add(new Element(Type.LINES, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.TRIANGLE_FAN, null));
-        mElements.add(new Element(Type.LINES, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.POINTS, null));
-        mElements.add(new Element(Type.TRIANGLE_FAN, null));
-        mElements.add(new Element(Type.LINES, null));
-        mElements.add(new Element(Type.POINTS, null));
+        // Get elements from returning activity intent or saved state, if
+        // possible.
+        Bundle extras = getIntent().getExtras();
 
+        if (extras != null && extras.containsKey("elements")) {
+            mElements = (ArrayList<Element>) extras.getSerializable("elements");
+
+        } else if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
+            mElements = (ArrayList<Element>) savedInstanceState.getSerializable("elements");
+
+        } else {
+            mElements = new ArrayList<Element>();
+        }
+
+        List<Drawable> scene = new LinkedList<Drawable>();
+        for (Element e : mElements) {
+            Drawable d = e.getDrawable();
+            scene.add(d);
+        }
+
+        updateScene();
+
+    }
+
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setDisplayShowHomeEnabled(false);
+        }
+    }
+
+    protected void updateScene() {
+        mPipelineView.updateScene(mElements);
     }
 
     @Override
@@ -74,18 +91,10 @@ public class MainActivity extends ActionBarActivity {
             case android.R.id.home:
                 break;
 
-            case R.id.menu_edit_scene:
+            case R.id.action_scene:
                 Intent intent = new Intent(this, SceneActivity.class);
                 intent.putExtra("elements", mElements);
                 startActivityForResult(intent, EDIT_SCENE_REQUEST);
-                break;
-
-            case R.id.menu_search:
-                Toast.makeText(this, "Zoomed out to level " + mPipelineView.zoomOut(),
-                        Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.menu_share:
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -97,13 +106,23 @@ public class MainActivity extends ActionBarActivity {
         // Check which request we're responding to
         if (requestCode == EDIT_SCENE_REQUEST) {
 
-            if (resultCode == Activity.RESULT_OK && requestCode == EDIT_SCENE_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
                 @SuppressWarnings("unchecked")
                 ArrayList<Element> newElems = (ArrayList<Element>) data.getExtras()
                         .getSerializable("elements");
                 mElements = newElems;
+                updateScene();
             }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putSerializable("elements", mElements);
     }
 
     @Override

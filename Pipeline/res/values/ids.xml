@@ -1,9 +1,0 @@
-
-<resources>
-    <item type="id" name="actionbar_compat" />
-    <item type="id" name="actionbar_compat_title" />
-    <item type="id" name="menu_edit_scene" />
-    <item type="id" name="menu_search" />
-    <item type="id" name="menu_share" />
-    <item type="id" name="menu_add" />
-</resources>
