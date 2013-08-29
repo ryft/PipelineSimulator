@@ -18,24 +18,28 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
     private static final long serialVersionUID = 5661009688352125290L;
 
     public static enum Type {
-        GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_QUADS, GL_QUAD_STRIP, GL_POLYGON
-    };
+        GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_QUADS, GL_QUAD_STRIP, GL_POLYGON;
 
-    private static final Map<Type, String> mDescriptionMap;
-    static {
-        Map<Type, String> descriptionMap = new HashMap<Type, String>();
-        descriptionMap.put(Type.GL_POINTS, "Single points");
-        descriptionMap.put(Type.GL_LINES, "Distinct lines");
-        descriptionMap.put(Type.GL_LINE_STRIP, "Line strip");
-        descriptionMap.put(Type.GL_LINE_LOOP, "Line loop");
-        descriptionMap.put(Type.GL_TRIANGLES, "Distinct triangles");
-        descriptionMap.put(Type.GL_TRIANGLE_STRIP, "Triangle strip");
-        descriptionMap.put(Type.GL_TRIANGLE_FAN, "Triangle fan");
-        descriptionMap.put(Type.GL_QUADS, "Distinct quads");
-        descriptionMap.put(Type.GL_QUAD_STRIP, "Quad strip");
-        descriptionMap.put(Type.GL_POLYGON, "Convex Polygon");
-        mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
-    }
+        private static final Map<Type, String> mDescriptionMap;
+        static {
+            Map<Type, String> descriptionMap = new HashMap<Type, String>();
+            descriptionMap.put(Type.GL_POINTS, "Single points");
+            descriptionMap.put(Type.GL_LINES, "Distinct lines");
+            descriptionMap.put(Type.GL_LINE_STRIP, "Line strip");
+            descriptionMap.put(Type.GL_LINE_LOOP, "Line loop");
+            descriptionMap.put(Type.GL_TRIANGLES, "Distinct triangles");
+            descriptionMap.put(Type.GL_TRIANGLE_STRIP, "Triangle strip");
+            descriptionMap.put(Type.GL_TRIANGLE_FAN, "Triangle fan");
+            descriptionMap.put(Type.GL_QUADS, "Distinct quads");
+            descriptionMap.put(Type.GL_QUAD_STRIP, "Quad strip");
+            descriptionMap.put(Type.GL_POLYGON, "Polygon");
+            mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
+        }
+        
+        public String getDescription() {
+            return mDescriptionMap.get(this);
+        }
+    };
 
     protected Type mType;
     protected final List<FloatPoint> mVertices = new ArrayList<FloatPoint>();
@@ -66,7 +70,7 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
     }
 
     public String getTitle() {
-        return mDescriptionMap.get(mType) + "\n(" + mType.toString() + ")";
+        return mType.toString() + "\n(" + mType.getDescription() + ")";
     }
 
     public String getSummary() {
@@ -85,6 +89,8 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
     /**
      * Instantiates a new Drawable object which represents this element, and is
      * ready to draw in the renderer.
+     * 
+     * This function must be called from the render thread, not the UI thread.
      * 
      * @return Drawable representation of this element.
      */

@@ -3,35 +3,51 @@ package uk.co.ryft.pipeline.ui;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SpinnerAdapter;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
+import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Element.Type;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ElementActivity extends Activity {
 
-    boolean edit_mode;
-    Element oldElem;
-    Element newElem;
+    boolean isEditMode;
+    Element mOldElem;
+    Element mNewElem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Bundle fromScene = this.getIntent().getExtras();
-        edit_mode = fromScene.getBoolean("edit_mode");
+        isEditMode = fromScene.getBoolean("edit_mode");
 
-        if (edit_mode) {
-            oldElem = (Element) fromScene.getSerializable("element");
-            newElem = (Element) oldElem.clone();
+        if (isEditMode) {
+            setTitle("Edit Element");
+
+            mOldElem = (Element) fromScene.getSerializable("element");
+            mNewElem = (Element) mOldElem.clone();
 
             setContentView(R.layout.activity_element_edit);
 
@@ -47,17 +63,33 @@ public class ElementActivity extends Activity {
         }
 
         else {
+            setTitle("Add Element");
+
+            mNewElem = new Element(Type.GL_POINTS);
+            
             setContentView(R.layout.activity_element_add);
 
         }
+
+        final TypeSpinner typeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
+        SpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this,
+                android.R.layout.simple_list_item_1, Element.Type.values());
+        typeSpinner.setAdapter(typeAdapter);
 
         final Button button_save = (Button) findViewById(R.id.button_element_save);
         button_save.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent result = new Intent();
-                if (edit_mode)
-                    result.putExtra("element_old", oldElem);
-                result.putExtra("element_new", newElem); // TODO
+                if (isEditMode)
+                    result.putExtra("element_old", mOldElem);
+
+                List<FloatPoint> verts = new LinkedList<FloatPoint>();
+                verts.add(new FloatPoint(0f, 0.5f, 0f));
+                verts.add(new FloatPoint(-0.5f, 0f, 0f));
+                verts.add(new FloatPoint(0.5f, -0.5f, 0f));
+                Element e = new Element((Type) typeSpinner.getSelectedItem(), verts, Colour.CYAN);
+
+                result.putExtra("element_new", e); // TODO
                 setResult(RESULT_OK, result);
                 finish();
             }
@@ -130,4 +162,112 @@ public class ElementActivity extends Activity {
         // The activity is about to be destroyed.
     }
 
+    class PointAdapter extends BaseAdapter {
+
+        final Context mContext;
+        final ArrayList<FloatPoint> mPoints;
+        final LayoutInflater mInflater;
+
+        public PointAdapter(Context context, Collection<FloatPoint> points) {
+            super();
+
+            mContext = context;
+            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            mPoints = new ArrayList<FloatPoint>();
+            mPoints.addAll(points);
+
+            final Button button = (Button) findViewById(R.id.button_element_save);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent result = new Intent();
+                    result.putExtra("points", mPoints);
+                    setResult(Activity.RESULT_OK, result);
+                    finish();
+                }
+            });
+        }
+
+        public boolean add(FloatPoint point) {
+            boolean ret = mPoints.add(point);
+            notifyDataSetChanged();
+            return ret;
+        }
+
+        public boolean addAll(Collection<FloatPoint> points) {
+            boolean ret = mPoints.addAll(points);
+            notifyDataSetChanged();
+            return ret;
+        }
+
+        public boolean remove(FloatPoint point) {
+            boolean ret = mPoints.remove(point);
+            notifyDataSetChanged();
+            return ret;
+        }
+
+        public boolean removeAll(Collection<FloatPoint> points) {
+            boolean ret = mPoints.removeAll(points);
+            notifyDataSetChanged();
+            return ret;
+        }
+
+        @SuppressWarnings("unchecked")
+        public ArrayList<Element> getAllElements() {
+            return (ArrayList<Element>) mPoints.clone();
+        }
+
+        public void clear() {
+            mPoints.clear();
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            // Recycle view if possible
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.listitem_element, null);
+            }
+
+            EditText pointX = (EditText) convertView.findViewById(R.id.textinput_point_x);
+            EditText pointY = (EditText) convertView.findViewById(R.id.textinput_point_y);
+            EditText pointZ = (EditText) convertView.findViewById(R.id.textinput_point_z);
+
+            pointX.setText(String.valueOf(mNewElem.getVertices().get(position).getX()));
+            pointY.setText(String.valueOf(mNewElem.getVertices().get(position).getY()));
+            pointZ.setText(String.valueOf(mNewElem.getVertices().get(position).getZ()));
+            
+            // TODO
+
+//            ImageView elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
+//            TextView typeTextView = (TextView) convertView.findViewById(R.id.element_type);
+//            ImageView forwardImageView = (ImageView) convertView.findViewById(R.id.element_edit);
+//            TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+//
+//            Element elem = mElems.get(position);
+//            elemIcon.setImageResource(elem.getIconRef());
+//            typeTextView.setText(elem.getTitle());
+//            forwardImageView.setImageResource(R.drawable.ic_button_edit);
+//            summaryTextView.setText(elem.getSummary());
+
+            return convertView;
+        }
+
+        @Override
+        public int getCount() {
+            return mPoints.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return mPoints.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+    }
+    
 }

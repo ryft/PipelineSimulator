@@ -4,31 +4,53 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ListView
-        android:id="@+id/element_list"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dip"
-		android:layout_weight="1"
-        android:clipToPadding="false"
-        android:divider="@null"
-        android:dividerHeight="6dp" />
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/label_element_type"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <uk.co.ryft.pipeline.ui.TypeSpinner
+            android:id="@+id/element_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_element_points"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <ListView
+            android:id="@+id/element_points_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <LinearLayout
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-		android:layout_weight="0"
-	    android:orientation="horizontal" >
-	    
-	    <Button
-	        android:id="@+id/button_element_save"
-	        android:layout_width="wrap_content"
-	        android:layout_height="match_parent"
-	        android:text="@string/button_element_save" />
-	    <Button
-	        android:id="@+id/button_element_delete"
-	        android:layout_width="wrap_content"
-	        android:layout_height="match_parent"
-	        android:text="@string/button_element_delete" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
 
-	</LinearLayout>
+        <Button
+            android:id="@+id/button_element_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+        	android:layout_weight="1"
+            android:text="@string/button_element_save" />
+
+        <Button
+            android:id="@+id/button_element_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+        	android:layout_weight="1"
+            android:text="@string/button_element_delete" />
+    </LinearLayout>
+
 </LinearLayout>

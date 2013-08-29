@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -225,6 +226,7 @@ public class SceneActivity extends Activity {
 
             final Button button = (Button) findViewById(R.id.button_scene_save);
             button.setOnClickListener(new View.OnClickListener() {
+                @Override
                 public void onClick(View v) {
                     Intent result = new Intent();
                     result.putExtra("elements", mElems);
@@ -269,7 +271,7 @@ public class SceneActivity extends Activity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
 
             // Recycle view if possible
             if (convertView == null) {
@@ -282,12 +284,22 @@ public class SceneActivity extends Activity {
             TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
 
             Element elem = mElems.get(position);
-            elemIcon.setImageResource(elem.getIconRef());
-            typeTextView.setText(elem.getTitle());
-            forwardImageView.setImageResource(R.drawable.ic_button_edit);
-            summaryTextView.setText(elem.getSummary());
 
-            System.out.println("Called getView()");
+            if (elem != null) {
+                elemIcon.setImageResource(elem.getIconRef());
+                typeTextView.setText(elem.getTitle());
+                forwardImageView.setImageResource(R.drawable.ic_button_edit);
+                summaryTextView.setText(elem.getSummary());
+
+                forwardImageView.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        editElement((Element) getItem(position));
+                    }
+
+                });
+            }
 
             return convertView;
         }

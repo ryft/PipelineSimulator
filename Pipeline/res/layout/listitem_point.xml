@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="12dp"
+    android:background="@color/list_item_bg"
+    android:gravity="center_vertical"
+    android:orientation="horizontal" >
+    
+    <TextView
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+        android:ellipsize="none"
+        android:singleLine="true"
+        android:text="@string/label_point_x" />
+    
+    <EditText
+	    android:id="@+id/textinput_point_x"
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+	    android:inputType="number" />
+    
+    <TextView
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+        android:ellipsize="none"
+        android:singleLine="true"
+        android:text="@string/label_point_y" />
+    
+    <EditText
+	    android:id="@+id/textinput_point_y"
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+	    android:inputType="number" />
+    
+    <TextView
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+        android:ellipsize="none"
+        android:singleLine="true"
+        android:text="@string/label_point_z" />
+    
+    <EditText
+	    android:id="@+id/textinput_point_z"
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+	    android:inputType="number" />
+
+</LinearLayout>
