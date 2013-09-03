@@ -36,6 +36,11 @@ public class SceneActivity extends Activity {
     protected ListView mListView;
     protected ElementAdapter mAdapter;
 
+    // XXX Need to store this reference to be able to update/delete.
+    // If we pass the worked-on element back and forth, it gets serialised and
+    // we lose the reference.
+    protected Element mThisElement;
+
     @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +100,7 @@ public class SceneActivity extends Activity {
                 return true;
 
             case R.id.action_element:
-                createElement();
+                addElement();
                 break;
 
             case R.id.action_clear:
@@ -106,7 +111,7 @@ public class SceneActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    protected void createElement() {
+    protected void addElement() {
         Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", false);
         startActivityForResult(intent, ADD_ELEMENT_REQUEST);
@@ -116,7 +121,8 @@ public class SceneActivity extends Activity {
         Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
-        startActivityForResult(intent, ADD_ELEMENT_REQUEST);
+        mThisElement = e;
+        startActivityForResult(intent, EDIT_ELEMENT_REQUEST);
     }
 
     @Override
@@ -136,34 +142,40 @@ public class SceneActivity extends Activity {
         // >> Otherwise replace element_old with element_new
         // Otherwise -> original element is element_old
 
-        // If the request went well (OK) and the request was ADD_ELEMENT_REQUEST
+        // If the request was ADD_ELEMENT_REQUEST
         if (requestCode == ADD_ELEMENT_REQUEST)
+
             if (resultCode == Activity.RESULT_OK) {
-                mAdapter.add((Element) data.getSerializableExtra("element_new"));
+                mAdapter.add((Element) data.getSerializableExtra("element"));
                 message = getString(R.string.message_element_added);
             } else
                 message = getString(R.string.message_element_discarded);
 
-        // If the request went well (OK) and the request was
-        // EDIT_ELEMENT_REQUEST
+        // If the request was EDIT_ELEMENT_REQUEST
         else if (requestCode == EDIT_ELEMENT_REQUEST)
-            if (resultCode == Activity.RESULT_OK) {
-                Element oldElem = (Element) data.getSerializableExtra("element_old");
-                Element newElem = (Element) data.getSerializableExtra("element_new");
+
+            if (resultCode == Activity.RESULT_OK)
 
                 if (data.getBooleanExtra("deleted", false)) {
-                    mAdapter.remove(oldElem);
+                    if (mThisElement != null)
+                        mAdapter.remove(mThisElement);
+                    mThisElement = null;
                     message = getString(R.string.message_element_deleted);
+
                 } else {
-                    mAdapter.remove(oldElem);
-                    mAdapter.add(newElem);
+                    if (mThisElement != null)
+                        mAdapter.remove(mThisElement);
+                    mThisElement = null;
+                    mAdapter.add((Element) data.getSerializableExtra("element"));
                     message = getString(R.string.message_element_updated);
                 }
-            } else
+
+            else
                 message = getString(R.string.message_changes_discarded);
 
-        else
-        // Add any new result codes here.
+        else {
+            // Add any new result codes here.
+        }
 
         if (message != "")
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();

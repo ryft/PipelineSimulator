@@ -64,9 +64,19 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
         return mType;
     }
 
+    public void setType(Type t) {
+        mType = t;
+    }
+
     public List<FloatPoint> getVertices() {
         // TODO this is unsafe -- passing a reference to a list.
         return mVertices;
+    }
+    
+    public void setVertices(List<FloatPoint> vertices) {
+        // Probably not unsafe but investigate and discuss the mutability of FloatPoints.
+        mVertices.clear();
+        mVertices.addAll(vertices);
     }
 
     public String getTitle() {

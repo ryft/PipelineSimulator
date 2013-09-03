@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +16,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SpinnerAdapter;
+import android.widget.ListView;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
@@ -32,9 +31,8 @@ import java.util.List;
 
 public class ElementActivity extends Activity {
 
-    boolean isEditMode;
-    Element mOldElem;
-    Element mNewElem;
+    protected boolean isEditMode;
+    protected Element mElement;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +43,7 @@ public class ElementActivity extends Activity {
 
         if (isEditMode) {
             setTitle("Edit Element");
-
-            mOldElem = (Element) fromScene.getSerializable("element");
-            mNewElem = (Element) mOldElem.clone();
+            mElement = (Element) fromScene.getSerializable("element");
 
             setContentView(R.layout.activity_element_edit);
 
@@ -65,31 +61,35 @@ public class ElementActivity extends Activity {
         else {
             setTitle("Add Element");
 
-            mNewElem = new Element(Type.GL_POINTS);
+            List<FloatPoint> verts = new LinkedList<FloatPoint>();
+            verts.add(new FloatPoint(0f, 0.5f, 0f));
+            verts.add(new FloatPoint(-0.5f, 0f, 0f));
+            verts.add(new FloatPoint(0.5f, -0.5f, 0f));
+            mElement = new Element((Type) Type.GL_QUAD_STRIP, verts, Colour.CYAN);
             
             setContentView(R.layout.activity_element_add);
 
         }
 
         final TypeSpinner typeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
-        SpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this,
-                android.R.layout.simple_list_item_1, Element.Type.values());
-        typeSpinner.setAdapter(typeAdapter);
+        TypeSpinnerAdapter mTypeAdapter = new TypeSpinnerAdapter(this, android.R.layout.simple_list_item_1, Element.Type.values());
+        typeSpinner.setAdapter(mTypeAdapter);
+        
+        ListView pointList = (ListView) findViewById(R.id.element_points_list);
+        pointList.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        
+        final PointAdapter pAdapter = new PointAdapter(this, mElement.getVertices());
+        pointList.setAdapter(pAdapter);
 
         final Button button_save = (Button) findViewById(R.id.button_element_save);
         button_save.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent result = new Intent();
-                if (isEditMode)
-                    result.putExtra("element_old", mOldElem);
-
-                List<FloatPoint> verts = new LinkedList<FloatPoint>();
-                verts.add(new FloatPoint(0f, 0.5f, 0f));
-                verts.add(new FloatPoint(-0.5f, 0f, 0f));
-                verts.add(new FloatPoint(0.5f, -0.5f, 0f));
-                Element e = new Element((Type) typeSpinner.getSelectedItem(), verts, Colour.CYAN);
-
-                result.putExtra("element_new", e); // TODO
+                
+                mElement.setType((Type) typeSpinner.getSelectedItem());
+                mElement.setVertices(pAdapter.mPoints);
+                result.putExtra("element", mElement);
+                
                 setResult(RESULT_OK, result);
                 finish();
             }
@@ -124,7 +124,7 @@ public class ElementActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                finish();
                 return true;
 
         }
@@ -176,16 +176,6 @@ public class ElementActivity extends Activity {
 
             mPoints = new ArrayList<FloatPoint>();
             mPoints.addAll(points);
-
-            final Button button = (Button) findViewById(R.id.button_element_save);
-            button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Intent result = new Intent();
-                    result.putExtra("points", mPoints);
-                    setResult(Activity.RESULT_OK, result);
-                    finish();
-                }
-            });
         }
 
         public boolean add(FloatPoint point) {
@@ -227,29 +217,33 @@ public class ElementActivity extends Activity {
 
             // Recycle view if possible
             if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.listitem_element, null);
+                convertView = mInflater.inflate(R.layout.listitem_point, null);
             }
 
             EditText pointX = (EditText) convertView.findViewById(R.id.textinput_point_x);
             EditText pointY = (EditText) convertView.findViewById(R.id.textinput_point_y);
             EditText pointZ = (EditText) convertView.findViewById(R.id.textinput_point_z);
 
-            pointX.setText(String.valueOf(mNewElem.getVertices().get(position).getX()));
-            pointY.setText(String.valueOf(mNewElem.getVertices().get(position).getY()));
-            pointZ.setText(String.valueOf(mNewElem.getVertices().get(position).getZ()));
-            
+            pointX.setText(String.valueOf(mElement.getVertices().get(position).getX()));
+            pointY.setText(String.valueOf(mElement.getVertices().get(position).getY()));
+            pointZ.setText(String.valueOf(mElement.getVertices().get(position).getZ()));
+
             // TODO
 
-//            ImageView elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
-//            TextView typeTextView = (TextView) convertView.findViewById(R.id.element_type);
-//            ImageView forwardImageView = (ImageView) convertView.findViewById(R.id.element_edit);
-//            TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
-//
-//            Element elem = mElems.get(position);
-//            elemIcon.setImageResource(elem.getIconRef());
-//            typeTextView.setText(elem.getTitle());
-//            forwardImageView.setImageResource(R.drawable.ic_button_edit);
-//            summaryTextView.setText(elem.getSummary());
+            // ImageView elemIcon = (ImageView)
+            // convertView.findViewById(R.id.element_icon);
+            // TextView typeTextView = (TextView)
+            // convertView.findViewById(R.id.element_type);
+            // ImageView forwardImageView = (ImageView)
+            // convertView.findViewById(R.id.element_edit);
+            // TextView summaryTextView = (TextView)
+            // convertView.findViewById(R.id.element_summary);
+            //
+            // Element elem = mElems.get(position);
+            // elemIcon.setImageResource(elem.getIconRef());
+            // typeTextView.setText(elem.getTitle());
+            // forwardImageView.setImageResource(R.drawable.ic_button_edit);
+            // summaryTextView.setText(elem.getSummary());
 
             return convertView;
         }
@@ -269,5 +263,5 @@ public class ElementActivity extends Activity {
             return position;
         }
     }
-    
+
 }
