@@ -2,46 +2,73 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/list_item_bg"
-    android:gravity="center_vertical"
     android:orientation="horizontal" >
-    
+
     <TextView
-	    android:layout_width="wrap_content"
-	    android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:ellipsize="none"
+        android:gravity="center_vertical"
         android:singleLine="true"
-        android:text="@string/label_point_x" />
-    
+        android:text="@string/label_point_1"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <EditText
-	    android:id="@+id/textinput_point_x"
-	    android:layout_width="wrap_content"
-	    android:layout_height="match_parent"
-	    android:inputType="number" />
-    
+        android:id="@+id/textinput_point_x"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:inputType="number" />
+
     <TextView
-	    android:layout_width="wrap_content"
-	    android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:ellipsize="none"
+        android:gravity="center_vertical"
         android:singleLine="true"
-        android:text="@string/label_point_y" />
-    
+        android:text="@string/label_point_2"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <EditText
-	    android:id="@+id/textinput_point_y"
-	    android:layout_width="wrap_content"
-	    android:layout_height="match_parent"
-	    android:inputType="number" />
-    
+        android:id="@+id/textinput_point_y"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:inputType="number" />
+
     <TextView
-	    android:layout_width="wrap_content"
-	    android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:ellipsize="none"
+        android:gravity="center_vertical"
         android:singleLine="true"
-        android:text="@string/label_point_z" />
-    
+        android:text="@string/label_point_2"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <EditText
-	    android:id="@+id/textinput_point_z"
-	    android:layout_width="wrap_content"
-	    android:layout_height="match_parent"
-	    android:inputType="number" />
+        android:id="@+id/textinput_point_z"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:ellipsize="none"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:text="@string/label_point_3"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/button_point_update"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:enabled="false"
+        android:text="@string/button_point_update" />
+
+    <Button
+        android:id="@+id/button_point_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/button_point_delete" />
 
 </LinearLayout>

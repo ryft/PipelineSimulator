@@ -16,6 +16,8 @@
     <string name="button_scene_save">Save Scene</string>
     <string name="button_element_save">Save</string>
     <string name="button_element_delete">Delete</string>
+    <string name="button_point_update">Update</string>
+    <string name="button_point_delete">Delete</string>
     
     <string name="message_clear">Scene cleared</string>
     <string name="message_element_added">Element added</string>
@@ -24,9 +26,9 @@
     <string name="message_element_discarded">Element discarded</string>
     <string name="message_changes_discarded">Changes discarded</string>
     
-    <string name="label_point_x">X: </string>
-    <string name="label_point_y">Y: </string>
-    <string name="label_point_z">Z: </string>
+    <string name="label_point_1">( </string>
+    <string name="label_point_2">, </string>
+    <string name="label_point_3"> )</string>
     
     <string name="label_element_type">Element type: </string>
     <string name="label_element_points">Vertex list: </string>
