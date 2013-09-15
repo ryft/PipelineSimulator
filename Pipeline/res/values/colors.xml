@@ -15,5 +15,5 @@
   -->
 
 <resources>
-    <color name="list_item_bg">#ffaaaaaa</color>
+    <color name="list_item_bg">#ffcccccc</color>
 </resources>

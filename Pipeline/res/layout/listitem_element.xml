@@ -31,9 +31,10 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="8dp"
             android:layout_weight="1"
-            android:ellipsize="none"
+            android:ellipsize="end"
             android:gravity="left|center_vertical"
-            android:singleLine="false" />
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageView
             android:id="@+id/element_edit"

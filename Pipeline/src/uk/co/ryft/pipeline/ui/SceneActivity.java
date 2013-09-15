@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -34,6 +35,11 @@ public class SceneActivity extends Activity {
 
     protected ListView mListView;
     protected ElementAdapter mAdapter;
+
+    // XXX Need to store this reference to be able to update/delete.
+    // If we pass the worked-on element back and forth, it gets serialised and
+    // we lose the reference.
+    protected Element mThisElement;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -94,7 +100,7 @@ public class SceneActivity extends Activity {
                 return true;
 
             case R.id.action_element:
-                createElement();
+                addElement();
                 break;
 
             case R.id.action_clear:
@@ -105,7 +111,7 @@ public class SceneActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    protected void createElement() {
+    protected void addElement() {
         Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", false);
         startActivityForResult(intent, ADD_ELEMENT_REQUEST);
@@ -115,7 +121,8 @@ public class SceneActivity extends Activity {
         Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
-        startActivityForResult(intent, ADD_ELEMENT_REQUEST);
+        mThisElement = e;
+        startActivityForResult(intent, EDIT_ELEMENT_REQUEST);
     }
 
     @Override
@@ -135,34 +142,40 @@ public class SceneActivity extends Activity {
         // >> Otherwise replace element_old with element_new
         // Otherwise -> original element is element_old
 
-        // If the request went well (OK) and the request was ADD_ELEMENT_REQUEST
+        // If the request was ADD_ELEMENT_REQUEST
         if (requestCode == ADD_ELEMENT_REQUEST)
+
             if (resultCode == Activity.RESULT_OK) {
-                mAdapter.add((Element) data.getSerializableExtra("element_new"));
+                mAdapter.add((Element) data.getSerializableExtra("element"));
                 message = getString(R.string.message_element_added);
             } else
                 message = getString(R.string.message_element_discarded);
 
-        // If the request went well (OK) and the request was
-        // EDIT_ELEMENT_REQUEST
+        // If the request was EDIT_ELEMENT_REQUEST
         else if (requestCode == EDIT_ELEMENT_REQUEST)
-            if (resultCode == Activity.RESULT_OK) {
-                Element oldElem = (Element) data.getSerializableExtra("element_old");
-                Element newElem = (Element) data.getSerializableExtra("element_new");
+
+            if (resultCode == Activity.RESULT_OK)
 
                 if (data.getBooleanExtra("deleted", false)) {
-                    mAdapter.remove(oldElem);
+                    if (mThisElement != null)
+                        mAdapter.remove(mThisElement);
+                    mThisElement = null;
                     message = getString(R.string.message_element_deleted);
+
                 } else {
-                    mAdapter.remove(oldElem);
-                    mAdapter.add(newElem);
+                    if (mThisElement != null)
+                        mAdapter.remove(mThisElement);
+                    mThisElement = null;
+                    mAdapter.add((Element) data.getSerializableExtra("element"));
                     message = getString(R.string.message_element_updated);
                 }
-            } else
+
+            else
                 message = getString(R.string.message_changes_discarded);
 
-        else
-        // Add any new result codes here.
+        else {
+            // Add any new result codes here.
+        }
 
         if (message != "")
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
@@ -225,6 +238,7 @@ public class SceneActivity extends Activity {
 
             final Button button = (Button) findViewById(R.id.button_scene_save);
             button.setOnClickListener(new View.OnClickListener() {
+                @Override
                 public void onClick(View v) {
                     Intent result = new Intent();
                     result.putExtra("elements", mElems);
@@ -269,7 +283,7 @@ public class SceneActivity extends Activity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
 
             // Recycle view if possible
             if (convertView == null) {
@@ -282,12 +296,22 @@ public class SceneActivity extends Activity {
             TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
 
             Element elem = mElems.get(position);
-            elemIcon.setImageResource(elem.getIconRef());
-            typeTextView.setText(elem.getTitle());
-            forwardImageView.setImageResource(R.drawable.ic_button_edit);
-            summaryTextView.setText(elem.getSummary());
 
-            System.out.println("Called getView()");
+            if (elem != null) {
+                elemIcon.setImageResource(elem.getIconRef());
+                typeTextView.setText(elem.getTitle());
+                forwardImageView.setImageResource(R.drawable.ic_button_edit);
+                summaryTextView.setText(elem.getSummary());
+
+                forwardImageView.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        editElement((Element) getItem(position));
+                    }
+
+                });
+            }
 
             return convertView;
         }

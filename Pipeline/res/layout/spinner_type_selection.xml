@@ -1,0 +1,9 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/spinner_type_selection"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="left|center_vertical"
+    android:singleLine="true"
+    android:ellipsize="end"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:typeface="monospace" />
