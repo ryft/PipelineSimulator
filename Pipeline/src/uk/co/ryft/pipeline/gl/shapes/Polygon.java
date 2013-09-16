@@ -20,24 +20,6 @@ public class Polygon extends Drawable {
     // Bytes between consecutive vertices
     private final int vertexStride = COORDS_PER_VERTEX * 4;
 
-    protected static final String VERTEX_SHADER_EMPTY =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
-
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    "  gl_Position = vPosition * uMVPMatrix;" +
-                    "}";
-
-    protected static final String FRAGMENT_SHADER_EMPTY =
-            "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
-
     protected FloatBuffer vertexBuffer;
     protected ShortBuffer drawListBuffer;
     protected final int mProgram;
