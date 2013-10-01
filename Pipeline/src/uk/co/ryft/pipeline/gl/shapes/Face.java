@@ -11,38 +11,41 @@ import java.nio.FloatBuffer;
 
 public class Face extends Drawable {
 
-    private FloatBuffer vertexBuffer;
-    private final int mProgram;
-    private int mPositionHandle;
-    private int mColorHandle;
-    private int mMVPMatrixHandle;
+    private FloatBuffer      vertexBuffer;
+    private final int        mProgram;
+    private int              mPositionHandle;
+    private int              mColorHandle;
+    private int              mMVPMatrixHandle;
 
-    private final static int COORDS_PER_VERTEX = 3;
+    private final static int COORDS_PER_VERTEX  = 3;
 
-    private final int vertexCount = 3;
+    private final int        vertexCount        = 3;
     // Bytes between consecutive vertices
-    private final int vertexStride = COORDS_PER_VERTEX * 4;
+    private final int        vertexStride       = COORDS_PER_VERTEX * 4;
 
-    final float triangleCoords[];
-    final float colour[];
+    final float              triangleCoords[];
+    final float              colour[];
 
-    private final String vertexShaderCode =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
+    private final String     vertexShaderCode   =
+                                                // This matrix member variable
+                                                // provides a hook to manipulate
+                                                // the coordinates of the
+                                                // objects that use this vertex
+                                                // shader
+                                                "uniform mat4 uMVPMatrix;"
+                                                        + "attribute vec4 vPosition;"
+                                                        + "void main() {"
+                                                        +
+                                                        // the matrix must be
+                                                        // included as a
+                                                        // modifier of
+                                                        // gl_Position
+                                                        "  gl_Position = vPosition * uMVPMatrix;"
+                                                        + "}";
 
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    "  gl_Position = vPosition * uMVPMatrix;" +
-                    "}";
-
-    private final String fragmentShaderCode =
-            "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
+    private final String     fragmentShaderCode = "precision mediump float;"
+                                                        + "uniform vec4 vColor;" + "void main() {"
+                                                        + "  gl_FragColor = vColor;" + "}";
 
     public Face(float[] triangleCoords, float[] colour) {
 
@@ -51,7 +54,7 @@ public class Face extends Drawable {
 
         // Initialise vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
-                // (number of coordinate values * 4 bytes per float)
+        // (number of coordinate values * 4 bytes per float)
                 triangleCoords.length * 4);
         // use the device hardware's native byte order
         bb.order(ByteOrder.nativeOrder());
@@ -87,8 +90,7 @@ public class Face extends Drawable {
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
         // get handle to fragment shader's vColor member

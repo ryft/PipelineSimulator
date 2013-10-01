@@ -1,18 +1,16 @@
 
 package uk.co.ryft.pipeline.gl.shapes;
 
-import android.opengl.GLES20;
-
-import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.model.Drawable;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-public class Polygon extends Drawable {
+import uk.co.ryft.pipeline.gl.PipelineRenderer;
+import uk.co.ryft.pipeline.model.Drawable;
+import android.opengl.GLES20;
+
+public class Point extends Drawable {
 
     protected FloatBuffer vertexBuffer;
     protected ShortBuffer drawListBuffer;
@@ -22,22 +20,8 @@ public class Polygon extends Drawable {
     protected int mMVPMatrixHandle;
     
     protected short mDrawOrder[];
-    
-    public static Polygon getRegularPolygon(int N, FloatPoint centre, double radius, double rotation, float[] colour) {       
-        
-        float coords[] = new float[N*3];
-        
-        for (int i = 0; i < N; i++) {
-            int j = i * 3;
-            coords[j] = (float) (radius * Math.cos(2 * Math.PI * ((double) i / N) + rotation) + centre.getX());
-            coords[j+1] = (float) (radius * Math.sin(2 * Math.PI * ((double) i / N) + rotation) + centre.getY());
-            coords[j+2] = centre.getZ();
-        }
-        
-        return new Polygon(coords, colour, N);
-    }
 
-    public Polygon(float[] coords, float[] colour, int vertexCount) {
+    public Point(float[] coords, float[] colour, int vertexCount) {
 
         mCoords = coords;
         mColour = colour;
@@ -121,7 +105,7 @@ public class Polygon extends Drawable {
         PipelineRenderer.checkGlError("glUniformMatrix4fv");
 
         // Draw the polygon
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mDrawOrder.length, GLES20.GL_UNSIGNED_SHORT,
+        GLES20.glDrawElements(GLES20.GL_POINTS, mDrawOrder.length, GLES20.GL_UNSIGNED_SHORT,
                 drawListBuffer);
 
         // Disable vertex array

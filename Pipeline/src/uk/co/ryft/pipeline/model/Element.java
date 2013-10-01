@@ -1,17 +1,17 @@
 
 package uk.co.ryft.pipeline.model;
 
-import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
-import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.gl.shapes.Polygon;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
+import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.shapes.Polygon;
 
 public class Element implements Comparable<Element>, Serializable, Cloneable {
 
@@ -93,7 +93,7 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
     }
 
     public int getIconRef() {
-        return R.drawable.ic_element;
+        return R.drawable.ic_action_element;
     }
 
     /**
@@ -109,7 +109,8 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
         if (mType == Type.GL_POLYGON) {
 
             // Convert vertices to float array
-            float[] coords = new float[mVertices.size() * 3];
+        	int vertexCount = mVertices.size() * 3;
+            float[] coords = new float[vertexCount];
             int i = 0;
             for (FloatPoint fp : mVertices) {
                 coords[i] = fp.getX();
@@ -118,6 +119,17 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
                 i += 3;
             }
             return new Polygon(coords, mColour.getColour(), mVertices.size());
+            
+        } else if (mType == Type.GL_POINTS) {
+        	return new Drawable() {
+
+				@Override
+				public void draw(float[] mvpMatrix) {
+					
+
+				}
+        		
+        	};
 
         } else
             return null;
