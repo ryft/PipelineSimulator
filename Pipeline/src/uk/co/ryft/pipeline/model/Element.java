@@ -1,17 +1,16 @@
 
 package uk.co.ryft.pipeline.model;
 
-import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
-import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.gl.shapes.Polygon;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import uk.co.ryft.pipeline.gl.Colour;
+import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.shapes.Polygon;
 
 public class Element implements Comparable<Element>, Serializable, Cloneable {
 
@@ -93,7 +92,7 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
     }
 
     public int getIconRef() {
-        return R.drawable.ic_element;
+        return 0; // TODO
     }
 
     /**

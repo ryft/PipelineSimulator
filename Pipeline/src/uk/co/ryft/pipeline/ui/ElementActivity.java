@@ -1,36 +1,33 @@
 
 package uk.co.ryft.pipeline.ui;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Element.Type;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
 
 public class ElementActivity extends Activity {
 
@@ -171,7 +168,8 @@ public class ElementActivity extends Activity {
         final Context mContext;
         final ArrayList<FloatPoint> mPoints;
         final LayoutInflater mInflater;
-        Button mUpdateButton;
+        ImageButton mUpdateButton;
+        ImageButton mDeleteButton;
 
         public PointAdapter(Context context, Collection<FloatPoint> points) {
             super();
@@ -195,8 +193,8 @@ public class ElementActivity extends Activity {
             return ret;
         }
 
-        public boolean remove(FloatPoint point) {
-            boolean ret = mPoints.remove(point);
+        public FloatPoint remove(int index) {
+            FloatPoint ret = mPoints.remove(index);
             notifyDataSetChanged();
             return ret;
         }
@@ -222,7 +220,7 @@ public class ElementActivity extends Activity {
 
             // Recycle view if possible
             if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.listitem_point, null);
+                convertView = mInflater.inflate(R.layout.edit_point, null);
             }
 
             final EditText pointX = (EditText) convertView.findViewById(R.id.textinput_point_x);
@@ -233,50 +231,30 @@ public class ElementActivity extends Activity {
             pointY.setText(String.valueOf(mElement.getVertices().get(position).getY()));
             pointZ.setText(String.valueOf(mElement.getVertices().get(position).getZ()));
 
-            mUpdateButton = (Button) convertView.findViewById(R.id.button_point_update);
-            mUpdateButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // XXX these should be safe casts, see edittext xml
-                    // parameters
-                    mPoints.get(position).setX(Float.valueOf(pointX.getText().toString()));
-                    mPoints.get(position).setY(Float.valueOf(pointY.getText().toString()));
-                    mPoints.get(position).setZ(Float.valueOf(pointZ.getText().toString()));
-                    mUpdateButton.setEnabled(false);
-                }
-            });
+//            mUpdateButton = (ImageButton) convertView.findViewById(R.id.button_point_update);
+//            mUpdateButton.setOnClickListener(new OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    // XXX these should be safe casts, see edittext xml
+//                    // parameters
+//                    mPoints.get(position).setX(Float.valueOf(pointX.getText().toString()));
+//                    mPoints.get(position).setY(Float.valueOf(pointY.getText().toString()));
+//                    mPoints.get(position).setZ(Float.valueOf(pointZ.getText().toString()));
+//                }
+//            });
 
-            pointX.addTextChangedListener(new PointTextWatcher(mUpdateButton));
-            pointY.addTextChangedListener(new PointTextWatcher(mUpdateButton));
-            pointZ.addTextChangedListener(new PointTextWatcher(mUpdateButton));
+//            mDeleteButton = (ImageButton) convertView.findViewById(R.id.button_point_remove);
+//            mDeleteButton.setOnClickListener(new OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    remove(position);
+//                    pointX.setText(String.valueOf(mElement.getVertices().get(position).getX()));
+//                    pointY.setText(String.valueOf(mElement.getVertices().get(position).getY()));
+//                    pointZ.setText(String.valueOf(mElement.getVertices().get(position).getZ()));
+//                }
+//            });
 
             return convertView;
-        }
-
-        private class PointTextWatcher implements TextWatcher {
-
-            private Button mUpdateButton;
-
-            private PointTextWatcher(Button updateButton) {
-                this.mUpdateButton = updateButton;
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                mUpdateButton.setEnabled(true);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // TODO Auto-generated method stub
-
-            }
         }
 
         @Override

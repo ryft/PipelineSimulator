@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -30,6 +30,13 @@
         </activity>
         <activity
             android:name="uk.co.ryft.pipeline.ui.ElementActivity"
+            android:label="@string/title_activity_element" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="uk.co.ryft.pipeline.ui.SceneActivity" />
+        </activity>
+        <activity
+            android:name="uk.co.ryft.pipeline.ui.DismissableActivity"
             android:label="@string/title_activity_element" >
 	        <meta-data
 	            android:name="android.support.PARENT_ACTIVITY"

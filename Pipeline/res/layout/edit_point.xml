@@ -1,7 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/list_item_bg"
     android:orientation="horizontal" >
 
     <TextView
@@ -15,7 +14,8 @@
 
     <EditText
         android:id="@+id/textinput_point_x"
-        android:layout_width="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
         android:layout_height="match_parent"
         android:inputType="numberSigned|numberDecimal" />
 
@@ -30,7 +30,8 @@
 
     <EditText
         android:id="@+id/textinput_point_y"
-        android:layout_width="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
         android:layout_height="match_parent"
         android:inputType="numberSigned|numberDecimal" />
 
@@ -45,7 +46,8 @@
 
     <EditText
         android:id="@+id/textinput_point_z"
-        android:layout_width="wrap_content"
+        android:layout_width="0dip"
+        android:layout_weight="1"
         android:layout_height="match_parent"
         android:inputType="numberSigned|numberDecimal" />
 
@@ -57,18 +59,5 @@
         android:singleLine="true"
         android:text="@string/label_point_3"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <Button
-        android:id="@+id/button_point_update"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:enabled="false"
-        android:text="@string/button_point_update" />
-
-    <Button
-        android:id="@+id/button_point_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="@string/button_point_delete" />
 
 </LinearLayout>

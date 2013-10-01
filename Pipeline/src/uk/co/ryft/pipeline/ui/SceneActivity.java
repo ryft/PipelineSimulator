@@ -112,9 +112,11 @@ public class SceneActivity extends Activity {
     }
 
     protected void addElement() {
-        Intent intent = new Intent(this, ElementActivity.class);
-        intent.putExtra("edit_mode", false);
-        startActivityForResult(intent, ADD_ELEMENT_REQUEST);
+//      Intent intent = new Intent(this, ElementActivity.class);
+//      intent.putExtra("edit_mode", false);
+//      startActivityForResult(intent, ADD_ELEMENT_REQUEST);
+      Intent intent = new Intent(this, DismissableActivity.class);
+      startActivityForResult(intent, ADD_ELEMENT_REQUEST);
     }
 
     protected void editElement(Element e) {
@@ -300,7 +302,7 @@ public class SceneActivity extends Activity {
             if (elem != null) {
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
-                forwardImageView.setImageResource(R.drawable.ic_button_edit);
+                forwardImageView.setImageResource(R.drawable.ic_action_edit);
                 summaryTextView.setText(elem.getSummary());
 
                 forwardImageView.setOnClickListener(new OnClickListener() {

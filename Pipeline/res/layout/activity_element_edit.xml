@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/label_element_type"
+            android:text="@string/heading_element_type"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <uk.co.ryft.pipeline.ui.TypeSpinner
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_element_points"
+            android:text="@string/heading_points"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ListView
