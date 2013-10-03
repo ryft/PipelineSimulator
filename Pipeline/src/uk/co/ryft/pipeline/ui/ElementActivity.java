@@ -11,7 +11,6 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Element.Type;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -99,10 +97,6 @@ public class ElementActivity extends Activity {
         setupActionBar();
     }
 
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
@@ -220,16 +214,16 @@ public class ElementActivity extends Activity {
 
             // Recycle view if possible
             if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.edit_point, null);
+                convertView = mInflater.inflate(R.layout.listitem_point, null);
             }
 
-            final EditText pointX = (EditText) convertView.findViewById(R.id.textinput_point_x);
-            final EditText pointY = (EditText) convertView.findViewById(R.id.textinput_point_y);
-            final EditText pointZ = (EditText) convertView.findViewById(R.id.textinput_point_z);
-
-            pointX.setText(String.valueOf(mElement.getVertices().get(position).getX()));
-            pointY.setText(String.valueOf(mElement.getVertices().get(position).getY()));
-            pointZ.setText(String.valueOf(mElement.getVertices().get(position).getZ()));
+//            final EditText pointX = (EditText) convertView.findViewById(R.id.textinput_point_x);
+//            final EditText pointY = (EditText) convertView.findViewById(R.id.textinput_point_y);
+//            final EditText pointZ = (EditText) convertView.findViewById(R.id.textinput_point_z);
+//
+//            pointX.setText(String.valueOf(mElement.getVertices().get(position).getX()));
+//            pointY.setText(String.valueOf(mElement.getVertices().get(position).getY()));
+//            pointZ.setText(String.valueOf(mElement.getVertices().get(position).getZ()));
 
 //            mUpdateButton = (ImageButton) convertView.findViewById(R.id.button_point_update);
 //            mUpdateButton.setOnClickListener(new OnClickListener() {

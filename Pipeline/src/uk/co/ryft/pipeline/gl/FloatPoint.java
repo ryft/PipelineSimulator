@@ -35,5 +35,10 @@ public class FloatPoint implements Serializable {
     public void setZ(float z) {
         this.z = z;
     }
+    
+    @Override
+    public String toString() {
+        return "("+getX()+", "+getY()+", "+getZ()+")";
+    }
 
 }

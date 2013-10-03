@@ -19,7 +19,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp" >
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp" >
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
@@ -30,15 +31,8 @@
     <uk.co.ryft.pipeline.ui.TypeSpinner
         android:id="@+id/element_type_spinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/heading_point_new" />
-    
-    <include android:id="@+id/point_new" layout="@layout/edit_point" />
+        android:layout_margin="4dp" />
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
