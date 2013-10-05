@@ -23,13 +23,13 @@ public class PipelineSurface extends GLSurfaceView {
         construct();
     }
     
-    private void construct() {
+    private void construct() { //TODO is this ever called?
 
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        this.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
+        setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
         setRenderer(mRenderer);
 
         // Render the view only when there is a change in the drawing data
