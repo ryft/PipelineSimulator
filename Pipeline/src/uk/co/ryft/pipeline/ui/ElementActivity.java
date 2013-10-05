@@ -1,117 +1,184 @@
+/*
+ * Copyright 2013 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+//  Adapted from https://github.com/romannurik/Android-SwipeToDismiss
 
 package uk.co.ryft.pipeline.ui;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+
+import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Element.Type;
+import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ViewSwitcher;
 
-import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
-import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Element.Type;
+import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+public class ElementActivity extends ListActivity {
 
-public class ElementActivity extends Activity {
-
-    protected boolean isEditMode;
+    protected ArrayAdapter<FloatPoint> mAdapter;
     protected Element mElement;
+    protected TypeSpinner mTypeSpinner;
+    protected ViewSwitcher mViewSwitcher;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_element);
 
+        // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
-        isEditMode = fromScene.getBoolean("edit_mode");
-
-        if (isEditMode) {
-            setTitle("Edit Element");
+        if (fromScene.getBoolean("edit_mode", false))
             mElement = (Element) fromScene.getSerializable("element");
+        else
+            mElement = new Element(Type.GL_POINTS);
 
-            setContentView(R.layout.activity_element_edit);
-
-            final Button button_delete = (Button) findViewById(R.id.button_element_delete);
-            button_delete.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    Intent result = new Intent();
-                    result.putExtra("deleted", true);
-                    setResult(RESULT_OK, result);
-                    finish();
-                }
-            });
-        }
-
-        else {
-            setTitle("Add Element");
-
-            List<FloatPoint> verts = new LinkedList<FloatPoint>();
-            verts.add(new FloatPoint(0f, 0.5f, 0f));
-            verts.add(new FloatPoint(-0.5f, 0f, 0f));
-            verts.add(new FloatPoint(0.5f, -0.5f, 0f));
-            mElement = new Element((Type) Type.GL_QUAD_STRIP, verts, Colour.CYAN);
-
-            setContentView(R.layout.activity_element_add);
-
-        }
-
-        final TypeSpinner typeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
-        TypeSpinnerAdapter mTypeAdapter = new TypeSpinnerAdapter(this,
+        // Set current element properties as default selections
+        mTypeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
+        TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this,
                 android.R.layout.simple_list_item_1, Element.Type.values());
-        typeSpinner.setAdapter(mTypeAdapter);
+        mTypeSpinner.setAdapter(typeAdapter);
+        mTypeSpinner.setSelection(mElement.getType());
 
-        ListView pointList = (ListView) findViewById(R.id.element_points_list);
-        pointList.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        mAdapter = new ArrayAdapter<FloatPoint>(this, R.layout.listitem_point_view,
+                R.id.text_point, mElement.getVertices());
+        setListAdapter(mAdapter);
 
-        final PointAdapter pAdapter = new PointAdapter(this, mElement.getVertices());
-        pointList.setAdapter(pAdapter);
+        // The below is copied verbatim from https://github.com/romannurik/Android-SwipeToDismiss
+        ListView listView = getListView();
+        // Create a ListView-specific touch listener. ListViews are given special treatment because
+        // by default they handle touches for their list items... i.e. they're in charge of drawing
+        // the pressed state (the list selector), handling list item clicks, etc.
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
+                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
 
-        final Button button_save = (Button) findViewById(R.id.button_element_save);
-        button_save.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent result = new Intent();
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        for (int position : reverseSortedPositions) {
+                            mAdapter.remove((FloatPoint) mAdapter.getItem(position));
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+        listView.setOnTouchListener(touchListener);
+        // Setting this scroll listener is required to ensure that during ListView scrolling,
+        // we don't look for swipes.
+        listView.setOnScrollListener(touchListener.makeScrollListener());
 
-                mElement.setType((Type) typeSpinner.getSelectedItem());
-                mElement.setVertices(pAdapter.mPoints);
-                result.putExtra("element", mElement);
+        // Set up list item click event handler.
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
-                setResult(RESULT_OK, result);
-                finish();
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+
+                // Instantiate and display a float picker dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(ElementActivity.this);
+                builder.setTitle(R.string.dialogue_title_point);
+
+                LayoutInflater inflater = ElementActivity.this.getLayoutInflater();
+                View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
+
+                final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
+                final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
+                final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
+                final FloatPoint thisPoint = mAdapter.getItem(position);
+
+                builder.setView(dialogueView);
+                builder.setPositiveButton(R.string.dialogue_button_save,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                float x = Float.valueOf(editX.getText().toString());
+                                float y = Float.valueOf(editY.getText().toString());
+                                float z = Float.valueOf(editZ.getText().toString());
+                                thisPoint.setCoordinates(x, y, z);
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        });
+                builder.setNegativeButton(R.string.dialogue_button_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                            }
+                        });
+
+                // Get the AlertDialog, initialise values and show it.
+                AlertDialog dialogue = builder.create();
+
+                editX.setText(String.valueOf(thisPoint.getX()));
+                editY.setText(String.valueOf(thisPoint.getY()));
+                editZ.setText(String.valueOf(thisPoint.getZ()));
+                dialogue.show();
             }
         });
 
         setupActionBar();
     }
 
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setDisplayShowHomeEnabled(false);
+    @Override
+    public void onBackPressed() {
+        saveAndQuit();
+    }
+
+    protected void saveAndQuit() {
+        Intent result = new Intent();
+
+        mElement.setType((Type) mTypeSpinner.getSelectedItem());
+        LinkedList<FloatPoint> points = new LinkedList<FloatPoint>();
+        for (int i = 0; i < mAdapter.getCount(); i++) {
+            points.add((FloatPoint) mAdapter.getItem(i));
         }
+        mElement.setVertices(points);
+        result.putExtra("element", mElement);
+
+        setResult(RESULT_OK, result);
+        finish();
+    }
+
+    protected void discardAndQuit() {
+        Intent result = new Intent();
+        setResult(RESULT_CANCELED, result);
+        finish();
+    }
+
+    private void setupActionBar() {
+        // Show the Up button in the action bar.
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayShowHomeEnabled(false);
     }
 
     @Override
@@ -128,171 +195,55 @@ public class ElementActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
-                return true;
+                // NavUtils.navigateUpFromSameTask(this);
+                saveAndQuit();
 
+            case R.id.action_point_new:
+                mAdapter.add(new FloatPoint(0f, 0f, 0f));
+                mAdapter.notifyDataSetChanged();
+                break;
+
+            case R.id.action_element_discard:
+                discardAndQuit();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // The activity is about to become visible.
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // The activity has become visible (it is now "resumed").
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Another activity is taking focus (this activity is about to be
-        // "paused").
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // The activity is no longer visible (it is now "stopped")
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // The activity is about to be destroyed.
-    }
-
-    class PointAdapter extends BaseAdapter {
+    // TODO: Consider using a BaseAdapter -- see
+    // http://www.piwai.info/android-adapter-good-practices/
+    // TODO: Consider using a ViewHolder -- see
+    // http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
+    class PointAdapter extends ArrayAdapter<FloatPoint> {
 
         final Context mContext;
         final ArrayList<FloatPoint> mPoints;
         final LayoutInflater mInflater;
-        Button mUpdateButton;
 
         public PointAdapter(Context context, Collection<FloatPoint> points) {
-            super();
+            super(context, 0);
 
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mPoints = new ArrayList<FloatPoint>(points);
 
-            mPoints = new ArrayList<FloatPoint>();
-            mPoints.addAll(points);
-        }
-
-        public boolean add(FloatPoint point) {
-            boolean ret = mPoints.add(point);
-            notifyDataSetChanged();
-            return ret;
-        }
-
-        public boolean addAll(Collection<FloatPoint> points) {
-            boolean ret = mPoints.addAll(points);
-            notifyDataSetChanged();
-            return ret;
-        }
-
-        public boolean remove(FloatPoint point) {
-            boolean ret = mPoints.remove(point);
-            notifyDataSetChanged();
-            return ret;
-        }
-
-        public boolean removeAll(Collection<FloatPoint> points) {
-            boolean ret = mPoints.removeAll(points);
-            notifyDataSetChanged();
-            return ret;
-        }
-
-        @SuppressWarnings("unchecked")
-        public ArrayList<Element> getAllElements() {
-            return (ArrayList<Element>) mPoints.clone();
-        }
-
-        public void clear() {
-            mPoints.clear();
-            notifyDataSetChanged();
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
             // Recycle view if possible
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.listitem_point, null);
-            }
-
-            final EditText pointX = (EditText) convertView.findViewById(R.id.textinput_point_x);
-            final EditText pointY = (EditText) convertView.findViewById(R.id.textinput_point_y);
-            final EditText pointZ = (EditText) convertView.findViewById(R.id.textinput_point_z);
-
-            pointX.setText(String.valueOf(mElement.getVertices().get(position).getX()));
-            pointY.setText(String.valueOf(mElement.getVertices().get(position).getY()));
-            pointZ.setText(String.valueOf(mElement.getVertices().get(position).getZ()));
-
-            mUpdateButton = (Button) convertView.findViewById(R.id.button_point_update);
-            mUpdateButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // XXX these should be safe casts, see edittext xml
-                    // parameters
-                    mPoints.get(position).setX(Float.valueOf(pointX.getText().toString()));
-                    mPoints.get(position).setY(Float.valueOf(pointY.getText().toString()));
-                    mPoints.get(position).setZ(Float.valueOf(pointZ.getText().toString()));
-                    mUpdateButton.setEnabled(false);
-                }
-            });
-
-            pointX.addTextChangedListener(new PointTextWatcher(mUpdateButton));
-            pointY.addTextChangedListener(new PointTextWatcher(mUpdateButton));
-            pointZ.addTextChangedListener(new PointTextWatcher(mUpdateButton));
-
+            if (convertView == null)
+                convertView = mInflater.inflate(R.layout.listitem_point_view, null);
+            // XXX All events are handled from the listview (parent) level.
             return convertView;
         }
 
-        private class PointTextWatcher implements TextWatcher {
-
-            private Button mUpdateButton;
-
-            private PointTextWatcher(Button updateButton) {
-                this.mUpdateButton = updateButton;
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                mUpdateButton.setEnabled(true);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // TODO Auto-generated method stub
-
-            }
+        protected void updatePoint(int position, float x, float y, float z) {
+            FloatPoint point = (FloatPoint) getItem(position);
+            point.setX(x);
+            point.setY(y);
+            point.setZ(z);
         }
 
-        @Override
-        public int getCount() {
-            return mPoints.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mPoints.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
     }
-
 }

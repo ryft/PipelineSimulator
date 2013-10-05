@@ -1,11 +1,13 @@
-
 package uk.co.ryft.pipeline.ui;
 
-import android.annotation.TargetApi;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.model.Element;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
@@ -17,16 +19,11 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.model.Element;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class SceneActivity extends Activity {
 
@@ -70,16 +67,10 @@ public class SceneActivity extends Activity {
         mListView.setAdapter(mAdapter);
     }
 
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setDisplayShowHomeEnabled(false);
-        }
+        // Show the Up button in the action bar.
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayShowHomeEnabled(false);
     }
 
     @Override
@@ -99,13 +90,13 @@ public class SceneActivity extends Activity {
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
 
-            case R.id.action_element:
+            case R.id.action_element_new:
                 addElement();
                 break;
 
-            case R.id.action_clear:
+            case R.id.action_scene_clear:
                 mAdapter.clear();
-                Toast.makeText(this, R.string.message_clear, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.message_scene_clear, Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -154,24 +145,16 @@ public class SceneActivity extends Activity {
         // If the request was EDIT_ELEMENT_REQUEST
         else if (requestCode == EDIT_ELEMENT_REQUEST)
 
-            if (resultCode == Activity.RESULT_OK)
-
-                if (data.getBooleanExtra("deleted", false)) {
-                    if (mThisElement != null)
-                        mAdapter.remove(mThisElement);
-                    mThisElement = null;
-                    message = getString(R.string.message_element_deleted);
-
-                } else {
-                    if (mThisElement != null)
-                        mAdapter.remove(mThisElement);
-                    mThisElement = null;
-                    mAdapter.add((Element) data.getSerializableExtra("element"));
-                    message = getString(R.string.message_element_updated);
-                }
-
-            else
-                message = getString(R.string.message_changes_discarded);
+            if (resultCode == Activity.RESULT_OK) {
+                mAdapter.remove(mThisElement);
+                mThisElement = null;
+                mAdapter.add((Element) data.getSerializableExtra("element"));
+                message = getString(R.string.message_element_updated);
+            } else {
+                mAdapter.remove(mThisElement);
+                mThisElement = null;
+                message = getString(R.string.message_element_deleted);
+            }
 
         else {
             // Add any new result codes here.
@@ -232,9 +215,7 @@ public class SceneActivity extends Activity {
 
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-            mElems = new ArrayList<Element>();
-            mElems.addAll(elements);
+            mElems = new ArrayList<Element>(elements);
 
             final Button button = (Button) findViewById(R.id.button_scene_save);
             button.setOnClickListener(new View.OnClickListener() {
@@ -292,7 +273,8 @@ public class SceneActivity extends Activity {
 
             ImageView elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
             TextView typeTextView = (TextView) convertView.findViewById(R.id.element_type);
-            ImageView forwardImageView = (ImageView) convertView.findViewById(R.id.element_edit);
+            ImageButton editButton = (ImageButton) convertView
+                    .findViewById(R.id.button_element_edit);
             TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
 
             Element elem = mElems.get(position);
@@ -300,10 +282,10 @@ public class SceneActivity extends Activity {
             if (elem != null) {
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
-                forwardImageView.setImageResource(R.drawable.ic_button_edit);
+                editButton.setImageResource(R.drawable.ic_action_edit);
                 summaryTextView.setText(elem.getSummary());
 
-                forwardImageView.setOnClickListener(new OnClickListener() {
+                editButton.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {

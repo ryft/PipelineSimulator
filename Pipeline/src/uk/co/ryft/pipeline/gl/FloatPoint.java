@@ -35,5 +35,15 @@ public class FloatPoint implements Serializable {
     public void setZ(float z) {
         this.z = z;
     }
+    
+    // XXX shortcut
+    public void setCoordinates(float x, float y, float z) {
+        setX(x); setY(y); setZ(z);
+    }
+    
+    @Override
+    public String toString() {
+        return "("+getX()+", "+getY()+", "+getZ()+")";
+    }
 
 }
