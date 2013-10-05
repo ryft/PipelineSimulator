@@ -36,7 +36,7 @@
 	            android:value="uk.co.ryft.pipeline.ui.SceneActivity" />
         </activity>
         <activity
-            android:name="uk.co.ryft.pipeline.ui.DismissableActivity"
+            android:name="uk.co.ryft.pipeline.ui.ElementActivity"
             android:label="@string/title_activity_element" >
 	        <meta-data
 	            android:name="android.support.PARENT_ACTIVITY"

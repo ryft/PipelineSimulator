@@ -103,13 +103,13 @@ public class SceneActivity extends Activity {
     }
 
     protected void addElement() {
-        Intent intent = new Intent(this, DismissableActivity.class);
+        Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", false);
         startActivityForResult(intent, ADD_ELEMENT_REQUEST);
     }
 
     protected void editElement(Element e) {
-        Intent intent = new Intent(this, DismissableActivity.class);
+        Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
         mThisElement = e;

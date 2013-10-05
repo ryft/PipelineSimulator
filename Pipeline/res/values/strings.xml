@@ -37,5 +37,9 @@
     <string name="desc_point_new">Add new point</string>
     <string name="desc_point_update">Update point</string>
     <string name="desc_point_remove">Remove point</string>
+    
+    <string name="dialogue_title_point">Edit Point</string>
+    <string name="dialogue_button_save">Save</string>
+    <string name="dialogue_button_cancel">Cancel</string>
 
 </resources>

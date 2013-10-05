@@ -9,8 +9,7 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:text="@string/label_point_1"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#888888" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
         android:id="@+id/edit_point_x"
@@ -24,8 +23,7 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:text="@string/label_point_2"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#888888" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
         android:id="@+id/edit_point_y"
@@ -39,8 +37,7 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:text="@string/label_point_3"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#888888" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <EditText
         android:id="@+id/edit_point_z"
@@ -54,7 +51,6 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:text="@string/label_point_4"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#888888" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>
