@@ -10,7 +10,8 @@
     <string name="action_element_discard">Discard element</string>
     
     <string name="title_activity_scene">Edit Scene</string>
-    <string name="title_activity_element">Edit Element</string>
+    <string name="title_activity_element_add">New Element</string>
+    <string name="title_activity_element_edit">Edit Element</string>
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
@@ -34,11 +35,11 @@
     <string name="heading_element_type">Element type</string>
     <string name="heading_points">Vertices</string>
     
-    <string name="desc_point_new">Add new point</string>
-    <string name="desc_point_update">Update point</string>
-    <string name="desc_point_remove">Remove point</string>
+    <string name="desc_point_new">Add new vertex</string>
+    <string name="desc_point_update">Update vertex</string>
+    <string name="desc_point_remove">Remove vertex</string>
     
-    <string name="dialogue_title_point">Edit Point</string>
+    <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
 
