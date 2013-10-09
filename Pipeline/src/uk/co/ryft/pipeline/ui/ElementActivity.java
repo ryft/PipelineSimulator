@@ -59,10 +59,13 @@ public class ElementActivity extends ListActivity {
 
         // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
-        if (fromScene.getBoolean("edit_mode", false))
+        if (fromScene.getBoolean("edit_mode", false)) {
             mElement = (Element) fromScene.getSerializable("element");
-        else
+            setTitle(R.string.title_activity_element_edit);
+        } else {
             mElement = new Element(Type.GL_POINTS);
+            setTitle(R.string.title_activity_element_add);
+        }
 
         // Set current element properties as default selections
         mTypeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);

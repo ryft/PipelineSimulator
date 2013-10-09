@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,7 +17,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -67,6 +65,18 @@ public class SceneActivity extends Activity {
         mListView.setAdapter(mAdapter);
     }
 
+    @Override
+    public void onBackPressed() {
+        saveAndQuit();
+    }
+
+    protected void saveAndQuit() {
+        Intent result = new Intent();
+        result.putExtra("elements", mAdapter.getAllElements());
+        setResult(Activity.RESULT_OK, result);
+        finish();
+    }
+
     private void setupActionBar() {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -87,8 +97,8 @@ public class SceneActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
-                return true;
+//                NavUtils.navigateUpFromSameTask(this);
+                saveAndQuit();
 
             case R.id.action_element_new:
                 addElement();
@@ -216,17 +226,6 @@ public class SceneActivity extends Activity {
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mElems = new ArrayList<Element>(elements);
-
-            final Button button = (Button) findViewById(R.id.button_scene_save);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent result = new Intent();
-                    result.putExtra("elements", mElems);
-                    setResult(Activity.RESULT_OK, result);
-                    finish();
-                }
-            });
         }
 
         public boolean add(Element element) {

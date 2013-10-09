@@ -7,17 +7,10 @@
     <ListView
         android:id="@+id/element_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
 		android:layout_weight="1"
         android:clipToPadding="false"
         android:divider="@null"
         android:dividerHeight="6dp" />
-
-    <Button
-        android:id="@+id/button_scene_save"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:text="@string/button_scene_save" />
 
 </LinearLayout>
