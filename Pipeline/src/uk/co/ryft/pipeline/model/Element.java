@@ -11,42 +11,74 @@ import java.util.Map;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.gl.shapes.Polygon;
+import uk.co.ryft.pipeline.gl.shapes.Primitive;
+import android.opengl.GLES20;
 
 public class Element implements Comparable<Element>, Serializable, Cloneable {
 
     private static final long serialVersionUID = 5661009688352125290L;
 
     public static enum Type {
-        GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_QUADS, GL_QUAD_STRIP, GL_POLYGON;
+        GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN;
 
         private static final Map<Type, String> mDescriptionMap;
         static {
             Map<Type, String> descriptionMap = new HashMap<Type, String>();
             descriptionMap.put(Type.GL_POINTS, "Single points");
-            descriptionMap.put(Type.GL_LINES, "Distinct lines");
+            descriptionMap.put(Type.GL_LINES, "Single lines");
             descriptionMap.put(Type.GL_LINE_STRIP, "Line strip");
             descriptionMap.put(Type.GL_LINE_LOOP, "Line loop");
-            descriptionMap.put(Type.GL_TRIANGLES, "Distinct triangles");
+            descriptionMap.put(Type.GL_TRIANGLES, "Single triangles");
             descriptionMap.put(Type.GL_TRIANGLE_STRIP, "Triangle strip");
             descriptionMap.put(Type.GL_TRIANGLE_FAN, "Triangle fan");
-            descriptionMap.put(Type.GL_QUADS, "Distinct quads");
-            descriptionMap.put(Type.GL_QUAD_STRIP, "Quad strip");
-            descriptionMap.put(Type.GL_POLYGON, "Polygon");
             mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
+        }
+
+        private static final Map<Type, Integer> mPrimitiveMap;
+        static {
+            Map<Type, Integer> primitiveMap = new HashMap<Type, Integer>();
+            primitiveMap.put(Type.GL_POINTS, GLES20.GL_POINTS);
+            primitiveMap.put(Type.GL_LINES, GLES20.GL_LINES);
+            primitiveMap.put(Type.GL_LINE_STRIP, GLES20.GL_LINE_STRIP);
+            primitiveMap.put(Type.GL_LINE_LOOP, GLES20.GL_LINE_LOOP);
+            primitiveMap.put(Type.GL_TRIANGLES, GLES20.GL_TRIANGLES);
+            primitiveMap.put(Type.GL_TRIANGLE_STRIP, GLES20.GL_TRIANGLE_STRIP);
+            primitiveMap.put(Type.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_FAN);
+            mPrimitiveMap = Collections.unmodifiableMap(primitiveMap);
         }
         
         public String getDescription() {
             return mDescriptionMap.get(this);
         }
+        
+        public Integer getPrimitive() {
+            return mPrimitiveMap.get(this);
+        }
     };
 
     protected Type mType;
     protected final List<FloatPoint> mVertices = new ArrayList<FloatPoint>();
-    protected Colour mColour = Colour.GREEN;
+    protected Colour mColour = Colour.WHITE;
 
     public Element(Type type) {
         mType = type;
+        mVertices.add(new FloatPoint(1f, 1f, 0f));
+        mVertices.add(new FloatPoint(-1f, 1f, 0f));
+        mVertices.add(new FloatPoint(-1f, 1f, 0f));
+        mVertices.add(new FloatPoint(-1f, -1f, 0f));
+        mVertices.add(new FloatPoint(-1f, -1f, 0f));
+        mVertices.add(new FloatPoint(1f, -1f, 0f));
+        mVertices.add(new FloatPoint(1f, -1f, 0f));
+        mVertices.add(new FloatPoint(1f, 1f, 0f));
+
+        mVertices.add(new FloatPoint(1f, 1f, 0f));
+        mVertices.add(new FloatPoint(0f, 0f, 0f));
+        mVertices.add(new FloatPoint(-1f, 1f, 0f));
+        mVertices.add(new FloatPoint(0f, 0f, 0f));
+        mVertices.add(new FloatPoint(-1f, -1f, 0f));
+        mVertices.add(new FloatPoint(0f, 0f, 0f));
+        mVertices.add(new FloatPoint(1f, -1f, 0f));
+        mVertices.add(new FloatPoint(0f, 0f, 0f));
     }
 
     public Element(Type type, List<FloatPoint> vertices) {
@@ -105,34 +137,28 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
      * @return Drawable representation of this element.
      */
     public Drawable getDrawable() {
+        
+        // Convert vertices to float array
+        int vertexCount = getVertices().size() * 3;
+        float[] coords = new float[vertexCount];
+        int i = 0;
+        for (FloatPoint fp : getVertices()) {
+            coords[i] = fp.getX();
+            coords[i + 1] = fp.getY();
+            coords[i + 2] = fp.getZ();
+            i += 3;
+        }
+        float[] colour = getColour().toArray();
 
-        if (mType == Type.GL_POLYGON) {
+        return new Primitive(coords, colour, vertexCount, getType().getPrimitive());
+    }
 
-            // Convert vertices to float array
-        	int vertexCount = mVertices.size() * 3;
-            float[] coords = new float[vertexCount];
-            int i = 0;
-            for (FloatPoint fp : mVertices) {
-                coords[i] = fp.getX();
-                coords[i + 1] = fp.getY();
-                coords[i + 2] = fp.getZ();
-                i += 3;
-            }
-            return new Polygon(coords, mColour.getColour(), mVertices.size());
-            
-        } else if (mType == Type.GL_POINTS) {
-        	return new Drawable() {
+    public Colour getColour() {
+        return mColour;
+    }
 
-				@Override
-				public void draw(float[] mvpMatrix) {
-					
-
-				}
-        		
-        	};
-
-        } else
-            return null;
+    public void setColour(Colour colour) {
+        mColour = colour;
     }
 
     @Override

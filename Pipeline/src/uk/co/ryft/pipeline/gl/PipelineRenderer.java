@@ -5,7 +5,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.util.Log;
-
 import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Element;
 
@@ -25,9 +24,25 @@ public class PipelineRenderer implements Renderer {
     private final float[] mVMatrix = new float[16];
     private final float[] mIdentityMatrix = new float[16];
 
-    public volatile int zoomLevel = 2;
-
     private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
+
+    // TODO Should these belong here?
+    public static final String VERTEX_SHADER_EMPTY =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    "  gl_Position = vPosition * uMVPMatrix;" +
+                    "}";
+
+    public static final String FRAGMENT_SHADER_EMPTY =
+            "precision mediump float;" +
+                    "uniform vec4 vColor;" +
+                    "void main() {" +
+                    "  gl_FragColor = vColor;" +
+                    "}";
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -46,8 +61,9 @@ public class PipelineRenderer implements Renderer {
         Matrix.setIdentityM(mIdentityMatrix, 0);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, zoomLevel, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mVMatrix, 0, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f);
         // Params: matrix, offset, eye(x, y, z), focus(x, y, z), up(x, y, z).
+        // XXX Coords are flipped on screen - explain why.
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);

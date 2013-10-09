@@ -46,11 +46,5 @@ public class PipelineSurface extends GLSurfaceView {
     public boolean onTouchEvent(MotionEvent e) {
         return false;
     }
-    
-    public int zoomOut() {
-        mRenderer.zoomLevel++;
-        requestRender();
-        return mRenderer.zoomLevel;
-    }
 
 }

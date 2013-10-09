@@ -40,7 +40,7 @@ public class Colour implements Serializable {
         this.alpha = (float) alpha / 255;
     }
 
-    public float[] getColour() {
+    public float[] toArray() {
         float[] c = { red, green, blue, alpha };
         return c;
     }
