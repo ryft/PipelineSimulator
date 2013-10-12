@@ -8,6 +8,8 @@
     <string name="action_point_new">New vertex</string>
     <string name="action_scene_clear">Clear scene</string>
     <string name="action_element_discard">Discard element</string>
+    <string name="action_draw_axes">Draw axes</string>
+    <string name="action_change_perspective">Skew</string>
     
     <string name="title_activity_scene">Edit Scene</string>
     <string name="title_activity_element_add">New Element</string>

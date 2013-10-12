@@ -61,24 +61,6 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
     protected Colour mColour = Colour.WHITE;
 
     public Element(Type type) {
-        mType = type;
-        mVertices.add(new FloatPoint(1f, 1f, 0f));
-        mVertices.add(new FloatPoint(-1f, 1f, 0f));
-        mVertices.add(new FloatPoint(-1f, 1f, 0f));
-        mVertices.add(new FloatPoint(-1f, -1f, 0f));
-        mVertices.add(new FloatPoint(-1f, -1f, 0f));
-        mVertices.add(new FloatPoint(1f, -1f, 0f));
-        mVertices.add(new FloatPoint(1f, -1f, 0f));
-        mVertices.add(new FloatPoint(1f, 1f, 0f));
-
-        mVertices.add(new FloatPoint(1f, 1f, 0f));
-        mVertices.add(new FloatPoint(0f, 0f, 0f));
-        mVertices.add(new FloatPoint(-1f, 1f, 0f));
-        mVertices.add(new FloatPoint(0f, 0f, 0f));
-        mVertices.add(new FloatPoint(-1f, -1f, 0f));
-        mVertices.add(new FloatPoint(0f, 0f, 0f));
-        mVertices.add(new FloatPoint(1f, -1f, 0f));
-        mVertices.add(new FloatPoint(0f, 0f, 0f));
     }
 
     public Element(Type type, List<FloatPoint> vertices) {

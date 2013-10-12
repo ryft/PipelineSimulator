@@ -5,15 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
+import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.PipelineSurface;
 import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Element.Type;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ConfigurationInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -56,7 +56,6 @@ public class MainActivity extends Activity {
         }
 
         updateScene();
-
     }
 
     /**
@@ -96,6 +95,51 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent(this, SceneActivity.class);
                 intent.putExtra("elements", mElements);
                 startActivityForResult(intent, EDIT_SCENE_REQUEST);
+                break;
+                
+            case R.id.action_draw_axes:
+                
+                LinkedList<FloatPoint> axes = new LinkedList<FloatPoint>();
+                axes.add(new FloatPoint(-10, 0, 0));
+                axes.add(new FloatPoint(10, 0, 0));
+                axes.add(new FloatPoint(0, -10, 0));
+                axes.add(new FloatPoint(0, 10, 0));
+                axes.add(new FloatPoint(0, 0, -1000));
+                axes.add(new FloatPoint(0, 0, 1000));
+                mElements.add(new Element(Type.GL_LINES, axes, Colour.RED));
+
+                LinkedList<FloatPoint> box = new LinkedList<FloatPoint>();
+                
+                // Front face
+                box.add(new FloatPoint(1, 1, 0));
+                box.add(new FloatPoint(1, -1, 0));
+                box.add(new FloatPoint(-1, -1, 0));
+                box.add(new FloatPoint(-1, 1, 0));
+                box.add(new FloatPoint(1, 1, 0));
+                
+                // Top
+                box.add(new FloatPoint(1, 1, 1));
+                box.add(new FloatPoint(1, -1, 1));
+                
+                box.add(new FloatPoint(1, -1, 0));
+                box.add(new FloatPoint(1, -1, 1));
+                
+                box.add(new FloatPoint(-1, -1, 1));
+                box.add(new FloatPoint(-1, -1, 0));
+                box.add(new FloatPoint(-1, -1, 1));
+
+                box.add(new FloatPoint(-1, 1, 1));
+                box.add(new FloatPoint(-1, 1, 0));
+                box.add(new FloatPoint(-1, 1, 1));
+                box.add(new FloatPoint(1, 1, 1));
+                
+                mElements.add(new Element(Type.GL_LINE_LOOP, box, Colour.WHITE));
+                
+                updateScene();
+                break;
+                
+            case R.id.action_change_perspective:
+                mPipelineView.togglePerspective();
                 break;
         }
         return super.onOptionsItemSelected(item);

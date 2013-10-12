@@ -1,19 +1,19 @@
 
 package uk.co.ryft.pipeline.gl;
 
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView.Renderer;
-import android.opengl.Matrix;
-import android.util.Log;
-import uk.co.ryft.pipeline.model.Drawable;
-import uk.co.ryft.pipeline.model.Element;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import uk.co.ryft.pipeline.model.Drawable;
+import uk.co.ryft.pipeline.model.Element;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView.Renderer;
+import android.opengl.Matrix;
+import android.util.Log;
 
 public class PipelineRenderer implements Renderer {
 
@@ -25,6 +25,12 @@ public class PipelineRenderer implements Renderer {
     private final float[] mIdentityMatrix = new float[16];
 
     private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
+    
+    private boolean mTogglePerspective = false;
+
+    public void togglePerspective() {
+        mTogglePerspective = !mTogglePerspective;
+    }
 
     // TODO Should these belong here?
     public static final String VERTEX_SHADER_EMPTY =
@@ -61,7 +67,10 @@ public class PipelineRenderer implements Renderer {
         Matrix.setIdentityM(mIdentityMatrix, 0);
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(mVMatrix, 0, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f);
+        if (mTogglePerspective)
+            Matrix.setLookAtM(mVMatrix, 0, -1f, -1f, 5f, 0f, 0f, 0f, 0f, 1f, 0f);
+        else
+            Matrix.setLookAtM(mVMatrix, 0, 0f, 0f, 5f, 0f, 0f, 0f, 0f, 1f, 0f);
         // Params: matrix, offset, eye(x, y, z), focus(x, y, z), up(x, y, z).
         // XXX Coords are flipped on screen - explain why.
 
@@ -75,6 +84,7 @@ public class PipelineRenderer implements Renderer {
             Drawable d = mElements.get(e);
             d.draw(mMVPMatrix);
         }
+        
     }
 
     @Override
