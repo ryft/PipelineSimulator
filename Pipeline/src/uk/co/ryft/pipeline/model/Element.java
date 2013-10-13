@@ -60,6 +60,18 @@ public class Element implements Comparable<Element>, Serializable, Cloneable {
         mColour = colour;
     }
 
+    public int getColourArgb() {
+        return mColour.toArgb();
+    }
+    
+    public void setColour(int red, int green, int blue, int alpha) {
+        mColour.setColour(red, green, blue, alpha);
+    }
+    
+    public void setColour(int red, int green, int blue) {
+        mColour.setColour(red, green, blue);
+    }
+
     public Type getType() {
         return mType;
     }

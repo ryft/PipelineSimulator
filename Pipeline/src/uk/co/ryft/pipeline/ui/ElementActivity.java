@@ -30,21 +30,26 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ViewSwitcher;
 
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
+import com.larswerkman.colorpicker.ColorPicker;
+import com.larswerkman.colorpicker.OpacityBar;
 
 public class ElementActivity extends ListActivity {
 
@@ -147,6 +152,51 @@ public class ElementActivity extends ListActivity {
                 editZ.setText(String.valueOf(thisPoint.getZ()));
                 dialogue.show();
             }
+        });
+        
+        final ImageButton buttonColour = (ImageButton) findViewById(R.id.button_element_colour);
+        final View swatch = (View) findViewById(R.id.element_colour_swatch);
+        swatch.setBackgroundColor(mElement.getColourArgb());
+        buttonColour.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Instantiate and display a float picker dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(ElementActivity.this);
+                builder.setTitle(R.string.dialogue_title_colour);
+
+                LayoutInflater inflater = ElementActivity.this.getLayoutInflater();
+                View dialogueView = inflater.inflate(R.layout.dialogue_colour_select, null);
+                
+                builder.setView(dialogueView);
+                
+                final ColorPicker picker = (ColorPicker) dialogueView.findViewById(R.id.picker);
+                OpacityBar opacityBar = (OpacityBar) dialogueView.findViewById(R.id.opacitybar);
+                picker.addOpacityBar(opacityBar);
+                picker.setOldCenterColor(mElement.getColourArgb());
+
+                builder.setPositiveButton(R.string.dialogue_button_save,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                int color = picker.getColor();
+                                // TODO this is terrible and unsafe.
+                                mElement.setColour(Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color));
+                                swatch.setBackgroundColor(color);
+                            }
+                        });
+                builder.setNegativeButton(R.string.dialogue_button_cancel,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                            }
+                        });
+
+                // Get the AlertDialog, initialise values and show it.
+                AlertDialog dialogue = builder.create();
+                dialogue.show();
+            }
+            
         });
 
         setupActionBar();

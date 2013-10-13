@@ -1,4 +1,3 @@
-
 package uk.co.ryft.pipeline.gl;
 
 import android.opengl.GLES20;
@@ -53,17 +52,20 @@ public class PipelineRenderer implements Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
 
         // Draw objects in the scene
-        for (Element e: mElements.keySet()) {
+        for (Element e : mElements.keySet()) {
             if (mElements.get(e) == null)
                 mElements.put(e, e.getDrawable());
             Drawable d = mElements.get(e);
-            d.draw(mMVPMatrix);
+            if (d != null)
+                d.draw(mMVPMatrix);
+            else
+                System.out.println("Ruh-roh, null drawable!");
         }
     }
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-        
+
         // Adjust the viewport based on geometry changes,
         // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
@@ -97,8 +99,7 @@ public class PipelineRenderer implements Renderer {
     }
 
     /**
-     * Utility method for debugging OpenGL calls. Provide the name of the call
-     * just after making it:
+     * Utility method for debugging OpenGL calls. Provide the name of the call just after making it:
      * 
      * <pre>
      * mColorHandle = GLES20.glGetUniformLocation(mProgram, &quot;vColor&quot;);
@@ -107,7 +108,8 @@ public class PipelineRenderer implements Renderer {
      * 
      * If the operation is not successful, the check throws an error.
      * 
-     * @param glOperation - Name of the OpenGL call to check.
+     * @param glOperation
+     *            - Name of the OpenGL call to check.
      */
     public static void checkGlError(String glOperation) {
         int error;
@@ -116,7 +118,7 @@ public class PipelineRenderer implements Renderer {
             throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
-    
+
     public void addToScene(Element e) {
         mElements.put(e, null);
     }
