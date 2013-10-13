@@ -18,10 +18,6 @@
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
     
-    <string name="button_scene_save">Save Scene</string>
-    <string name="button_element_save">Save</string>
-    <string name="button_element_delete">Delete</string>
-    
     <string name="message_scene_clear">Scene cleared</string>
     <string name="message_element_clear">Vertex list cleared</string>
     <string name="message_element_added">Element added</string>
@@ -35,13 +31,16 @@
     <string name="label_point_4"> )</string>
     
     <string name="heading_element_type">Element type</string>
+    <string name="heading_element_colour">Element colour</string>
     <string name="heading_points">Vertices</string>
+    <string name="heading_colour_opacity">Opacity</string>
     
     <string name="desc_point_new">Add new vertex</string>
     <string name="desc_point_update">Update vertex</string>
     <string name="desc_point_remove">Remove vertex</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
+    <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
 
