@@ -1,13 +1,12 @@
 package uk.co.ryft.pipeline.gl;
 
+import java.util.List;
+
+import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-
-import uk.co.ryft.pipeline.model.Element;
-
-import java.util.List;
 
 public class PipelineSurface extends GLSurfaceView {
 
