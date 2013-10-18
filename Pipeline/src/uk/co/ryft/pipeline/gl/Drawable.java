@@ -1,5 +1,5 @@
 
-package uk.co.ryft.pipeline.model;
+package uk.co.ryft.pipeline.gl;
 
 public interface Drawable {
     

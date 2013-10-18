@@ -5,11 +5,11 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.model.Drawable;
 import android.opengl.GLES20;
 
-public class Primitive implements Drawable {
+public class GL_Primitive implements Drawable {
 
     // Number of coordinates per vertex in the provided array
     protected final int COORDS_PER_VERTEX = 3;
@@ -35,7 +35,7 @@ public class Primitive implements Drawable {
     private final int mVertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private final int mPrimitiveType;
 
-    public Primitive(float[] coords, float[] colour, int vertexCount, int primitiveType) {
+    public GL_Primitive(float[] coords, float[] colour, int vertexCount, int primitiveType) {
 
         mCoords = coords;
         mColour = colour;

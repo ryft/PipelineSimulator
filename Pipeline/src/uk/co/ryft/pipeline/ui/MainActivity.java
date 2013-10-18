@@ -6,11 +6,13 @@ import java.util.List;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
+import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.PipelineSurface;
-import uk.co.ryft.pipeline.model.Drawable;
+import uk.co.ryft.pipeline.model.Composite;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Element.Type;
+import uk.co.ryft.pipeline.model.Primitive;
+import uk.co.ryft.pipeline.model.Primitive.Type;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -98,6 +100,8 @@ public class MainActivity extends Activity {
                 break;
                 
             case R.id.action_draw_axes:
+
+                LinkedList<Element> elements = new LinkedList<Element>();
                 
                 LinkedList<FloatPoint> axes = new LinkedList<FloatPoint>();
                 axes.add(new FloatPoint(-10, 0, 0));
@@ -106,7 +110,7 @@ public class MainActivity extends Activity {
                 axes.add(new FloatPoint(0, 10, 0));
                 axes.add(new FloatPoint(0, 0, -1000));
                 axes.add(new FloatPoint(0, 0, 1000));
-                mElements.add(new Element(Type.GL_LINES, axes, Colour.RED));
+                elements.add(new Primitive(Type.GL_LINES, axes, Colour.RED));
 
                 LinkedList<FloatPoint> box = new LinkedList<FloatPoint>();
                 
@@ -133,7 +137,8 @@ public class MainActivity extends Activity {
                 box.add(new FloatPoint(-1, 1, 1));
                 box.add(new FloatPoint(1, 1, 1));
                 
-                mElements.add(new Element(Type.GL_LINE_LOOP, box, Colour.WHITE));
+                elements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
+                mElements.add(new Composite(elements));
                 
                 updateScene();
                 break;

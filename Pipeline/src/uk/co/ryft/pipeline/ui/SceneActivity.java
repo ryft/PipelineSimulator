@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Primitive;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +35,7 @@ public class SceneActivity extends Activity {
     // XXX Need to store this reference to be able to update/delete.
     // If we pass the worked-on element back and forth, it gets serialised and
     // we lose the reference.
-    protected Element mThisElement;
+    protected Primitive mThisElement;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -118,7 +119,7 @@ public class SceneActivity extends Activity {
         startActivityForResult(intent, ADD_ELEMENT_REQUEST);
     }
 
-    protected void editElement(Element e) {
+    protected void editPrimitive(Primitive e) {
         Intent intent = new Intent(this, ElementActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
@@ -147,7 +148,7 @@ public class SceneActivity extends Activity {
         if (requestCode == ADD_ELEMENT_REQUEST)
 
             if (resultCode == Activity.RESULT_OK) {
-                mAdapter.add((Element) data.getSerializableExtra("element"));
+                mAdapter.add((Primitive) data.getSerializableExtra("element"));
                 message = getString(R.string.message_element_added);
             } else
                 message = getString(R.string.message_element_discarded);
@@ -158,7 +159,7 @@ public class SceneActivity extends Activity {
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.remove(mThisElement);
                 mThisElement = null;
-                mAdapter.add((Element) data.getSerializableExtra("element"));
+                mAdapter.add((Primitive) data.getSerializableExtra("element"));
                 message = getString(R.string.message_element_updated);
             } else {
                 mAdapter.remove(mThisElement);
@@ -228,7 +229,7 @@ public class SceneActivity extends Activity {
             mElems = new ArrayList<Element>(elements);
         }
 
-        public boolean add(Element element) {
+        public boolean add(Primitive element) {
             boolean ret = mElems.add(element);
             notifyDataSetChanged();
             return ret;
@@ -288,7 +289,10 @@ public class SceneActivity extends Activity {
 
                     @Override
                     public void onClick(View v) {
-                        editElement((Element) getItem(position));
+                        Element elem = (Element) getItem(position);
+                        if (elem.isPrimitive())
+                            // XXX safe cast due to previous check.
+                            editPrimitive((Primitive) elem);
                     }
 
                 });

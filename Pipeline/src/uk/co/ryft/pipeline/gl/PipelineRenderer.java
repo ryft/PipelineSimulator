@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Element;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;

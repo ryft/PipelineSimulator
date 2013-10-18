@@ -1,16 +1,17 @@
 
 package uk.co.ryft.pipeline.model;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.model.Element.Type;
+import uk.co.ryft.pipeline.model.Primitive.Type;
 
 public class ConvexPolygon {
-    
-    public static Element getRegularPolygon(int vertexCount, FloatPoint centre, double radius, double rotation, Colour colour) {       
+
+    public static Composite getRegularPolygon(int vertexCount, FloatPoint centre, double radius, double rotation, Colour colour) {       
         
         List<FloatPoint> points = new LinkedList<FloatPoint>();
         
@@ -24,9 +25,9 @@ public class ConvexPolygon {
         return getConvexPolygon(points, colour);
     }
 
-    public static Element getConvexPolygon(List<FloatPoint> points, Colour colour) {
+    public static Composite getConvexPolygon(List<FloatPoint> points, Colour colour) {
 
-        return new Element(Type.GL_TRIANGLE_FAN, points, colour);
+        return new Composite(Collections.singletonList(new Primitive(Type.GL_TRIANGLE_FAN, points, colour)));
     }
 
 }
