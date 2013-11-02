@@ -36,13 +36,18 @@ public class PipelineSurface extends GLSurfaceView {
         
     }
     
-    public void togglePerspective() {
-        mRenderer.togglePerspective();
+    public void toggle() {
+        mRenderer.toggle();
         requestRender();
     }
     
     public void updateScene(List<Element> elements) {
         mRenderer.updateScene(elements);
+        requestRender();
+    }
+    
+    public void boop() {
+        mRenderer.rot += 0.1f;
         requestRender();
     }
 

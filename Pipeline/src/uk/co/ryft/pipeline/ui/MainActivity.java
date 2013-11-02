@@ -9,7 +9,6 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.PipelineSurface;
-import uk.co.ryft.pipeline.model.Composite;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Primitive;
 import uk.co.ryft.pipeline.model.Primitive.Type;
@@ -101,50 +100,49 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                LinkedList<Element> elements = new LinkedList<Element>();
-                
-                LinkedList<FloatPoint> axes = new LinkedList<FloatPoint>();
-                axes.add(new FloatPoint(-10, 0, 0));
-                axes.add(new FloatPoint(10, 0, 0));
-                axes.add(new FloatPoint(0, -10, 0));
-                axes.add(new FloatPoint(0, 10, 0));
-                axes.add(new FloatPoint(0, 0, -1000));
-                axes.add(new FloatPoint(0, 0, 1000));
-                elements.add(new Primitive(Type.GL_LINES, axes, Colour.RED));
-
                 LinkedList<FloatPoint> box = new LinkedList<FloatPoint>();
                 
                 // Front face
-                box.add(new FloatPoint(1, 1, 0));
-                box.add(new FloatPoint(1, -1, 0));
-                box.add(new FloatPoint(-1, -1, 0));
-                box.add(new FloatPoint(-1, 1, 0));
-                box.add(new FloatPoint(1, 1, 0));
+                box.add(new FloatPoint(0.1f, 0.1f, -0.1f));
+                box.add(new FloatPoint(0.1f, -0.1f, -0.1f));
+                box.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
+                box.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
+                box.add(new FloatPoint(0.1f, 0.1f, -0.1f));
                 
                 // Top
-                box.add(new FloatPoint(1, 1, 1));
-                box.add(new FloatPoint(1, -1, 1));
+                box.add(new FloatPoint(0.1f, 0.1f, 0.1f));
+                box.add(new FloatPoint(0.1f, -0.1f, 0.1f));
                 
-                box.add(new FloatPoint(1, -1, 0));
-                box.add(new FloatPoint(1, -1, 1));
+                box.add(new FloatPoint(0.1f, -0.1f, -0.1f));
+                box.add(new FloatPoint(0.1f, -0.1f, 0.1f));
                 
-                box.add(new FloatPoint(-1, -1, 1));
-                box.add(new FloatPoint(-1, -1, 0));
-                box.add(new FloatPoint(-1, -1, 1));
+                box.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
+                box.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
+                box.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
 
-                box.add(new FloatPoint(-1, 1, 1));
-                box.add(new FloatPoint(-1, 1, 0));
-                box.add(new FloatPoint(-1, 1, 1));
-                box.add(new FloatPoint(1, 1, 1));
+                box.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
+                box.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
+                box.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
+                box.add(new FloatPoint(0.1f, 0.1f, 0.1f));
                 
-                elements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
-                mElements.add(new Composite(elements));
+                mElements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
+
+                LinkedList<FloatPoint> backface = new LinkedList<FloatPoint>();
+                backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
+                backface.add(new FloatPoint(0.1f, -0.1f, -0.1f));
+                backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
+                backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
+                backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
+                backface.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
+                
+                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.BLUE));
                 
                 updateScene();
                 break;
                 
             case R.id.action_change_perspective:
-                mPipelineView.togglePerspective();
+//                mPipelineView.togglePerspective();
+                mPipelineView.boop();
                 break;
         }
         return super.onOptionsItemSelected(item);

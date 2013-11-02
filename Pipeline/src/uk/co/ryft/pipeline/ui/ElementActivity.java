@@ -60,7 +60,7 @@ public class ElementActivity extends ListActivity {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_element);
+        setContentView(R.layout.activity_element_primitive);
 
         // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
