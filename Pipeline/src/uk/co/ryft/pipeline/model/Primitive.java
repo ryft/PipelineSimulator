@@ -106,7 +106,7 @@ public class Primitive implements Element {
     }
 
     public String getTitle() {
-        return mType.toString() + "\n(" + mType.getDescription() + ")";
+        return mType.getDescription() + "\n(" + mType.toString() + ")";
     }
 
     public String getSummary() {
@@ -119,7 +119,7 @@ public class Primitive implements Element {
     }
 
     public int getIconRef() {
-        return R.drawable.ic_action_element; // TODO
+        return R.drawable.ic_action_scene; // TODO
     }
 
     /**

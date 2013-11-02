@@ -7,7 +7,6 @@ import java.util.List;
 
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.model.Primitive.Type;
 
 public class ConvexPolygon {
 
@@ -27,7 +26,7 @@ public class ConvexPolygon {
 
     public static Composite getConvexPolygon(List<FloatPoint> points, Colour colour) {
 
-        return new Composite(Collections.singletonList(new Primitive(Type.GL_TRIANGLE_FAN, points, colour)));
+        return new Composite(Composite.Type.CONVEX_POLYGON, Collections.singletonList(new Primitive(Primitive.Type.GL_TRIANGLE_FAN, points, colour)));
     }
 
 }
