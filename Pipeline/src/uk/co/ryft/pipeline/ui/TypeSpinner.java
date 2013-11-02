@@ -10,8 +10,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Element.Type;
+import uk.co.ryft.pipeline.model.Primitive;
+import uk.co.ryft.pipeline.model.Primitive.Type;
 
 public class TypeSpinner extends Spinner {
     
@@ -32,7 +32,7 @@ class TypeSpinnerAdapter extends ArrayAdapter<Type> {
 
     final LayoutInflater mInflater;
 
-    public TypeSpinnerAdapter(Context context, int textViewResourceId, Element.Type[] objects) {
+    public TypeSpinnerAdapter(Context context, int textViewResourceId, Primitive.Type[] objects) {
         super(context, textViewResourceId, objects);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -45,7 +45,7 @@ class TypeSpinnerAdapter extends ArrayAdapter<Type> {
             convertView = mInflater.inflate(R.layout.spinner_type_selection, null);
         }
 
-        Element.Type thisType = getItem(position);
+        Primitive.Type thisType = getItem(position);
         TextView typeView = (TextView) convertView.findViewById(R.id.spinner_type_selection);
         typeView.setText(thisType.toString());
 
@@ -60,7 +60,7 @@ class TypeSpinnerAdapter extends ArrayAdapter<Type> {
             convertView = mInflater.inflate(R.layout.spinner_type_item, null);
         }
 
-        Element.Type thisType = getItem(position);
+        Primitive.Type thisType = getItem(position);
         TextView typeView = (TextView) convertView.findViewById(R.id.spinner_type_item);
         TextView descView = (TextView) convertView.findViewById(R.id.spinner_type_item_desc);
 

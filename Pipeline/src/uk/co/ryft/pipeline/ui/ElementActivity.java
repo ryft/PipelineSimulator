@@ -23,8 +23,8 @@ import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Element.Type;
+import uk.co.ryft.pipeline.model.Primitive;
+import uk.co.ryft.pipeline.model.Primitive.Type;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -54,28 +54,28 @@ import com.larswerkman.colorpicker.OpacityBar;
 public class ElementActivity extends ListActivity {
 
     protected ArrayAdapter<FloatPoint> mAdapter;
-    protected Element mElement;
+    protected Primitive mElement;
     protected TypeSpinner mTypeSpinner;
     protected ViewSwitcher mViewSwitcher;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_element);
+        setContentView(R.layout.activity_element_primitive);
 
         // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
         if (fromScene.getBoolean("edit_mode", false)) {
-            mElement = (Element) fromScene.getSerializable("element");
+            mElement = (Primitive) fromScene.getSerializable("element");
             setTitle(R.string.title_activity_element_edit);
         } else {
-            mElement = new Element(Type.GL_POINTS);
+            mElement = new Primitive(Type.GL_POINTS);
             setTitle(R.string.title_activity_element_add);
         }
 
         // Set current element properties as default selections
         mTypeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
         TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this,
-                android.R.layout.simple_list_item_1, Element.Type.values());
+                android.R.layout.simple_list_item_1, Primitive.Type.values());
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 

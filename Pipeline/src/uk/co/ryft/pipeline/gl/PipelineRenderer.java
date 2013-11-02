@@ -1,14 +1,17 @@
 package uk.co.ryft.pipeline.gl;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import uk.co.ryft.pipeline.model.Drawable;
+import uk.co.ryft.pipeline.model.Composite;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Primitive;
+import uk.co.ryft.pipeline.model.Primitive.Type;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
@@ -18,32 +21,73 @@ public class PipelineRenderer implements Renderer {
 
     private static final String TAG = "PipelineRenderer";
 
-    private final float[] mMVPMatrix = new float[16];
-    private final float[] mProjMatrix = new float[16];
-    private final float[] mVMatrix = new float[16];
     private final float[] mIdentityMatrix = new float[16];
+    private final float[] mModelMatrix = new float[16];
+    private final float[] mViewMatrix = new float[16];
+    private final float[] mProjMatrix = new float[16];
+    private final float[] mMVMatrix = new float[16];
+    private final float[] mMVPMatrix = new float[16];
 
     private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
     
-    private boolean mTogglePerspective = false;
+    private Drawable axes;
+    private static Composite axesPrim;
+    static {
+        LinkedList<Primitive> prims = new LinkedList<Primitive>();
+        
+        LinkedList<FloatPoint> points = new LinkedList<FloatPoint>();
+        points.add(new FloatPoint(0, 0, 0));
+        points.add(new FloatPoint(1, 0, 0));
+        points.add(new FloatPoint(0, 0, 0));
+        points.add(new FloatPoint(0, 1, 0));
+        points.add(new FloatPoint(0, 0, 0));
+        points.add(new FloatPoint(0, 0, 1));
+        prims.add(new Primitive(Type.GL_LINES, points, Colour.WHITE));
 
-    public void togglePerspective() {
-        mTogglePerspective = !mTogglePerspective;
+        LinkedList<FloatPoint> arrX = new LinkedList<FloatPoint>();
+        arrX.add(new FloatPoint(0.8f, 0.1f, -0.1f));
+        arrX.add(new FloatPoint(1, 0, 0));
+        arrX.add(new FloatPoint(0.8f, -0.1f, 0.1f));
+        arrX.add(new FloatPoint(0.9f, 0, 0));
+        prims.add(new Primitive(Type.GL_LINE_LOOP, arrX, Colour.RED));
+
+        LinkedList<FloatPoint> arrY = new LinkedList<FloatPoint>();
+        arrY.add(new FloatPoint(-0.1f, 0.8f, 0.1f));
+        arrY.add(new FloatPoint(0, 1, 0));
+        arrY.add(new FloatPoint(0.1f, 0.8f, -0.1f));
+        arrY.add(new FloatPoint(0, 0.9f, 0));
+        prims.add(new Primitive(Type.GL_LINE_LOOP, arrY, Colour.GREEN));
+
+        LinkedList<FloatPoint> arrZ = new LinkedList<FloatPoint>();
+        arrZ.add(new FloatPoint(0.1f, -0.1f, 0.8f));
+        arrZ.add(new FloatPoint(0, 0, 1));
+        arrZ.add(new FloatPoint(-0.1f, 0.1f, 0.8f));
+        arrZ.add(new FloatPoint(0, 0, 0.9f));
+        prims.add(new Primitive(Type.GL_LINE_LOOP, arrZ, Colour.CYAN));
+        
+        axesPrim = new Composite(Composite.Type.CUSTOM_SHAPE, prims);
+    }
+
+    private boolean mToggled = false;
+
+    public void toggle() {
+        mToggled = !mToggled;
     }
 
     // TODO Should these belong here?
     public static final String VERTEX_SHADER_EMPTY =
             // This matrix member variable provides a hook to manipulate
             // the coordinates of the objects that use this vertex shader
-            "uniform mat4 uMVPMatrix;" +
+                    "uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
                     "void main() {" +
                     // the matrix must be included as a modifier of gl_Position
-                    "  gl_Position = vPosition * uMVPMatrix;" +
+                    // the order must be matrix * vector as the matrix is in col-major order.
+                    "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
     public static final String FRAGMENT_SHADER_EMPTY =
-            "precision mediump float;" +
+                    "precision mediump float;" +
                     "uniform vec4 vColor;" +
                     "void main() {" +
                     "  gl_FragColor = vColor;" +
@@ -55,6 +99,8 @@ public class PipelineRenderer implements Renderer {
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
+    
+    public volatile float rot = 0f;
 
     @Override
     public void onDrawFrame(GL10 unused) {
@@ -65,16 +111,22 @@ public class PipelineRenderer implements Renderer {
         // Set up an identity matrix
         Matrix.setIdentityM(mIdentityMatrix, 0);
 
+        // Set up the model (world transformation) matrix
+        Matrix.setIdentityM(mModelMatrix, 0);
+//        Matrix.translateM(mModelMatrix, 0, 0, 10f, 0);
+
         // Set the camera position (View matrix)
-        if (mTogglePerspective)
-            Matrix.setLookAtM(mVMatrix, 0, -1f, -1f, 5f, 0f, 0f, 0f, 0f, 1f, 0f);
-        else
-            Matrix.setLookAtM(mVMatrix, 0, 0f, 0f, 5f, 0f, 0f, 0f, 0f, 1f, 0f);
+//        if (mToggled)
+//            Matrix.setLookAtM(mViewMatrix, 0, 3f, 3f, 3f, 0f, 0f, 0f, 1f, 1f, 0f);
+//        else
+            Matrix.setLookAtM(mViewMatrix, 0, (float) Math.sin(rot)*3, 3f, (float) Math.cos(rot)*3, 0f, 0f, 0f, 0f, 1f, 0f);
+//      Matrix.setLookAtM(mViewMatrix, 0, 3f, 3f, 3f, 0f, 0f, 0f, 0f, 1f, 0f);
         // Params: matrix, offset, eye(x, y, z), focus(x, y, z), up(x, y, z).
-        // XXX Coords are flipped on screen - explain why.
+        // XXX Coords are flipped on screen with frustrumM a la http://www.learnopengles.com/understanding-opengls-matrices/
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mVMatrix, 0);
+        Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
 
         // Draw objects in the scene
         for (Element e : mElements.keySet()) {
@@ -86,7 +138,10 @@ public class PipelineRenderer implements Renderer {
             else
                 System.out.println("Ruh-roh, null drawable!");
         }
-        
+            axes = axesPrim.getDrawable();
+        // Ignore world (model) coord transformation when drawing axes
+        axes.draw(mMVPMatrix);
+
     }
 
     @Override
@@ -96,16 +151,20 @@ public class PipelineRenderer implements Renderer {
         // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
 
+        // XXX display a unit square with correct aspect ratio, regardless of screen orientation
         if (width >= height) {
             float ratio = (float) width / height;
 
             // this projection matrix is applied to object coordinates
             // in the onDrawFrame() method
             Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+            // (float[] m, int offset, float left, float right, float bottom, float top, float near, float far)
 
         } else {
             float ratio = (float) height / width;
             Matrix.frustumM(mProjMatrix, 0, -1, 1, -ratio, ratio, 3, 7);
+//            float ratio = (float) width / height;
+//            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 
         }
 
