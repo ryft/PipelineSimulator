@@ -8,10 +8,9 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.gl.PipelineSurface;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Primitive;
-import uk.co.ryft.pipeline.model.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -134,15 +133,23 @@ public class MainActivity extends Activity {
                 backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
                 backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
                 backface.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                
                 mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.BLUE));
+
+                LinkedList<FloatPoint> frontface = new LinkedList<FloatPoint>();
+                frontface.add(new FloatPoint(0.1f, 0.1f, 0.1f));
+                frontface.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
+                frontface.add(new FloatPoint(0.1f, -0.1f, 0.1f));
+                frontface.add(new FloatPoint(0.1f, 0.1f, 0.1f));
+                frontface.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
+                frontface.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
+                mElements.add(new Primitive(Type.GL_TRIANGLES, frontface, Colour.GREEN));
                 
                 updateScene();
                 break;
                 
             case R.id.action_change_perspective:
-//                mPipelineView.togglePerspective();
-                mPipelineView.boop();
+                mPipelineView.toggle();
+//                mPipelineView.boop();
                 break;
         }
         return super.onOptionsItemSelected(item);

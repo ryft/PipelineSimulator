@@ -1,5 +1,5 @@
 
-package uk.co.ryft.pipeline.model;
+package uk.co.ryft.pipeline.model.shapes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +12,7 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
+import uk.co.ryft.pipeline.model.Element;
 import android.opengl.GLES20;
 
 public class Primitive implements Element {

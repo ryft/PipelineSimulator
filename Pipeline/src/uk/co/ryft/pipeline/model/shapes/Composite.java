@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.model;
+package uk.co.ryft.pipeline.model.shapes;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
+import uk.co.ryft.pipeline.model.Element;
 
 // XXX Implementation of Drawable which uses one or more GL ES 2 primitives.
 public class Composite implements Element {

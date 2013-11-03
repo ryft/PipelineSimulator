@@ -23,8 +23,8 @@ import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.model.Primitive;
-import uk.co.ryft.pipeline.model.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;

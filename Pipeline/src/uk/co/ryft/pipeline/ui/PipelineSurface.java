@@ -1,7 +1,8 @@
-package uk.co.ryft.pipeline.gl;
+package uk.co.ryft.pipeline.ui;
 
 import java.util.List;
 
+import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -11,8 +12,8 @@ import android.view.MotionEvent;
 public class PipelineSurface extends GLSurfaceView {
 
     private final PipelineRenderer mRenderer = new PipelineRenderer();
-    
-    public PipelineSurface (Context context, AttributeSet attrs) {
+
+    public PipelineSurface(Context context, AttributeSet attrs) {
         super(context, attrs);
         construct();
     }
@@ -21,8 +22,8 @@ public class PipelineSurface extends GLSurfaceView {
         super(context);
         construct();
     }
-    
-    private void construct() { //TODO is this ever called?
+
+    private void construct() { // TODO is this ever called?
 
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
@@ -31,21 +32,21 @@ public class PipelineSurface extends GLSurfaceView {
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setRenderer(mRenderer);
 
-        // Render the view only when there is a change in the drawing data
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        
+        // Render the view continuously so we can support transition effects.
+         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
     }
-    
+
     public void toggle() {
-        mRenderer.toggle();
+        mRenderer.interact();
         requestRender();
     }
-    
+
     public void updateScene(List<Element> elements) {
         mRenderer.updateScene(elements);
         requestRender();
     }
-    
+
     public void boop() {
         mRenderer.rot += 0.1f;
         requestRender();
