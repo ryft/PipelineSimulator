@@ -86,8 +86,8 @@ public class PipelineRenderer implements Renderer {
 
     public void interact() {
         mModelTransformations.add(new Translation(new FloatPoint(0, 1, 0), 100));
-        mViewTransformations.add(new Translation(new FloatPoint(-2, 2, -2), 100));
-        mViewTransformations.add(new Rotation(45, new FloatPoint(0, 1, 0), 100));
+        mModelTransformations.add(new Rotation(180, new FloatPoint(0, 1, 0), 100));
+//        mViewTransformations.add(new Translation(new FloatPoint(-2, 2, -2), 100));
     }
 
     // TODO Should these belong here?
@@ -114,6 +114,16 @@ public class PipelineRenderer implements Renderer {
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearDepthf(1.0f);
+        
+        // Enable depth buffer and set parameters
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        
+        // Enable face culling and set parameters
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
+        GLES20.glFrontFace(GLES20.GL_CCW);
     }
     
     public volatile float rot = 0f;
@@ -121,8 +131,8 @@ public class PipelineRenderer implements Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
 
-        // Draw background colour
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        // Clear background colour and depth buffer
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Set up an identity matrix
         Matrix.setIdentityM(mIdentityMatrix, 0);
