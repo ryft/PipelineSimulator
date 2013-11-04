@@ -33,7 +33,7 @@ public class PipelineSurface extends GLSurfaceView {
         setRenderer(mRenderer);
 
         // Render the view continuously so we can support transition effects.
-         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
     }
 
@@ -47,14 +47,40 @@ public class PipelineSurface extends GLSurfaceView {
         requestRender();
     }
 
-    public void boop() {
-        mRenderer.rot += 0.1f;
-        requestRender();
-    }
+    private float mPreviousX = 0;
+    private float mPreviousY = 0;
+    private float TOUCH_SCALE_FACTOR = 0.3f;
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        return false;
+        // MotionEvent reports input details from the touch screen
+        // and other input controls. In this case, you are only
+        // interested in events where the touch position changed.
+
+        float x = e.getX();
+        float y = e.getY();
+
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_MOVE:
+
+                float dx = x - mPreviousX;
+                float dy = y - mPreviousY;
+
+                // reverse direction of rotation above the mid-line
+                if (y > getHeight() / 2)
+                  dx = dx * -1;
+
+                // reverse direction of rotation to left of the mid-line
+                if (x < getWidth() / 2)
+                  dy = dy * -1;
+
+                mRenderer.mAngle -= (dx + dy) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
+                requestRender();
+        }
+
+        mPreviousX = x;
+        mPreviousY = y;
+        return true;
     }
 
 }

@@ -102,47 +102,56 @@ public class MainActivity extends Activity {
                 LinkedList<FloatPoint> box = new LinkedList<FloatPoint>();
                 
                 // Front face
-                box.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                box.add(new FloatPoint(0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                box.add(new FloatPoint(0.1f, 0.1f, -0.1f));
+                box.add(new FloatPoint(0.2f, 0.2f, -0.2f));
+                box.add(new FloatPoint(0.2f, -0.2f, -0.2f));
+                box.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
+                box.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
+                box.add(new FloatPoint(0.2f, 0.2f, -0.2f));
                 
                 // Top
-                box.add(new FloatPoint(0.1f, 0.1f, 0.1f));
-                box.add(new FloatPoint(0.1f, -0.1f, 0.1f));
+                box.add(new FloatPoint(0.2f, 0.2f, 0.2f));
+                box.add(new FloatPoint(0.2f, -0.2f, 0.2f));
                 
-                box.add(new FloatPoint(0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(0.1f, -0.1f, 0.1f));
+                box.add(new FloatPoint(0.2f, -0.2f, -0.2f));
+                box.add(new FloatPoint(0.2f, -0.2f, 0.2f));
                 
-                box.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
-                box.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
+                box.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
+                box.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
+                box.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
 
-                box.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
-                box.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
-                box.add(new FloatPoint(0.1f, 0.1f, 0.1f));
+                box.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
+                box.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
+                box.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
+                box.add(new FloatPoint(0.2f, 0.2f, 0.2f));
                 
                 mElements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
 
                 LinkedList<FloatPoint> backface = new LinkedList<FloatPoint>();
-                backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                backface.add(new FloatPoint(0.1f, -0.1f, -0.1f));
-                backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                backface.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.BLUE));
+                backface.add(new FloatPoint(0.2f, 0.2f, -0.2f));
+                backface.add(new FloatPoint(0.2f, -0.2f, -0.2f));
+                backface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
+                backface.add(new FloatPoint(0.2f, 0.2f, -0.2f));
+                backface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
+                backface.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
+                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.RED));
 
                 LinkedList<FloatPoint> frontface = new LinkedList<FloatPoint>();
-                frontface.add(new FloatPoint(0.1f, 0.1f, 0.1f));
-                frontface.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
-                frontface.add(new FloatPoint(0.1f, -0.1f, 0.1f));
-                frontface.add(new FloatPoint(0.1f, 0.1f, 0.1f));
-                frontface.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
-                frontface.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
+                frontface.add(new FloatPoint(0.2f, 0.2f, 0.2f));
+                frontface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
+                frontface.add(new FloatPoint(0.2f, -0.2f, 0.2f));
+                frontface.add(new FloatPoint(0.2f, 0.2f, 0.2f));
+                frontface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
+                frontface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
                 mElements.add(new Primitive(Type.GL_TRIANGLES, frontface, Colour.GREEN));
+
+                LinkedList<FloatPoint> sideface = new LinkedList<FloatPoint>();
+                sideface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
+                sideface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
+                sideface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
+                sideface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
+                sideface.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
+                sideface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
+                mElements.add(new Primitive(Type.GL_TRIANGLES, sideface, Colour.BLUE));
                 
                 updateScene();
                 break;

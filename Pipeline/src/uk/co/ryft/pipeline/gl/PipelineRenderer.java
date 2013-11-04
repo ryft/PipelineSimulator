@@ -36,6 +36,10 @@ public class PipelineRenderer implements Renderer {
 
     private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
     private final List<Transformation> mViewTransformations = new LinkedList<Transformation>();
+
+    // For touch events
+    public volatile float mAngle;
+    private final float[] mRotationMatrix = new float[16];
     
     private Drawable axes;
     private static Composite axesPrim;
@@ -124,9 +128,10 @@ public class PipelineRenderer implements Renderer {
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
         GLES20.glFrontFace(GLES20.GL_CCW);
+        
+        // For touch events
+        Matrix.setIdentityM(mRotationMatrix, 0);
     }
-    
-    public volatile float rot = 0f;
 
     @Override
     public void onDrawFrame(GL10 unused) {
@@ -149,6 +154,10 @@ public class PipelineRenderer implements Renderer {
             Matrix.multiplyMM(mModelMatrix, 0, t.next(), 0, mModelMatrix, 0);
         for (Transformation t : mViewTransformations)
             Matrix.multiplyMM(mViewMatrix, 0, t.next(), 0, mViewMatrix, 0); // TODO: This is not right.
+        
+        // Combine the rotation matrix with the projection and camera view
+        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 1, 0);
+        Matrix.multiplyMM(mModelMatrix, 0, mRotationMatrix, 0, mModelMatrix, 0);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
