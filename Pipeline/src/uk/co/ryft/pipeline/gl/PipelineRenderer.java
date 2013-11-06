@@ -38,6 +38,7 @@ public class PipelineRenderer implements Renderer {
     private final List<Transformation> mViewTransformations = new LinkedList<Transformation>();
 
     // For touch events
+    // TODO: Implement synchronised block for this.
     public volatile float mAngle;
     private final float[] mRotationMatrix = new float[16];
     
