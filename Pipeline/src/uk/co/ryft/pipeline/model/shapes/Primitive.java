@@ -156,17 +156,30 @@ public class Primitive implements Element {
     public void setColour(Colour colour) {
         mColour = colour;
     }
+    
+    @Override
+    public Primitive rotate(float a, float x, float y, float z) {
+        
+        for (FloatPoint v : mVertices)
+            v.rotate(a, x, y, z);
+        
+        // TODO: Decide whether this (and other set operations) should instantiate a new Primitive
+        // (immutable) or perform operations on itself (mutable) and document this.
+        
+        return this;
+    }
+    
+    @Override
+    public Primitive translate(float x, float y, float z) {
+
+        for (FloatPoint v : mVertices)
+            v.translate(x, y, z);
+        return this;
+    }
 
     @Override
     public Object clone() {
         return new Primitive(mType, mVertices, mColour);
-    }
-
-    @Override
-    public int compareTo(Element arg0) {
-        // Compare z-orders. TODO: cache these min/max values for faster
-        // sorting.
-        return 0;
     }
 
     @Override

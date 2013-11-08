@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import uk.co.ryft.pipeline.gl.Drawable;
 
-public interface Element extends Comparable<Element>, Serializable, Cloneable {
+public interface Element extends Serializable, Cloneable {
     
     public Drawable getDrawable();
 
@@ -15,5 +15,10 @@ public interface Element extends Comparable<Element>, Serializable, Cloneable {
     public CharSequence getSummary();
     
     public boolean isPrimitive();
+    
+    public Element translate(float x, float y, float z);
+    
+    // XXX Rotates about the origin.
+    public Element rotate(float a, float x, float y, float z);
 
 }

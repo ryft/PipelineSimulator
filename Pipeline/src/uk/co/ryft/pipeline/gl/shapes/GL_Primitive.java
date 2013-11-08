@@ -97,6 +97,7 @@ public class GL_Primitive implements Drawable {
         PipelineRenderer.checkGlError("glUniformMatrix4fv");
 
         // Draw the line(s)
+        // TODO: Consider using glDrawElements
         GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
 
         // Disable vertex array

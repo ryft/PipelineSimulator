@@ -42,12 +42,19 @@ public class PipelineRenderer implements Renderer {
     public volatile float mAngle;
     private final float[] mRotationMatrix = new float[16];
     
+    // Virtual camera parameters
+    // TODO: Wrap these in a Camera class?
+    private FloatPoint mCameraEye;
+    private FloatPoint mCameraFocus;
+    private FloatPoint mCameraUp;
+    
     private Drawable axes;
     private static Composite axesPrim;
     static {
-        LinkedList<Primitive> prims = new LinkedList<Primitive>();
+        LinkedList<Element> prims = new LinkedList<Element>();
 
         LinkedList<FloatPoint> lineCoords = new LinkedList<FloatPoint>();
+        // XXX i < 1.1 is required to draw the edge lines
         for (float i = -1; i < 1.1; i += 0.1) {
             lineCoords.add(new FloatPoint(i, 0, -1));
             lineCoords.add(new FloatPoint(i, 0, 1));
@@ -91,7 +98,7 @@ public class PipelineRenderer implements Renderer {
 
     public void interact() {
         mModelTransformations.add(new Translation(new FloatPoint(0, 1, 0), 100));
-        mModelTransformations.add(new Rotation(180, new FloatPoint(0, 1, 0), 100));
+        mModelTransformations.add(new Rotation(180, new FloatPoint(0, 0, 1), 100));
 //        mViewTransformations.add(new Translation(new FloatPoint(-2, 2, -2), 100));
     }
 

@@ -5,12 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -56,7 +54,15 @@ public class MainActivity extends Activity {
         }
 
         updateScene();
+        
     }
+    
+//    private void printVector(float[] v) {
+//        System.out.print("[ ");
+//        for (int i = 0; i < v.length; i++)
+//            System.out.print(v[i]+" ");
+//        System.out.println("]");
+//    }
 
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
@@ -124,7 +130,7 @@ public class MainActivity extends Activity {
                 box.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
                 box.add(new FloatPoint(0.2f, 0.2f, 0.2f));
                 
-                mElements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
+//                mElements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
 
                 LinkedList<FloatPoint> backface = new LinkedList<FloatPoint>();
                 backface.add(new FloatPoint(0.2f, 0.2f, -0.2f));
@@ -133,7 +139,7 @@ public class MainActivity extends Activity {
                 backface.add(new FloatPoint(0.2f, 0.2f, -0.2f));
                 backface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
                 backface.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
-                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.RED));
+//                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.RED));
 
                 LinkedList<FloatPoint> frontface = new LinkedList<FloatPoint>();
                 frontface.add(new FloatPoint(0.2f, 0.2f, 0.2f));
@@ -142,7 +148,7 @@ public class MainActivity extends Activity {
                 frontface.add(new FloatPoint(0.2f, 0.2f, 0.2f));
                 frontface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
                 frontface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
-                mElements.add(new Primitive(Type.GL_TRIANGLES, frontface, Colour.GREEN));
+//                mElements.add(new Primitive(Type.GL_TRIANGLES, frontface, Colour.GREEN));
 
                 LinkedList<FloatPoint> sideface = new LinkedList<FloatPoint>();
                 sideface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
@@ -151,7 +157,12 @@ public class MainActivity extends Activity {
                 sideface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
                 sideface.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
                 sideface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-                mElements.add(new Primitive(Type.GL_TRIANGLES, sideface, Colour.BLUE));
+//                mElements.add(new Primitive(Type.GL_TRIANGLES, sideface, Colour.BLUE));
+                
+//                mElements.add(ConvexPolygon.getRegularPolygon(60, new FloatPoint(0,0,0), 1, 0, Colour.MAGENTA).rotate(90, 0, 1, 0).translate(0, -1, 0).rotate(180, 1,0,0));
+//                mElements.add(ConvexPolygon.getCylinder(16, new FloatPoint(0,0,0), 1f, 0.5f, 0, Colour.CYAN));
+                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.5f));
+                
                 
                 updateScene();
                 break;

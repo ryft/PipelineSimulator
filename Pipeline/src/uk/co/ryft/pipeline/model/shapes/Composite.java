@@ -56,12 +56,6 @@ public class Composite implements Element {
     }
 
     @Override
-    public int compareTo(Element another) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public int getIconRef() {
         // TODO
         return R.drawable.ic_action_element;
@@ -84,11 +78,22 @@ public class Composite implements Element {
     }
 
     @Override
+    public Composite translate(float x, float y, float z) {
+        for (Element e : mComponents)
+            e.translate(x, y, z);
+        return this;
+    }
+
+    @Override
+    public Composite rotate(float a, float x, float y, float z) {
+        for (Element e : mComponents)
+            e.rotate(a, x, y, z);
+        return this;
+    }
+
+    @Override
     public boolean isPrimitive() {
         return false;
     }
-    
-    
-
 
 }
