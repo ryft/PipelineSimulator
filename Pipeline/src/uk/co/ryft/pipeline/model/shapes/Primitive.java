@@ -58,7 +58,7 @@ public class Primitive implements Element {
     };
 
     protected Type mType;
-    protected final List<FloatPoint> mVertices = new ArrayList<FloatPoint>();
+    protected final ArrayList<FloatPoint> mVertices = new ArrayList<FloatPoint>();
     protected Colour mColour = Colour.WHITE;
 
     public Primitive(Type type) {
@@ -179,7 +179,10 @@ public class Primitive implements Element {
 
     @Override
     public Object clone() {
-        return new Primitive(mType, mVertices, mColour);
+        
+        Colour colour = (Colour) mColour.clone();
+        ArrayList<FloatPoint> vertices = (ArrayList<FloatPoint>) mVertices.clone();
+        return new Primitive(mType, vertices, colour);
     }
 
     @Override

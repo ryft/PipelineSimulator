@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
 import uk.co.ryft.pipeline.model.Element;
@@ -35,8 +33,7 @@ public class Composite implements Element {
     };
     
     protected Type mType;
-    protected final List<Element> mComponents;
-    protected Colour mColour = Colour.WHITE;
+    protected final LinkedList<Element> mComponents;
     
     public Composite(Type type, Collection<? extends Element> elements) {
         mType = type;
@@ -94,6 +91,13 @@ public class Composite implements Element {
     @Override
     public boolean isPrimitive() {
         return false;
+    }
+
+    @Override
+    public Object clone() {
+        
+        LinkedList<Element> components = (LinkedList<Element>) mComponents.clone();
+        return new Composite(mType, components);
     }
 
 }

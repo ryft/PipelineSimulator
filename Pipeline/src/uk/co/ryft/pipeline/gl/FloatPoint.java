@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import android.opengl.Matrix;
 
-public class FloatPoint implements Serializable {
+public class FloatPoint implements Serializable, Cloneable {
     
     private static final long serialVersionUID = -4166884951552173806L;
     
@@ -13,7 +13,6 @@ public class FloatPoint implements Serializable {
     private float z;
     
     public FloatPoint(float x, float y, float z) {
-        super();
         this.x = x;
         this.y = y;
         this.z = z;
@@ -67,6 +66,11 @@ public class FloatPoint implements Serializable {
     @Override
     public String toString() {
         return "("+getX()+", "+getY()+", "+getZ()+")";
+    }
+    
+    @Override
+    public Object clone() {
+        return new FloatPoint(x, y, z);
     }
 
 }
