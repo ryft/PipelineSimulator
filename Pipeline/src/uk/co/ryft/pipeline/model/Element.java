@@ -14,11 +14,16 @@ public interface Element extends Serializable, Cloneable {
 
     public CharSequence getSummary();
     
+    @Override
+    public String toString();
+
     public boolean isPrimitive();
     
     public Element translate(float x, float y, float z);
     
     // XXX Rotates about the origin.
     public Element rotate(float a, float x, float y, float z);
+    
+    public Object clone();
 
 }

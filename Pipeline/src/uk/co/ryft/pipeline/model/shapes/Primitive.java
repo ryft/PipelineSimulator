@@ -106,21 +106,12 @@ public class Primitive implements Element {
         mVertices.addAll(vertices);
     }
 
-    public String getTitle() {
-        return mType.getDescription() + "\n(" + mType.toString() + ")";
+    public Colour getColour() {
+        return mColour;
     }
 
-    public String getSummary() {
-        String summary = "Consists of " + mVertices.size();
-        if (mVertices.size() == 1)
-            summary += " vertex.";
-        else
-            summary += " vertices.";
-        return summary;
-    }
-
-    public int getIconRef() {
-        return R.drawable.ic_action_scene; // TODO
+    public void setColour(Colour colour) {
+        mColour = colour;
     }
 
     /**
@@ -145,18 +136,49 @@ public class Primitive implements Element {
             i += 3;
         }
         float[] colour = getColour().toArray();
-
+    
         return new GL_Primitive(coords, colour, vertexCount, getType().getGLPrimitive());
     }
 
-    public Colour getColour() {
-        return mColour;
+    public int getIconRef() {
+        return R.drawable.ic_action_scene; // TODO
     }
 
-    public void setColour(Colour colour) {
-        mColour = colour;
+    @Override
+    public String getTitle() {
+        return mType.getDescription() + "\n(" + mType.toString() + ")";
     }
-    
+
+    @Override
+    public String getSummary() {
+        String summary = "Consists of " + mVertices.size();
+        if (mVertices.size() == 1)
+            summary += " vertex.";
+        else
+            summary += " vertices.";
+        return summary;
+    }
+
+    @Override
+    public String toString() {
+        String details = getTitle() + "\n" + getSummary() + "\n";
+        for (FloatPoint p : mVertices)
+            details += "\n" + p.toString();
+        return details;
+    }
+
+    @Override
+    public boolean isPrimitive() {
+        return true;
+    }
+
+    @Override
+    public Primitive translate(float x, float y, float z) {
+        for (FloatPoint v : mVertices)
+            v.translate(x, y, z);
+        return this;
+    }
+
     @Override
     public Primitive rotate(float a, float x, float y, float z) {
         
@@ -170,24 +192,11 @@ public class Primitive implements Element {
     }
     
     @Override
-    public Primitive translate(float x, float y, float z) {
-
-        for (FloatPoint v : mVertices)
-            v.translate(x, y, z);
-        return this;
-    }
-
-    @Override
     public Object clone() {
         
         Colour colour = (Colour) mColour.clone();
         ArrayList<FloatPoint> vertices = (ArrayList<FloatPoint>) mVertices.clone();
         return new Primitive(mType, vertices, colour);
-    }
-
-    @Override
-    public boolean isPrimitive() {
-        return true;
     }
 
 }

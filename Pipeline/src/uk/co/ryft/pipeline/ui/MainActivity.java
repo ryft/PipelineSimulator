@@ -5,9 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -130,71 +133,14 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                LinkedList<FloatPoint> box = new LinkedList<FloatPoint>();
-                
-                // Front face
-                box.add(new FloatPoint(0.2f, 0.2f, -0.2f));
-                box.add(new FloatPoint(0.2f, -0.2f, -0.2f));
-                box.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-                box.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
-                box.add(new FloatPoint(0.2f, 0.2f, -0.2f));
-                
-                // Top
-                box.add(new FloatPoint(0.2f, 0.2f, 0.2f));
-                box.add(new FloatPoint(0.2f, -0.2f, 0.2f));
-                
-                box.add(new FloatPoint(0.2f, -0.2f, -0.2f));
-                box.add(new FloatPoint(0.2f, -0.2f, 0.2f));
-                
-                box.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
-                box.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-                box.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
-
-                box.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
-                box.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
-                box.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
-                box.add(new FloatPoint(0.2f, 0.2f, 0.2f));
-                
-//                mElements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
-
-                LinkedList<FloatPoint> backface = new LinkedList<FloatPoint>();
-                backface.add(new FloatPoint(0.2f, 0.2f, -0.2f));
-                backface.add(new FloatPoint(0.2f, -0.2f, -0.2f));
-                backface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-                backface.add(new FloatPoint(0.2f, 0.2f, -0.2f));
-                backface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-                backface.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
-//                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.RED));
-
-                LinkedList<FloatPoint> frontface = new LinkedList<FloatPoint>();
-                frontface.add(new FloatPoint(0.2f, 0.2f, 0.2f));
-                frontface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
-                frontface.add(new FloatPoint(0.2f, -0.2f, 0.2f));
-                frontface.add(new FloatPoint(0.2f, 0.2f, 0.2f));
-                frontface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
-                frontface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
-//                mElements.add(new Primitive(Type.GL_TRIANGLES, frontface, Colour.GREEN));
-
-                LinkedList<FloatPoint> sideface = new LinkedList<FloatPoint>();
-                sideface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
-                sideface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-                sideface.add(new FloatPoint(-0.2f, -0.2f, 0.2f));
-                sideface.add(new FloatPoint(-0.2f, 0.2f, 0.2f));
-                sideface.add(new FloatPoint(-0.2f, 0.2f, -0.2f));
-                sideface.add(new FloatPoint(-0.2f, -0.2f, -0.2f));
-//                mElements.add(new Primitive(Type.GL_TRIANGLES, sideface, Colour.BLUE));
-                
-//                mElements.add(ConvexPolygon.getRegularPolygon(60, new FloatPoint(0,0,0), 1, 0, Colour.MAGENTA).rotate(90, 0, 1, 0).translate(0, -1, 0).rotate(180, 1,0,0));
-//                mElements.add(ConvexPolygon.getCylinder(16, new FloatPoint(0,0,0), 1f, 0.5f, 0, Colour.CYAN));
-                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.5f));
-                
+                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
+                mElements.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
                 
                 updateScene();
                 break;
                 
             case R.id.action_change_perspective:
                 mPipelineView.toggle();
-//                mPipelineView.boop();
                 break;
         }
         return super.onOptionsItemSelected(item);
