@@ -18,9 +18,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <uk.co.ryft.pipeline.gl.PipelineSurface
+    <uk.co.ryft.pipeline.ui.PipelineSurface
+    	android:padding="2dip"
         android:id="@+id/pipeline_surface"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
 </FrameLayout>
+

@@ -8,18 +8,23 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
-import uk.co.ryft.pipeline.gl.PipelineSurface;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Primitive;
-import uk.co.ryft.pipeline.model.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
 public class MainActivity extends Activity {
 
@@ -35,6 +40,26 @@ public class MainActivity extends Activity {
         setupActionBar();
 
         mPipelineView = (PipelineSurface) findViewById(R.id.pipeline_surface);
+        
+        final GestureDetector gestureDetector = new GestureDetector(this, new SimpleOnGestureListener() {
+            @Override
+            public void onLongPress(MotionEvent e) {
+                boolean editMode = mPipelineView.toggleEditMode();
+                if (editMode)
+                    mPipelineView.setBackgroundResource(R.drawable.surface_border);
+                else
+                    mPipelineView.setBackgroundResource(0);
+            }
+        });
+        
+        mPipelineView.setOnTouchListener(new OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+            
+        });
 
         // Get elements from returning activity intent or saved state, if
         // possible.
@@ -57,7 +82,15 @@ public class MainActivity extends Activity {
         }
 
         updateScene();
+        
     }
+    
+//    private void printVector(float[] v) {
+//        System.out.print("[ ");
+//        for (int i = 0; i < v.length; i++)
+//            System.out.print(v[i]+" ");
+//        System.out.println("]");
+//    }
 
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
@@ -100,49 +133,14 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                LinkedList<FloatPoint> box = new LinkedList<FloatPoint>();
-                
-                // Front face
-                box.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                box.add(new FloatPoint(0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                box.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                
-                // Top
-                box.add(new FloatPoint(0.1f, 0.1f, 0.1f));
-                box.add(new FloatPoint(0.1f, -0.1f, 0.1f));
-                
-                box.add(new FloatPoint(0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(0.1f, -0.1f, 0.1f));
-                
-                box.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
-                box.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, -0.1f, 0.1f));
-
-                box.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
-                box.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                box.add(new FloatPoint(-0.1f, 0.1f, 0.1f));
-                box.add(new FloatPoint(0.1f, 0.1f, 0.1f));
-                
-                mElements.add(new Primitive(Type.GL_LINE_LOOP, box, Colour.WHITE));
-
-                LinkedList<FloatPoint> backface = new LinkedList<FloatPoint>();
-                backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                backface.add(new FloatPoint(0.1f, -0.1f, -0.1f));
-                backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                backface.add(new FloatPoint(0.1f, 0.1f, -0.1f));
-                backface.add(new FloatPoint(-0.1f, -0.1f, -0.1f));
-                backface.add(new FloatPoint(-0.1f, 0.1f, -0.1f));
-                
-                mElements.add(new Primitive(Type.GL_TRIANGLES, backface, Colour.BLUE));
+                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
+                mElements.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
                 
                 updateScene();
                 break;
                 
             case R.id.action_change_perspective:
-//                mPipelineView.togglePerspective();
-                mPipelineView.boop();
+                mPipelineView.toggle();
                 break;
         }
         return super.onOptionsItemSelected(item);

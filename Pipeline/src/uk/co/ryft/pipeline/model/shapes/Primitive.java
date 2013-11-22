@@ -1,5 +1,5 @@
 
-package uk.co.ryft.pipeline.model;
+package uk.co.ryft.pipeline.model.shapes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +12,7 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
+import uk.co.ryft.pipeline.model.Element;
 import android.opengl.GLES20;
 
 public class Primitive implements Element {
@@ -57,7 +58,7 @@ public class Primitive implements Element {
     };
 
     protected Type mType;
-    protected final List<FloatPoint> mVertices = new ArrayList<FloatPoint>();
+    protected final ArrayList<FloatPoint> mVertices = new ArrayList<FloatPoint>();
     protected Colour mColour = Colour.WHITE;
 
     public Primitive(Type type) {
@@ -105,21 +106,12 @@ public class Primitive implements Element {
         mVertices.addAll(vertices);
     }
 
-    public String getTitle() {
-        return mType.getDescription() + "\n(" + mType.toString() + ")";
+    public Colour getColour() {
+        return mColour;
     }
 
-    public String getSummary() {
-        String summary = "Consists of " + mVertices.size();
-        if (mVertices.size() == 1)
-            summary += " vertex.";
-        else
-            summary += " vertices.";
-        return summary;
-    }
-
-    public int getIconRef() {
-        return R.drawable.ic_action_scene; // TODO
+    public void setColour(Colour colour) {
+        mColour = colour;
     }
 
     /**
@@ -144,33 +136,67 @@ public class Primitive implements Element {
             i += 3;
         }
         float[] colour = getColour().toArray();
-
+    
         return new GL_Primitive(coords, colour, vertexCount, getType().getGLPrimitive());
     }
 
-    public Colour getColour() {
-        return mColour;
-    }
-
-    public void setColour(Colour colour) {
-        mColour = colour;
+    public int getIconRef() {
+        return R.drawable.ic_action_scene; // TODO
     }
 
     @Override
-    public Object clone() {
-        return new Primitive(mType, mVertices, mColour);
+    public String getTitle() {
+        return mType.getDescription() + "\n(" + mType.toString() + ")";
     }
 
     @Override
-    public int compareTo(Element arg0) {
-        // Compare z-orders. TODO: cache these min/max values for faster
-        // sorting.
-        return 0;
+    public String getSummary() {
+        String summary = "Consists of " + mVertices.size();
+        if (mVertices.size() == 1)
+            summary += " vertex.";
+        else
+            summary += " vertices.";
+        return summary;
+    }
+
+    @Override
+    public String toString() {
+        String details = getTitle() + "\n" + getSummary() + "\n";
+        for (FloatPoint p : mVertices)
+            details += "\n" + p.toString();
+        return details;
     }
 
     @Override
     public boolean isPrimitive() {
         return true;
+    }
+
+    @Override
+    public Primitive translate(float x, float y, float z) {
+        for (FloatPoint v : mVertices)
+            v.translate(x, y, z);
+        return this;
+    }
+
+    @Override
+    public Primitive rotate(float a, float x, float y, float z) {
+        
+        for (FloatPoint v : mVertices)
+            v.rotate(a, x, y, z);
+        
+        // TODO: Decide whether this (and other set operations) should instantiate a new Primitive
+        // (immutable) or perform operations on itself (mutable) and document this.
+        
+        return this;
+    }
+    
+    @Override
+    public Object clone() {
+        
+        Colour colour = (Colour) mColour.clone();
+        ArrayList<FloatPoint> vertices = (ArrayList<FloatPoint>) mVertices.clone();
+        return new Primitive(mType, vertices, colour);
     }
 
 }

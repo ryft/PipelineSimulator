@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

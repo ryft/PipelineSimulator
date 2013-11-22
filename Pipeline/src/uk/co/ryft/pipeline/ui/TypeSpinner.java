@@ -8,10 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.model.Primitive;
-import uk.co.ryft.pipeline.model.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 
 public class TypeSpinner extends Spinner {
     

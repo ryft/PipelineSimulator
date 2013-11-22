@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import android.graphics.Color;
 
-public class Colour implements Serializable {
+public class Colour implements Serializable, Cloneable {
     
     private static final long serialVersionUID = -6574165998266076014L;
     
@@ -79,5 +79,10 @@ public class Colour implements Serializable {
 //        else
 //            throw new RuntimeException("toHex() only accepts integers in the range [0 .. 16), "+decimal+" was provided.");
 //    }
+
+    @Override
+    public Object clone() {
+        return new Colour(red, green, blue, alpha);
+    }
 
 }

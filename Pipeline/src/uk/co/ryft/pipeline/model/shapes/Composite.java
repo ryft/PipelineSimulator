@@ -1,16 +1,16 @@
-package uk.co.ryft.pipeline.model;
+package uk.co.ryft.pipeline.model.shapes;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
+import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
+import uk.co.ryft.pipeline.model.Element;
 
 // XXX Implementation of Drawable which uses one or more GL ES 2 primitives.
 public class Composite implements Element {
@@ -34,8 +34,7 @@ public class Composite implements Element {
     };
     
     protected Type mType;
-    protected final List<Element> mComponents;
-    protected Colour mColour = Colour.WHITE;
+    protected final LinkedList<Element> mComponents;
     
     public Composite(Type type, Collection<? extends Element> elements) {
         mType = type;
@@ -52,12 +51,6 @@ public class Composite implements Element {
             drawables.add(e.getDrawable());
         
         return new GL_Composite(drawables);
-    }
-
-    @Override
-    public int compareTo(Element another) {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
     @Override
@@ -81,13 +74,39 @@ public class Composite implements Element {
             summary += " components.";
         return summary;
     }
+    
+    @Override
+    public String toString() {
+        String details = getTitle() + "\n" + getSummary() + "\n";
+        for (Element e : mComponents)
+            details += "\n" + e.toString();
+        return details;
+    }
 
     @Override
     public boolean isPrimitive() {
         return false;
     }
-    
-    
 
+    @Override
+    public Composite translate(float x, float y, float z) {
+        for (Element e : mComponents)
+            e.translate(x, y, z);
+        return this;
+    }
+
+    @Override
+    public Composite rotate(float a, float x, float y, float z) {
+        for (Element e : mComponents)
+            e.rotate(a, x, y, z);
+        return this;
+    }
+
+    @Override
+    public Object clone() {
+        
+        LinkedList<Element> components = (LinkedList<Element>) mComponents.clone();
+        return new Composite(mType, components);
+    }
 
 }

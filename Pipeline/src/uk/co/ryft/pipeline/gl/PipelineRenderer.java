@@ -8,10 +8,13 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import uk.co.ryft.pipeline.model.Composite;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Primitive;
-import uk.co.ryft.pipeline.model.Primitive.Type;
+import uk.co.ryft.pipeline.model.Rotation;
+import uk.co.ryft.pipeline.model.Transformation;
+import uk.co.ryft.pipeline.model.Translation;
+import uk.co.ryft.pipeline.model.shapes.Composite;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
@@ -26,14 +29,39 @@ public class PipelineRenderer implements Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mProjMatrix = new float[16];
     private final float[] mMVMatrix = new float[16];
+    private final float[] mVPMatrix = new float[16];
     private final float[] mMVPMatrix = new float[16];
 
     private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
+
+    private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
+    private final List<Transformation> mViewTransformations = new LinkedList<Transformation>();
+
+    // For touch events
+    // TODO: Implement synchronised block for this.
+    public volatile float mAngle;
+    private final float[] mRotationMatrix = new float[16];
+    
+    // Virtual camera parameters
+    // TODO: Wrap these in a Camera class?
+    private FloatPoint mCameraEye;
+    private FloatPoint mCameraFocus;
+    private FloatPoint mCameraUp;
     
     private Drawable axes;
     private static Composite axesPrim;
     static {
-        LinkedList<Primitive> prims = new LinkedList<Primitive>();
+        LinkedList<Element> prims = new LinkedList<Element>();
+
+        LinkedList<FloatPoint> lineCoords = new LinkedList<FloatPoint>();
+        // XXX i < 1.1 is required to draw the edge lines
+        for (float i = -1; i < 1.1; i += 0.1) {
+            lineCoords.add(new FloatPoint(i, 0, -1));
+            lineCoords.add(new FloatPoint(i, 0, 1));
+            lineCoords.add(new FloatPoint(-1, 0, i));
+            lineCoords.add(new FloatPoint(1, 0, i));
+        }
+        prims.add(new Primitive(Type.GL_LINES, lineCoords, Colour.GREY));
         
         LinkedList<FloatPoint> points = new LinkedList<FloatPoint>();
         points.add(new FloatPoint(0, 0, 0));
@@ -68,10 +96,10 @@ public class PipelineRenderer implements Renderer {
         axesPrim = new Composite(Composite.Type.CUSTOM_SHAPE, prims);
     }
 
-    private boolean mToggled = false;
-
-    public void toggle() {
-        mToggled = !mToggled;
+    public void interact() {
+        mModelTransformations.add(new Translation(new FloatPoint(0, 1, 0), 100));
+        mModelTransformations.add(new Rotation(180, new FloatPoint(0, 0, 1), 100));
+//        mViewTransformations.add(new Translation(new FloatPoint(-2, 2, -2), 100));
     }
 
     // TODO Should these belong here?
@@ -98,36 +126,57 @@ public class PipelineRenderer implements Renderer {
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearDepthf(1.0f);
+        
+        // Enable depth buffer and set parameters
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        
+        // Enable face culling and set parameters
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
+        GLES20.glFrontFace(GLES20.GL_CCW);
+        
+        // For touch events
+        Matrix.setIdentityM(mRotationMatrix, 0);
     }
-    
-    public volatile float rot = 0f;
 
     @Override
     public void onDrawFrame(GL10 unused) {
 
-        // Draw background colour
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        // Clear background colour and depth buffer
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Set up an identity matrix
         Matrix.setIdentityM(mIdentityMatrix, 0);
 
         // Set up the model (world transformation) matrix
         Matrix.setIdentityM(mModelMatrix, 0);
-//        Matrix.translateM(mModelMatrix, 0, 0, 10f, 0);
 
-        // Set the camera position (View matrix)
-//        if (mToggled)
-//            Matrix.setLookAtM(mViewMatrix, 0, 3f, 3f, 3f, 0f, 0f, 0f, 1f, 1f, 0f);
-//        else
-            Matrix.setLookAtM(mViewMatrix, 0, (float) Math.sin(rot)*3, 3f, (float) Math.cos(rot)*3, 0f, 0f, 0f, 0f, 1f, 0f);
-//      Matrix.setLookAtM(mViewMatrix, 0, 3f, 3f, 3f, 0f, 0f, 0f, 0f, 1f, 0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 2f, 2f, 2f, 0f, 0f, 0f, 0f, 1f, 0f);
         // Params: matrix, offset, eye(x, y, z), focus(x, y, z), up(x, y, z).
         // XXX Coords are flipped on screen with frustrumM a la http://www.learnopengles.com/understanding-opengls-matrices/
+
+        // Apply all transformations to the world, in order, in their current state
+        for (Transformation t : mModelTransformations)
+            Matrix.multiplyMM(mModelMatrix, 0, t.next(), 0, mModelMatrix, 0);
+        for (Transformation t : mViewTransformations)
+            Matrix.multiplyMM(mViewMatrix, 0, t.next(), 0, mViewMatrix, 0); // TODO: This is not right.
+        
+        // Combine the rotation matrix with the projection and camera view
+        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 1, 0);
+        Matrix.multiplyMM(mModelMatrix, 0, mRotationMatrix, 0, mModelMatrix, 0);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
+        Matrix.multiplyMM(mVPMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
 
+        // Ignore world (model) coord transformation when drawing axes
+//        if (axes == null)
+            axes = axesPrim.getDrawable();
+        axes.draw(mVPMatrix);
+        
         // Draw objects in the scene
         for (Element e : mElements.keySet()) {
             if (mElements.get(e) == null)
@@ -138,9 +187,6 @@ public class PipelineRenderer implements Renderer {
             else
                 System.out.println("Ruh-roh, null drawable!");
         }
-            axes = axesPrim.getDrawable();
-        // Ignore world (model) coord transformation when drawing axes
-        axes.draw(mMVPMatrix);
 
     }
 
@@ -157,12 +203,12 @@ public class PipelineRenderer implements Renderer {
 
             // this projection matrix is applied to object coordinates
             // in the onDrawFrame() method
-            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 2, 7);
             // (float[] m, int offset, float left, float right, float bottom, float top, float near, float far)
 
         } else {
             float ratio = (float) height / width;
-            Matrix.frustumM(mProjMatrix, 0, -1, 1, -ratio, ratio, 3, 7);
+            Matrix.frustumM(mProjMatrix, 0, -1, 1, -ratio, ratio, 2, 7);
 //            float ratio = (float) width / height;
 //            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 
