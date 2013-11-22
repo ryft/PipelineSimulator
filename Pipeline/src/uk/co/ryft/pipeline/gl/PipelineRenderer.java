@@ -44,9 +44,12 @@ public class PipelineRenderer implements Renderer {
     
     // Virtual camera parameters
     // TODO: Wrap these in a Camera class?
-    private FloatPoint mCameraEye;
-    private FloatPoint mCameraFocus;
-    private FloatPoint mCameraUp;
+    private FloatPoint mCameraEye = new FloatPoint(-1, 0.5f, 2);
+    private FloatPoint mCameraFocus = new FloatPoint(0, 0, 0);
+    private FloatPoint mCameraUp = new FloatPoint(0, 1, 0);
+
+    private final float[] mCameraViewMatrix = new float[16];
+    private final float[] mCameraTMatrix = new float[16];
     
     private Drawable axes;
     private static Composite axesPrim;
@@ -140,6 +143,8 @@ public class PipelineRenderer implements Renderer {
         // For touch events
         Matrix.setIdentityM(mRotationMatrix, 0);
     }
+    
+    private boolean printed = false;
 
     @Override
     public void onDrawFrame(GL10 unused) {
@@ -156,6 +161,22 @@ public class PipelineRenderer implements Renderer {
         Matrix.setLookAtM(mViewMatrix, 0, 2f, 2f, 2f, 0f, 0f, 0f, 0f, 1f, 0f);
         // Params: matrix, offset, eye(x, y, z), focus(x, y, z), up(x, y, z).
         // XXX Coords are flipped on screen with frustrumM a la http://www.learnopengles.com/understanding-opengls-matrices/
+        
+//        FloatPoint negZ = mCameraFocus.minus(mCameraEye).normalised();
+
+        Matrix.setLookAtM(mCameraViewMatrix, 0, mCameraEye.getX(), mCameraEye.getY(), mCameraEye.getZ(), mCameraFocus.getX(), mCameraFocus.getY(), mCameraFocus.getZ(), mCameraUp.getX(), mCameraUp.getY(), mCameraUp.getZ());
+        Matrix.invertM(mCameraTMatrix, 0, mCameraViewMatrix, 0);
+        Matrix.multiplyMM(mModelMatrix, 0, mCameraTMatrix, 0, mModelMatrix, 0);
+
+//        if (!printed) {
+//            System.out.println("Scene view");
+//            printMatrix(mViewMatrix, 4, 4);
+//            System.out.println("Camera transformation");
+//            printMatrix(mCameraTMatrix, 4, 4);
+//            System.out.println("Camera view");
+//            printMatrix(mCameraViewMatrix, 4, 4);
+//            printed = true;
+//        }
 
         // Apply all transformations to the world, in order, in their current state
         for (Transformation t : mModelTransformations)
@@ -168,9 +189,19 @@ public class PipelineRenderer implements Renderer {
         Matrix.multiplyMM(mModelMatrix, 0, mRotationMatrix, 0, mModelMatrix, 0);
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        float[] viewMatrix;
+        boolean useCameraView = true;
+        if (useCameraView)
+            viewMatrix = mCameraViewMatrix;
+        else
+            viewMatrix = mViewMatrix;
+        
+        Matrix.multiplyMM(mVPMatrix, 0, mProjMatrix, 0, viewMatrix, 0);
+        Matrix.multiplyMM(mMVMatrix, 0, viewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
-        Matrix.multiplyMM(mVPMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
+        
+//        Matrix.multiplyMM(mCameraTMatrix, 0, mProjMatrix, 0, mCameraTMatrix, 0);
+//        Matrix.invertM(mCameraTMatrix, 0, mCameraTMatrix, 0);
 
         // Ignore world (model) coord transformation when drawing axes
 //        if (axes == null)
@@ -184,10 +215,29 @@ public class PipelineRenderer implements Renderer {
             Drawable d = mElements.get(e);
             if (d != null)
                 d.draw(mMVPMatrix);
+//                d.draw(mCameraTMatrix);
             else
+                // Occasionally happens when app is quitting
+                // TODO: Investigate turning off continuous rendering when quitting
                 System.out.println("Ruh-roh, null drawable!");
         }
 
+    }
+    
+    protected void printMatrix(float[] m, int cols, int rows) {
+        for (int i = 0; i < rows; i++) {
+            if (i == 0)
+                System.out.print("[");
+            else
+                System.out.print(" ");
+            for (int j = 0; j < cols; j++) {
+                System.out.print(m[i + (j * 4)] + " ");
+            }
+            if (i == rows - 1)
+                System.out.println("]");
+            else
+                System.out.println();
+        }
     }
 
     @Override
@@ -203,12 +253,12 @@ public class PipelineRenderer implements Renderer {
 
             // this projection matrix is applied to object coordinates
             // in the onDrawFrame() method
-            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 2, 7);
+            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 1, 7);
             // (float[] m, int offset, float left, float right, float bottom, float top, float near, float far)
 
         } else {
             float ratio = (float) height / width;
-            Matrix.frustumM(mProjMatrix, 0, -1, 1, -ratio, ratio, 2, 7);
+            Matrix.frustumM(mProjMatrix, 0, -1, 1, -ratio, ratio, 1, 7);
 //            float ratio = (float) width / height;
 //            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 

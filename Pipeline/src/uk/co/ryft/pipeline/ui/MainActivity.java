@@ -133,8 +133,8 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
-                mElements.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
+                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f));
+                mElements.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f));
                 
                 updateScene();
                 break;

@@ -11,7 +11,7 @@ import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 // XXX Not an actual abstract factory but a collection of factory methods
 public class ShapeFactory {
 
-    // XXX Regular polygons are created with the normal pointing along the positive z-axis
+    // XXX Regular polygons are created with the normal pointing along the negative z-axis
     public static Primitive buildRegularPolygon(int vertexCount, boolean reverse,
             FloatPoint centre, float radius, float rotation, Colour colour) {
 
@@ -26,16 +26,16 @@ public class ShapeFactory {
             points.add(new FloatPoint(x, y, centre.getZ()));
 
             if (reverse)
-                angle -= step;
-            else
                 angle += step;
+            else
+                angle -= step;
         }
 
         return buildConvexPolygon(points, colour);
     }
 
     // XXX Builds a right circular cylinder with 'centre' as the centre of the base,
-    // extending along the positive z-axis
+    // extending along the negative z-axis
     public static Composite buildCylinder(int stepCount, FloatPoint centre, float height,
             float radius, float rotation, Colour colour, Colour capColour) {
 
@@ -43,7 +43,7 @@ public class ShapeFactory {
 
         float angle = rotation;
         float bottom = centre.getZ();
-        float top = centre.getZ() + height;
+        float top = centre.getZ() - height;
         double step = 2 * Math.PI / stepCount;
 
         // Note the '<=' to complete the ring of triangles
@@ -55,11 +55,11 @@ public class ShapeFactory {
             points.add(new FloatPoint(x, y, top));
 
             // To wind correctly, we need to iterate anti-clockwise around the cylinder
-            angle -= step;
+            angle += step;
         }
 
         List<Primitive> cylinder = new LinkedList<Primitive>();
-        FloatPoint capCentre = new FloatPoint(centre.getX(), centre.getY(), centre.getZ() + height);
+        FloatPoint capCentre = new FloatPoint(centre.getX(), centre.getY(), centre.getZ() - height);
 
         cylinder.add(buildRegularPolygon(stepCount, true, centre, radius, rotation, capColour));
         cylinder.add(buildRegularPolygon(stepCount, false, capCentre, radius, rotation, capColour));
@@ -137,18 +137,19 @@ public class ShapeFactory {
 
         // XXX Explain what scale parameter does
         List<Element> camera = new LinkedList<Element>();
-        camera.add(buildCuboid(new FloatPoint(eye.getX(), eye.getY(), eye.getZ() - 0.75f * scale),
+        camera.add(buildCuboid(new FloatPoint(eye.getX(), eye.getY(), eye.getZ() + 0.75f * scale),
                 scale * 2, scale, scale / 2, Colour.GREY, Colour.GREY));
-        camera.add(buildCylinder(16, new FloatPoint(0, 0, -scale / 2), scale / 2, scale / 2, 0,
-                Colour.WHITE, Colour.GREY));
+        // buildCylinder(int stepCount, FloatPoint centre, float height, float radius, float rotation, Colour colour, Colour capColour)
+        camera.add(buildCylinder(10, new FloatPoint(eye.getX(), eye.getY(), eye.getZ() + scale / 2), scale / 2, scale / 2, 0, Colour.WHITE, Colour.GREY));
         camera.add(buildCuboid(new FloatPoint(eye.getX() - 0.75f * scale, eye.getY() + 0.5625f
-                * scale, eye.getZ() - 0.75f * scale), 0.25f * scale, 0.125f * scale, 0.25f * scale,
+                * scale, eye.getZ() + 0.75f * scale), 0.25f * scale, 0.125f * scale, 0.25f * scale,
                 Colour.BLACK, Colour.BLACK));
 
         return new Composite(Composite.Type.CUSTOM_SHAPE, camera);
     }
     
     // TODO: Create synonym with fovX, fovY?
+    // XXX Extends along negative Z
     public static Composite buildFrustrum(FloatPoint eye, float left, float right, float bottom, float top, float near, float far) {
         
         List<Primitive> frustum = new LinkedList<Primitive>();
@@ -157,20 +158,20 @@ public class ShapeFactory {
         List<FloatPoint> enclosure = new LinkedList<FloatPoint>();
         // XXX Do we need to clone the origin here?
         enclosure.add((FloatPoint) eye.clone());
-        enclosure.add(new FloatPoint(right, top, near));
+        enclosure.add(new FloatPoint(right, top, -near));
         enclosure.add((FloatPoint) eye.clone());
-        enclosure.add(new FloatPoint(right, bottom, near));
+        enclosure.add(new FloatPoint(right, bottom, -near));
         enclosure.add((FloatPoint) eye.clone());
-        enclosure.add(new FloatPoint(left, bottom, near));
+        enclosure.add(new FloatPoint(left, bottom, -near));
         enclosure.add((FloatPoint) eye.clone());
-        enclosure.add(new FloatPoint(left, top, near));
+        enclosure.add(new FloatPoint(left, top, -near));
 
         // Viewing plane outlines, near then far
         List<FloatPoint> planes = new LinkedList<FloatPoint>();
-        planes.add(new FloatPoint(right, top, near));
-        planes.add(new FloatPoint(right, bottom, near));
-        planes.add(new FloatPoint(left, bottom, near));
-        planes.add(new FloatPoint(left, top, near));
+        planes.add(new FloatPoint(right, top, -near));
+        planes.add(new FloatPoint(right, bottom, -near));
+        planes.add(new FloatPoint(left, bottom, -near));
+        planes.add(new FloatPoint(left, top, -near));
 
         frustum.add(new Primitive(Type.GL_LINES, enclosure, Colour.WHITE));
         frustum.add(new Primitive(Type.GL_LINE_LOOP, planes, Colour.WHITE));
