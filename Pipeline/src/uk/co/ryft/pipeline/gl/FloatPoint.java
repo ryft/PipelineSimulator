@@ -87,6 +87,10 @@ public class FloatPoint implements Serializable, Cloneable {
         return new FloatPoint(getX() - v.getX(), getY() - v.getY(), getZ() - v.getZ());
     }
 
+    public FloatPoint scale(float sf) {
+        return new FloatPoint(getX() * sf, getY() * sf, getZ() * sf);
+    }
+
     public float dot(FloatPoint v) {
         return (getX() * v.getX()) + (getY() * v.getY()) + (getZ() * v.getZ());
     }
