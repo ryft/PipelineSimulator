@@ -9,8 +9,6 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -133,8 +131,7 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f));
-                mElements.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f));
+                mElements.add(ShapeFactory.buildCuboid(new FloatPoint(0, 0, 0), 1, 1, 1, Colour.GREEN, Colour.RED));
                 
                 updateScene();
                 break;
