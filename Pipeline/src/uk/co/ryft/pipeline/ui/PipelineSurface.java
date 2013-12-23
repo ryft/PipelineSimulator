@@ -2,6 +2,7 @@ package uk.co.ryft.pipeline.ui;
 
 import java.util.List;
 
+import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
@@ -51,6 +52,16 @@ public class PipelineSurface extends GLSurfaceView {
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;
 
+    private boolean mEditMode;
+
+    public void setEditMode(boolean editMode) {
+        mEditMode = editMode;
+        if (editMode)
+            setBackgroundResource(R.drawable.surface_border);
+        else
+            setBackgroundResource(0);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         // MotionEvent reports input details from the touch screen
@@ -84,13 +95,6 @@ public class PipelineSurface extends GLSurfaceView {
         mPreviousX = x;
         mPreviousY = y;
         return true;
-    }
-    
-    private boolean mEditMode;
-
-    public boolean toggleEditMode() {
-        mEditMode = !mEditMode;
-        return mEditMode;
     }
 
 }

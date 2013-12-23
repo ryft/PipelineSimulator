@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
 
     protected PipelineSurface mPipelineView;
     protected ArrayList<Element> mElements;
+    
+    protected boolean mEditMode;
 
     protected static final int EDIT_SCENE_REQUEST = 1;
 
@@ -44,11 +46,7 @@ public class MainActivity extends Activity {
         final GestureDetector gestureDetector = new GestureDetector(this, new SimpleOnGestureListener() {
             @Override
             public void onLongPress(MotionEvent e) {
-                boolean editMode = mPipelineView.toggleEditMode();
-                if (editMode)
-                    mPipelineView.setBackgroundResource(R.drawable.surface_border);
-                else
-                    mPipelineView.setBackgroundResource(0);
+                toggleEditMode();
             }
         });
         
@@ -83,6 +81,19 @@ public class MainActivity extends Activity {
 
         updateScene();
         
+    }
+    
+    public void toggleEditMode() {
+        mEditMode = !mEditMode;
+        mPipelineView.setEditMode(mEditMode);
+    }
+    
+    @Override
+    public void onBackPressed() {
+        if (mEditMode)
+            toggleEditMode();
+        else
+            super.onBackPressed();
     }
     
 //    private void printVector(float[] v) {
