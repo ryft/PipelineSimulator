@@ -5,33 +5,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.FloatPoint;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
 
 public class MainActivity extends Activity {
 
     protected PipelineSurface mPipelineView;
     protected ArrayList<Element> mElements;
-    
-    protected boolean mEditMode;
 
     protected static final int EDIT_SCENE_REQUEST = 1;
 
@@ -42,22 +32,6 @@ public class MainActivity extends Activity {
         setupActionBar();
 
         mPipelineView = (PipelineSurface) findViewById(R.id.pipeline_surface);
-        
-        final GestureDetector gestureDetector = new GestureDetector(this, new SimpleOnGestureListener() {
-            @Override
-            public void onLongPress(MotionEvent e) {
-                toggleEditMode();
-            }
-        });
-        
-        mPipelineView.setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-            
-        });
 
         // Get elements from returning activity intent or saved state, if
         // possible.
@@ -83,15 +57,10 @@ public class MainActivity extends Activity {
         
     }
     
-    public void toggleEditMode() {
-        mEditMode = !mEditMode;
-        mPipelineView.setEditMode(mEditMode);
-    }
-    
     @Override
     public void onBackPressed() {
-        if (mEditMode)
-            toggleEditMode();
+        if (mPipelineView.isEditMode())
+            mPipelineView.toggleEditMode();
         else
             super.onBackPressed();
     }
