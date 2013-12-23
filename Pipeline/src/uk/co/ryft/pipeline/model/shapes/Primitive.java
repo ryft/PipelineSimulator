@@ -10,7 +10,7 @@ import java.util.Map;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
-import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import uk.co.ryft.pipeline.model.Element;
 import android.opengl.GLES20;
@@ -58,18 +58,18 @@ public class Primitive implements Element {
     };
 
     protected Type mType;
-    protected final ArrayList<FloatPoint> mVertices = new ArrayList<FloatPoint>();
+    protected final ArrayList<Float3> mVertices = new ArrayList<Float3>();
     protected Colour mColour = Colour.WHITE;
 
     public Primitive(Type type) {
     }
 
-    public Primitive(Type type, List<FloatPoint> vertices) {
+    public Primitive(Type type, List<Float3> vertices) {
         mType = type;
         mVertices.addAll(vertices);
     }
 
-    public Primitive(Type type, List<FloatPoint> vertices, Colour colour) {
+    public Primitive(Type type, List<Float3> vertices, Colour colour) {
         mType = type;
         mVertices.addAll(vertices);
         mColour = colour;
@@ -95,13 +95,13 @@ public class Primitive implements Element {
         mType = t;
     }
 
-    public List<FloatPoint> getVertices() {
+    public List<Float3> getVertices() {
         // TODO this is unsafe -- passing a reference to a list.
         return mVertices;
     }
     
-    public void setVertices(List<FloatPoint> vertices) {
-        // Probably not unsafe but investigate and discuss the mutability of FloatPoints.
+    public void setVertices(List<Float3> vertices) {
+        // Probably not unsafe but investigate and discuss the mutability of Float3s.
         mVertices.clear();
         mVertices.addAll(vertices);
     }
@@ -129,7 +129,7 @@ public class Primitive implements Element {
         int vertexCount = getVertices().size() * 3;
         float[] coords = new float[vertexCount];
         int i = 0;
-        for (FloatPoint fp : getVertices()) {
+        for (Float3 fp : getVertices()) {
             coords[i] = fp.getX();
             coords[i + 1] = fp.getY();
             coords[i + 2] = fp.getZ();
@@ -162,7 +162,7 @@ public class Primitive implements Element {
     @Override
     public String toString() {
         String details = getTitle() + "\n" + getSummary() + "\n";
-        for (FloatPoint p : mVertices)
+        for (Float3 p : mVertices)
             details += "\n" + p.toString();
         return details;
     }
@@ -174,19 +174,35 @@ public class Primitive implements Element {
 
     @Override
     public Primitive translate(float x, float y, float z) {
-        for (FloatPoint v : mVertices)
+        for (Float3 v : mVertices)
             v.translate(x, y, z);
+        return this;
+    }
+
+    @Override
+    public Primitive translate(Float3 v) {
+        for (Float3 x : mVertices)
+            x.translate(v.getX(), v.getY(), v.getZ());
         return this;
     }
 
     @Override
     public Primitive rotate(float a, float x, float y, float z) {
         
-        for (FloatPoint v : mVertices)
+        for (Float3 v : mVertices)
             v.rotate(a, x, y, z);
         
         // TODO: Decide whether this (and other set operations) should instantiate a new Primitive
         // (immutable) or perform operations on itself (mutable) and document this.
+        
+        return this;
+    }
+
+    @Override
+    public Primitive rotate(float a, Float3 v) {
+        
+        for (Float3 x : mVertices)
+            x.rotate(a, v.getX(), v.getY(), v.getZ());
         
         return this;
     }
@@ -195,7 +211,7 @@ public class Primitive implements Element {
     public Object clone() {
         
         Colour colour = (Colour) mColour.clone();
-        ArrayList<FloatPoint> vertices = (ArrayList<FloatPoint>) mVertices.clone();
+        ArrayList<Float3> vertices = (ArrayList<Float3>) mVertices.clone();
         return new Primitive(mType, vertices, colour);
     }
 

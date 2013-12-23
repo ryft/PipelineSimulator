@@ -11,7 +11,7 @@ import android.view.MotionEvent;
 
 public class PipelineSurface extends GLSurfaceView {
 
-    private final PipelineRenderer mRenderer = new PipelineRenderer();
+    final PipelineRenderer mRenderer = new PipelineRenderer();
 
     public PipelineSurface(Context context, AttributeSet attrs) {
         super(context, attrs);

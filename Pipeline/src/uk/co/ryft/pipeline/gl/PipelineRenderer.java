@@ -44,8 +44,8 @@ public class PipelineRenderer implements Renderer {
 
     private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
     
-    Camera mActualCamera = new Camera(new FloatPoint(2, 2, 2), new FloatPoint(0, 0, 0), new FloatPoint(0, 1, 0));
-    Camera mVirtualCamera = new Camera(new FloatPoint(-2, 1, 1), new FloatPoint(0, 0, 1), new FloatPoint(0, 1, 0));
+    static Camera mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
+    static Camera mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
 
     // For touch events
     // TODO: Implement synchronised block for this.
@@ -58,51 +58,51 @@ public class PipelineRenderer implements Renderer {
         LinkedList<Element> axes = new LinkedList<Element>();
         LinkedList<Element> camera = new LinkedList<Element>();
 
-        LinkedList<FloatPoint> lineCoords = new LinkedList<FloatPoint>();
+        LinkedList<Float3> lineCoords = new LinkedList<Float3>();
         // XXX i < 1.1 is required to draw the edge lines
         for (float i = -1; i < 1.1; i += 0.1) {
-            lineCoords.add(new FloatPoint(i, 0, -1));
-            lineCoords.add(new FloatPoint(i, 0, 1));
-            lineCoords.add(new FloatPoint(-1, 0, i));
-            lineCoords.add(new FloatPoint(1, 0, i));
+            lineCoords.add(new Float3(i, 0, -1));
+            lineCoords.add(new Float3(i, 0, 1));
+            lineCoords.add(new Float3(-1, 0, i));
+            lineCoords.add(new Float3(1, 0, i));
         }
         axes.add(new Primitive(Type.GL_LINES, lineCoords, Colour.GREY));
         
-        LinkedList<FloatPoint> points = new LinkedList<FloatPoint>();
-        points.add(new FloatPoint(0, 0, 0));
-        points.add(new FloatPoint(1, 0, 0));
-        points.add(new FloatPoint(0, 0, 0));
-        points.add(new FloatPoint(0, 1, 0));
-        points.add(new FloatPoint(0, 0, 0));
-        points.add(new FloatPoint(0, 0, 1));
+        LinkedList<Float3> points = new LinkedList<Float3>();
+        points.add(new Float3(0, 0, 0));
+        points.add(new Float3(1, 0, 0));
+        points.add(new Float3(0, 0, 0));
+        points.add(new Float3(0, 1, 0));
+        points.add(new Float3(0, 0, 0));
+        points.add(new Float3(0, 0, 1));
         axes.add(new Primitive(Type.GL_LINES, points, Colour.WHITE));
 
-        LinkedList<FloatPoint> arrowX = new LinkedList<FloatPoint>();
-        arrowX.add(new FloatPoint(0.8f, 0.1f, -0.1f));
-        arrowX.add(new FloatPoint(1, 0, 0));
-        arrowX.add(new FloatPoint(0.8f, -0.1f, 0.1f));
-        arrowX.add(new FloatPoint(0.9f, 0, 0));
+        LinkedList<Float3> arrowX = new LinkedList<Float3>();
+        arrowX.add(new Float3(0.8f, 0.1f, -0.1f));
+        arrowX.add(new Float3(1, 0, 0));
+        arrowX.add(new Float3(0.8f, -0.1f, 0.1f));
+        arrowX.add(new Float3(0.9f, 0, 0));
         axes.add(new Primitive(Type.GL_LINE_LOOP, arrowX, Colour.RED));
 
-        LinkedList<FloatPoint> arrowY = new LinkedList<FloatPoint>();
-        arrowY.add(new FloatPoint(-0.1f, 0.8f, 0.1f));
-        arrowY.add(new FloatPoint(0, 1, 0));
-        arrowY.add(new FloatPoint(0.1f, 0.8f, -0.1f));
-        arrowY.add(new FloatPoint(0, 0.9f, 0));
+        LinkedList<Float3> arrowY = new LinkedList<Float3>();
+        arrowY.add(new Float3(-0.1f, 0.8f, 0.1f));
+        arrowY.add(new Float3(0, 1, 0));
+        arrowY.add(new Float3(0.1f, 0.8f, -0.1f));
+        arrowY.add(new Float3(0, 0.9f, 0));
         axes.add(new Primitive(Type.GL_LINE_LOOP, arrowY, Colour.GREEN));
 
-        LinkedList<FloatPoint> arrowZ = new LinkedList<FloatPoint>();
-        arrowZ.add(new FloatPoint(0.1f, -0.1f, 0.8f));
-        arrowZ.add(new FloatPoint(0, 0, 1));
-        arrowZ.add(new FloatPoint(-0.1f, 0.1f, 0.8f));
-        arrowZ.add(new FloatPoint(0, 0, 0.9f));
-        axes.add(new Primitive(Type.GL_LINE_LOOP, arrowZ, Colour.CYAN));
+        LinkedList<Float3> arrowZ = new LinkedList<Float3>();
+        arrowZ.add(new Float3(0.1f, -0.1f, 0.8f));
+        arrowZ.add(new Float3(0, 0, 1));
+        arrowZ.add(new Float3(-0.1f, 0.1f, 0.8f));
+        arrowZ.add(new Float3(0, 0, 0.9f));
+        axes.add(new Primitive(Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
         
         // Add a camera located at the origin pointing along the negative z-axis
         // to be transformed into place by the virtual camera model matrix
         // FIXME This is proving to be problematic in terms of render time
-        camera.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f));
-        camera.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f));
+        camera.add(ShapeFactory.buildCamera(mVirtualCamera, 0.25f));
+        camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
 
         sAxes = new Composite(Composite.Type.CUSTOM_SHAPE, axes);
         sCamera = new Composite(Composite.Type.CUSTOM_SHAPE, camera);
@@ -152,9 +152,6 @@ public class PipelineRenderer implements Renderer {
         
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
-        
-        // Initialise camera projection parameters
-        mActualCamera.setProjection(-1, 1, -1, 1, 1, 7);
     }
 
     
@@ -182,6 +179,7 @@ public class PipelineRenderer implements Renderer {
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
         Matrix.multiplyMM(mModelMatrix, 0, mModelRotationMatrix, 0, mModelMatrix, 0);
+        Matrix.multiplyMM(mCameraModelMatrix, 0, mModelRotationMatrix, 0, mCameraModelMatrix, 0);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
@@ -191,7 +189,7 @@ public class PipelineRenderer implements Renderer {
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
 
         // Ignore model (world) coord transformation when drawing axes
-        sAxes.getDrawable().draw(mVPMatrix);
+        sAxes.getDrawable().draw(mMVPMatrix);
         sCamera.getDrawable().draw(mCVPMatrix);
         
         // Draw world objects in the scene

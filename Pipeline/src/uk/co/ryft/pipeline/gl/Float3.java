@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import android.opengl.Matrix;
 
-public class FloatPoint implements Serializable, Cloneable {
+public class Float3 implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -4166884951552173806L;
 
@@ -12,7 +12,7 @@ public class FloatPoint implements Serializable, Cloneable {
     private float y;
     private float z;
 
-    public FloatPoint(float x, float y, float z) {
+    public Float3(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -58,7 +58,8 @@ public class FloatPoint implements Serializable, Cloneable {
 
     // XXX Find out whether or not using Matrix operations is better than a home-grown solution.
     // Perhaps run a test to see how long matrix ops really take.
-    // TODO: Try to multiply multiple points in one M x V operation in Primitive
+    // TODO: Try to multiply multiple points in one M x V operation in Primitive.
+    // This function belongs in Element, not Point.
     // XXX This rotates about the origin.
     public void rotate(float a, float x, float y, float z) {
 
@@ -79,33 +80,33 @@ public class FloatPoint implements Serializable, Cloneable {
     }
 
     /* Modifications which return new objects */
-    public FloatPoint plus(FloatPoint v) {
-        return new FloatPoint(getX() + v.getX(), getY() + v.getY(), getZ() + v.getZ());
+    public Float3 plus(Float3 v) {
+        return new Float3(getX() + v.getX(), getY() + v.getY(), getZ() + v.getZ());
     }
 
-    public FloatPoint minus(FloatPoint v) {
-        return new FloatPoint(getX() - v.getX(), getY() - v.getY(), getZ() - v.getZ());
+    public Float3 minus(Float3 v) {
+        return new Float3(getX() - v.getX(), getY() - v.getY(), getZ() - v.getZ());
     }
 
-    public FloatPoint scale(float sf) {
-        return new FloatPoint(getX() * sf, getY() * sf, getZ() * sf);
+    public Float3 scale(float sf) {
+        return new Float3(getX() * sf, getY() * sf, getZ() * sf);
     }
 
-    public float dot(FloatPoint v) {
+    public float dot(Float3 v) {
         return (getX() * v.getX()) + (getY() * v.getY()) + (getZ() * v.getZ());
     }
 
-    public FloatPoint cross(FloatPoint v) {
+    public Float3 cross(Float3 v) {
         float x = getY() * v.getZ() - getZ() * v.getY();
         float y = getZ() * v.getX() - getX() * v.getZ();
         float z = getX() * v.getY() - getY() * v.getX();
 
-        return new FloatPoint(x, y, z);
+        return new Float3(x, y, z);
     }
 
-    public FloatPoint normalised() {
+    public Float3 normalised() {
         float norm = (float) Math.sqrt(getX() * getX() + getY() * getY() + getZ() * getZ());
-        return new FloatPoint(getX() / norm, getY() / norm, getZ() / norm);
+        return new Float3(getX() / norm, getY() / norm, getZ() / norm);
     }
 
     @Override
@@ -115,7 +116,7 @@ public class FloatPoint implements Serializable, Cloneable {
 
     @Override
     public Object clone() {
-        return new FloatPoint(x, y, z);
+        return new Float3(x, y, z);
     }
 
 }
