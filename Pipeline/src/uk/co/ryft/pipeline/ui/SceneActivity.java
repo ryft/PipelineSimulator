@@ -9,6 +9,7 @@ import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -17,8 +18,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
@@ -27,12 +30,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SceneActivity extends Activity {
+import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
+
+public class SceneActivity extends ListActivity {
 
     protected static final int ADD_ELEMENT_REQUEST = 2;
     protected static final int EDIT_ELEMENT_REQUEST = 3;
 
-    protected ListView mListView;
     protected ElementAdapter mAdapter;
 
     // XXX Need to store this reference to be able to update/delete.
@@ -46,9 +50,6 @@ public class SceneActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scene);
         setupActionBar();
-
-        mListView = (ListView) findViewById(R.id.element_list);
-        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         // Get elements from returning activity intent or saved state, if
         // possible.
@@ -66,7 +67,28 @@ public class SceneActivity extends Activity {
         }
 
         mAdapter = new ElementAdapter(this, elements);
-        mListView.setAdapter(mAdapter);
+        setListAdapter(mAdapter);
+        
+        ListView listView = getListView();
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
+                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        for (int position : reverseSortedPositions) {
+                            mAdapter.remove((Element) mAdapter.getItem(position));
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+        listView.setOnTouchListener(touchListener);
+        // Setting this scroll listener is required to ensure that during ListView scrolling,
+        // we don't look for swipes.
+        listView.setOnScrollListener(touchListener.makeScrollListener());
     }
 
     @Override
@@ -291,6 +313,8 @@ public class SceneActivity extends Activity {
                 typeTextView.setText(elem.getTitle());
                 summaryTextView.setText(elem.getSummary());
                 
+                typeTextView.setClickable(false);
+                
                 if (isPrimitive)
                     editButton.setImageResource(R.drawable.ic_action_edit);
                 else
@@ -315,7 +339,6 @@ public class SceneActivity extends Activity {
                             Toast.makeText(SceneActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
                     }
-
                 });
             }
 

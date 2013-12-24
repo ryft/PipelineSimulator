@@ -79,7 +79,7 @@ public class ElementActivity extends ListActivity {
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 
-        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point_view,
+        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point,
                 R.id.text_point, mElement.getVertices());
         setListAdapter(mAdapter);
 
@@ -287,7 +287,7 @@ public class ElementActivity extends ListActivity {
 
             // Recycle view if possible
             if (convertView == null)
-                convertView = mInflater.inflate(R.layout.listitem_point_view, null);
+                convertView = mInflater.inflate(R.layout.listitem_point, null);
             // XXX All events are handled from the listview (parent) level.
             return convertView;
         }
