@@ -3,42 +3,24 @@ package uk.co.ryft.pipeline.model;
 import android.opengl.Matrix;
 import uk.co.ryft.pipeline.gl.Float3;
 
-public class Rotation implements Transformation {
+public class Rotation extends Transformation {
 
     private final Float3 mAxis;
     private final float mAngle;
-    private final int mTotalIterations;
-    private int mIterationsComplete = 0;
 
     private float[] mCurrentState = new float[16];
 
-    public Rotation(float angle, Float3 axis, int steps) {
-        mTotalIterations = steps;
-        mAxis = axis; // TODO: unsafe.
-        mAngle = angle / steps;
-        
+    public Rotation(float angle, Float3 axis) {
+        mAxis = (Float3) axis.clone();
+        mAngle = angle;
+    }
+
+    @Override
+    protected float[] getTransformationState(float progress) {
         Matrix.setIdentityM(mCurrentState, 0);
-    }
-
-    @Override
-    public boolean hasNext() {
-        return (mIterationsComplete < mTotalIterations);
-    }
-
-    @Override
-    public float[] next() {
-        if (hasNext()) {
-            Matrix.setIdentityM(mCurrentState, 0);
-            Matrix.rotateM(mCurrentState, 0, mAngle * (mIterationsComplete + 1), mAxis.getX(), mAxis.getY(), mAxis.getZ());
-            mIterationsComplete++;
-        }
-        return mCurrentState; // XXX safe because primitive. (I think)
-    }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException(
-                "Unsupported operation: attempting to remove a transformation step from a transition.");
+        Matrix.rotateM(mCurrentState, 0, mAngle * progress, mAxis.getX(), mAxis.getY(), mAxis.getZ());
+        
+        return mCurrentState;
     }
 
 }

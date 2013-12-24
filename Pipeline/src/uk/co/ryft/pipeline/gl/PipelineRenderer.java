@@ -10,7 +10,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Rotation;
 import uk.co.ryft.pipeline.model.Transformation;
+import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
@@ -18,6 +20,7 @@ import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 import android.util.Log;
 
 public class PipelineRenderer implements Renderer {
@@ -109,6 +112,8 @@ public class PipelineRenderer implements Renderer {
     }
 
     public void interact() {
+        mModelTransformations.add(new Translation(new Float3(0, 1, 0)));
+        mModelTransformations.add(new Rotation(90, new Float3(1, 0, 0)));
     }
 
     // TODO Should these belong here?
@@ -168,9 +173,16 @@ public class PipelineRenderer implements Renderer {
         // The camera model matrix transforms the camera to its correct position and orientation in world space
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
 
+        long time = SystemClock.uptimeMillis();
+        
         // Apply all transformations to the world, in order, in their current state
         for (Transformation t : mModelTransformations)
-            Matrix.multiplyMM(mModelMatrix, 0, t.next(), 0, mModelMatrix, 0);
+            Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
+
+        // Create a rotation transformation for the triangle
+//        time %= 4000L;
+//        float angle = 0.090f * ((int) time);
+//        Matrix.setRotateM(mModelRotationMatrix, 0, angle, 0, 0, -1.0f);
         
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);

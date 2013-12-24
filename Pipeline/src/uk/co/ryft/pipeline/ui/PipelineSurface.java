@@ -63,7 +63,7 @@ public class PipelineSurface extends GLSurfaceView {
 
         // Render the view continuously so we can support transition effects.
         // FIXME Disabled for now, along with transitions
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
     }
 
