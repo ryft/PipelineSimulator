@@ -5,10 +5,13 @@ import java.util.Collection;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -78,6 +81,7 @@ public class SceneActivity extends Activity {
         finish();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -280,19 +284,30 @@ public class SceneActivity extends Activity {
             Element elem = mElems.get(position);
 
             if (elem != null) {
+                
+                final boolean isPrimitive = elem.isPrimitive();
+                
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
-                editButton.setImageResource(R.drawable.ic_action_edit);
                 summaryTextView.setText(elem.getSummary());
+                
+                if (isPrimitive)
+                    editButton.setImageResource(R.drawable.ic_action_edit);
+                else
+                    editButton.setImageResource(R.drawable.ic_action_expand);
 
                 editButton.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
                         Element elem = (Element) getItem(position);
-                        if (elem.isPrimitive())
+                        if (isPrimitive)
                             // XXX safe cast due to previous check.
                             editPrimitive((Primitive) elem);
+                        else {
+                            remove(elem);
+                            addAll(((Composite) elem).getComponents());
+                        }
                     }
 
                 });
