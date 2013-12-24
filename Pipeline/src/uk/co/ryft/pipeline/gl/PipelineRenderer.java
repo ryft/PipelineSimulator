@@ -32,8 +32,6 @@ public class PipelineRenderer implements Renderer {
     private final float[] mCameraViewMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     
-    private final float[] mVPMatrix = new float[16];
-    
     private final float[] mMVMatrix = new float[16];
     private final float[] mCVMatrix = new float[16];
     
@@ -54,6 +52,8 @@ public class PipelineRenderer implements Renderer {
 
     private static Composite sAxes;
     private static Composite sCamera;
+    private static Drawable sAxesDrawable;
+    private static Drawable sCameraDrawable;
     static {
         LinkedList<Element> axes = new LinkedList<Element>();
         LinkedList<Element> camera = new LinkedList<Element>();
@@ -178,15 +178,21 @@ public class PipelineRenderer implements Renderer {
         Matrix.multiplyMM(mCameraModelMatrix, 0, mModelRotationMatrix, 0, mCameraModelMatrix, 0);
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mCVMatrix, 0, mViewMatrix, 0, mCameraModelMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
 
-        // Ignore model (world) coord transformation when drawing axes
-        sAxes.getDrawable().draw(mMVPMatrix);
-        sCamera.getDrawable().draw(mCVPMatrix);
+        // Initialise axes and camera drawables if necessary
+        // Avoid object construction as much as possible at render time
+        if (sAxesDrawable == null)
+            sAxesDrawable = sAxes.getDrawable();
+        if (sCameraDrawable == null)
+            sCameraDrawable = sCamera.getDrawable();
+
+        // Draw axes and virtual camera        
+        sAxesDrawable.draw(mMVPMatrix);
+        sCameraDrawable.draw(mCVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -272,6 +278,12 @@ public class PipelineRenderer implements Renderer {
         mElements.clear();
         for (Element e : elements)
             mElements.put(e, null);
+    }
+
+    public void onResume() {
+        // Force re-initialisation of static scene objects in this new render thread context
+        sAxesDrawable = null;
+        sCameraDrawable = null;
     }
 
 }

@@ -95,6 +95,12 @@ public class PipelineSurface extends GLSurfaceView {
     private float mPreviousX = 0;
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        mRenderer.onResume();
+    }
 
     public void onSceneMove(MotionEvent e) {
         // MotionEvent reports input details from the touch screen
