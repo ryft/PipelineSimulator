@@ -47,29 +47,12 @@ public class Primitive implements Element {
             mPrimitiveMap = Collections.unmodifiableMap(primitiveMap);
         }
 
-        private static final Map<Type, Integer> mImageMap;
-        static {
-            Map<Type, Integer> imageMap = new HashMap<Type, Integer>();
-            imageMap.put(Type.GL_POINTS, R.drawable.gl_points);
-            imageMap.put(Type.GL_LINES, R.drawable.gl_lines);
-            imageMap.put(Type.GL_LINE_STRIP, R.drawable.gl_line_strip);
-            imageMap.put(Type.GL_LINE_LOOP, R.drawable.gl_line_loop);
-            imageMap.put(Type.GL_TRIANGLES, R.drawable.gl_triangles);
-            imageMap.put(Type.GL_TRIANGLE_STRIP, R.drawable.gl_triangle_strip);
-            imageMap.put(Type.GL_TRIANGLE_FAN, R.drawable.gl_triangle_fan);
-            mImageMap = Collections.unmodifiableMap(imageMap);
-        }
-
         public String getDescription() {
             return mDescriptionMap.get(this);
         }
 
         public Integer getGLPrimitive() {
             return mPrimitiveMap.get(this);
-        }
-
-        public Integer getImageRef() {
-            return mImageMap.get(this);
         }
     };
 
@@ -157,7 +140,7 @@ public class Primitive implements Element {
     }
 
     public int getIconRef() {
-        return mType.getImageRef();
+        return R.drawable.ic_action_scene;
     }
 
     @Override

@@ -60,7 +60,6 @@ public class Composite implements Element {
 
     @Override
     public int getIconRef() {
-        // TODO
         return R.drawable.ic_action_element;
     }
 
