@@ -8,7 +8,7 @@ import java.util.Map;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Drawable;
-import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
 import uk.co.ryft.pipeline.model.Element;
 
@@ -96,9 +96,23 @@ public class Composite implements Element {
     }
 
     @Override
+    public Composite translate(Float3 v) {
+        for (Element e : mComponents)
+            e.translate(v);
+        return this;
+    }
+
+    @Override
     public Composite rotate(float a, float x, float y, float z) {
         for (Element e : mComponents)
             e.rotate(a, x, y, z);
+        return this;
+    }
+
+    @Override
+    public Composite rotate(float a, Float3 v) {
+        for (Element e : mComponents)
+            e.rotate(a, v);
         return this;
     }
 

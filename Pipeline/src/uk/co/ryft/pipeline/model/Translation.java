@@ -1,20 +1,20 @@
 package uk.co.ryft.pipeline.model;
 
-import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.Float3;
 import android.opengl.Matrix;
 
 // XXX: Explain the rationale behind this being immutable
 public class Translation implements Transformation {
 
-    private final FloatPoint mTranslation;
+    private final Float3 mTranslation;
     private final int mTotalIterations;
     private int mIterationsComplete = 0;
 
     private float[] mCurrentState = new float[16];
 
-    public Translation(FloatPoint translation, int steps) {
+    public Translation(Float3 translation, int steps) {
         mTotalIterations = steps;
-        mTranslation = new FloatPoint(translation.getX() / steps, translation.getY() / steps,
+        mTranslation = new Float3(translation.getX() / steps, translation.getY() / steps,
                 translation.getZ() / steps);
         
         Matrix.setIdentityM(mCurrentState, 0);

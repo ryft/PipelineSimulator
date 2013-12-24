@@ -6,7 +6,7 @@ import java.util.List;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Drawable;
-import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
@@ -113,8 +113,7 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                mElements.add(ShapeFactory.buildCamera(new FloatPoint(0,0,0), 0.25f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
-                mElements.add(ShapeFactory.buildFrustrum(new FloatPoint(0, 0, 0), -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f).rotate(90, 0, 1, 0).translate(-1, 0, 0));
+                mElements.add(ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.GREEN, Colour.RED));
                 
                 updateScene();
                 break;

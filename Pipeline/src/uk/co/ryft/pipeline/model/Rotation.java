@@ -1,18 +1,18 @@
 package uk.co.ryft.pipeline.model;
 
 import android.opengl.Matrix;
-import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.Float3;
 
 public class Rotation implements Transformation {
 
-    private final FloatPoint mAxis;
+    private final Float3 mAxis;
     private final float mAngle;
     private final int mTotalIterations;
     private int mIterationsComplete = 0;
 
     private float[] mCurrentState = new float[16];
 
-    public Rotation(float angle, FloatPoint axis, int steps) {
+    public Rotation(float angle, Float3 axis, int steps) {
         mTotalIterations = steps;
         mAxis = axis; // TODO: unsafe.
         mAngle = angle / steps;

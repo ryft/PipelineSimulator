@@ -15,7 +15,7 @@ import android.view.View;
 
 public class PipelineSurface extends GLSurfaceView {
 
-    private final PipelineRenderer mRenderer = new PipelineRenderer();
+    final PipelineRenderer mRenderer = new PipelineRenderer();
 
     public PipelineSurface(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,7 +62,8 @@ public class PipelineSurface extends GLSurfaceView {
         setRenderer(mRenderer);
 
         // Render the view continuously so we can support transition effects.
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        // FIXME Disabled for now, along with transitions
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
     }
 

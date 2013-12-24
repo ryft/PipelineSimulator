@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.FloatPoint;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import android.app.AlertDialog;
@@ -53,7 +53,7 @@ import com.larswerkman.colorpicker.OpacityBar;
 
 public class ElementActivity extends ListActivity {
 
-    protected ArrayAdapter<FloatPoint> mAdapter;
+    protected ArrayAdapter<Float3> mAdapter;
     protected Primitive mElement;
     protected TypeSpinner mTypeSpinner;
     protected ViewSwitcher mViewSwitcher;
@@ -79,7 +79,7 @@ public class ElementActivity extends ListActivity {
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 
-        mAdapter = new ArrayAdapter<FloatPoint>(this, R.layout.listitem_point_view,
+        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point_view,
                 R.id.text_point, mElement.getVertices());
         setListAdapter(mAdapter);
 
@@ -98,7 +98,7 @@ public class ElementActivity extends ListActivity {
                     @Override
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         for (int position : reverseSortedPositions) {
-                            mAdapter.remove((FloatPoint) mAdapter.getItem(position));
+                            mAdapter.remove((Float3) mAdapter.getItem(position));
                         }
                         mAdapter.notifyDataSetChanged();
                     }
@@ -124,7 +124,7 @@ public class ElementActivity extends ListActivity {
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
                 final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
                 final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
-                final FloatPoint thisPoint = mAdapter.getItem(position);
+                final Float3 thisPoint = mAdapter.getItem(position);
 
                 builder.setView(dialogueView);
                 builder.setPositiveButton(R.string.dialogue_button_save,
@@ -211,9 +211,9 @@ public class ElementActivity extends ListActivity {
         Intent result = new Intent();
 
         mElement.setType((Type) mTypeSpinner.getSelectedItem());
-        LinkedList<FloatPoint> points = new LinkedList<FloatPoint>();
+        LinkedList<Float3> points = new LinkedList<Float3>();
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            points.add((FloatPoint) mAdapter.getItem(i));
+            points.add((Float3) mAdapter.getItem(i));
         }
         mElement.setVertices(points);
         result.putExtra("element", mElement);
@@ -252,7 +252,7 @@ public class ElementActivity extends ListActivity {
                 saveAndQuit();
 
             case R.id.action_point_new:
-                mAdapter.add(new FloatPoint(0f, 0f, 0f));
+                mAdapter.add(new Float3(0f, 0f, 0f));
                 mAdapter.notifyDataSetChanged();
                 break;
 
@@ -266,18 +266,18 @@ public class ElementActivity extends ListActivity {
     // http://www.piwai.info/android-adapter-good-practices/
     // TODO: Consider using a ViewHolder -- see
     // http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
-    class PointAdapter extends ArrayAdapter<FloatPoint> {
+    class PointAdapter extends ArrayAdapter<Float3> {
 
         final Context mContext;
-        final ArrayList<FloatPoint> mPoints;
+        final ArrayList<Float3> mPoints;
         final LayoutInflater mInflater;
 
-        public PointAdapter(Context context, Collection<FloatPoint> points) {
+        public PointAdapter(Context context, Collection<Float3> points) {
             super(context, 0);
 
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mPoints = new ArrayList<FloatPoint>(points);
+            mPoints = new ArrayList<Float3>(points);
 
         }
 
@@ -292,7 +292,7 @@ public class ElementActivity extends ListActivity {
         }
 
         protected void updatePoint(int position, float x, float y, float z) {
-            FloatPoint point = (FloatPoint) getItem(position);
+            Float3 point = (Float3) getItem(position);
             point.setX(x);
             point.setY(y);
             point.setZ(z);
