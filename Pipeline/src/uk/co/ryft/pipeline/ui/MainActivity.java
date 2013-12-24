@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Element;
@@ -94,8 +95,7 @@ public class MainActivity extends Activity {
         menuInflater.inflate(R.menu.main, menu);
 
         // Calling super after populating the menu is necessary here to ensure
-        // that the
-        // action bar helpers have a chance to handle this event.
+        // that the bar helpers have a chance to handle this event.
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -113,7 +113,7 @@ public class MainActivity extends Activity {
                 
             case R.id.action_draw_axes:
 
-                mElements.add(ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.GREEN, Colour.RED));
+                mElements.add(ShapeFactory.buildCuboid(new Float3(0, 0, 0), 0.5f, 0.5f, 0.5f, Colour.GREEN, Colour.RED));
                 
                 updateScene();
                 break;

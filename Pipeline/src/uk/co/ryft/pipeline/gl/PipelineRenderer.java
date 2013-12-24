@@ -13,8 +13,8 @@ import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Transformation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
+import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
@@ -109,10 +109,6 @@ public class PipelineRenderer implements Renderer {
     }
 
     public void interact() {
-//        mModelTransformations.add(new Translation(new FloatPoint(0, 1, 0), 100));
-//        mModelTransformations.add(new Rotation(180, new FloatPoint(0, 0, 1), 100));
-//        mCameraEyeTransformations.add(new Translation(new FloatPoint(0, 0.5f, 0), 100));
-//        mActualCamera.transformTo(mVirtualCamera, 100);
     }
 
     // TODO Should these belong here?
@@ -173,8 +169,8 @@ public class PipelineRenderer implements Renderer {
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
 
         // Apply all transformations to the world, in order, in their current state
-//        for (Transformation t : mModelTransformations)
-//            Matrix.multiplyMM(mModelMatrix, 0, t.next(), 0, mModelMatrix, 0);
+        for (Transformation t : mModelTransformations)
+            Matrix.multiplyMM(mModelMatrix, 0, t.next(), 0, mModelMatrix, 0);
         
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
