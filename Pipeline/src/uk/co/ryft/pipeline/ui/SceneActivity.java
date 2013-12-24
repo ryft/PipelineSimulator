@@ -305,8 +305,14 @@ public class SceneActivity extends Activity {
                             // XXX safe cast due to previous check.
                             editPrimitive((Primitive) elem);
                         else {
+                            Collection<Element> components = ((Composite) elem).getComponents();
                             remove(elem);
-                            addAll(((Composite) elem).getComponents());
+                            addAll(components);
+                            
+                            String message = "Expanded " + components.size() + " component";
+                            if (components.size() != 1)
+                                message += "s";
+                            Toast.makeText(SceneActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
                     }
 

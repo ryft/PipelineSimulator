@@ -1,4 +1,3 @@
-
 package uk.co.ryft.pipeline.model.shapes;
 
 import java.util.ArrayList;
@@ -47,13 +46,30 @@ public class Primitive implements Element {
             primitiveMap.put(Type.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_FAN);
             mPrimitiveMap = Collections.unmodifiableMap(primitiveMap);
         }
-        
+
+        private static final Map<Type, Integer> mImageMap;
+        static {
+            Map<Type, Integer> imageMap = new HashMap<Type, Integer>();
+            imageMap.put(Type.GL_POINTS, R.drawable.gl_points);
+            imageMap.put(Type.GL_LINES, R.drawable.gl_lines);
+            imageMap.put(Type.GL_LINE_STRIP, R.drawable.gl_line_strip);
+            imageMap.put(Type.GL_LINE_LOOP, R.drawable.gl_line_loop);
+            imageMap.put(Type.GL_TRIANGLES, R.drawable.gl_triangles);
+            imageMap.put(Type.GL_TRIANGLE_STRIP, R.drawable.gl_triangle_strip);
+            imageMap.put(Type.GL_TRIANGLE_FAN, R.drawable.gl_triangle_fan);
+            mImageMap = Collections.unmodifiableMap(imageMap);
+        }
+
         public String getDescription() {
             return mDescriptionMap.get(this);
         }
-        
+
         public Integer getGLPrimitive() {
             return mPrimitiveMap.get(this);
+        }
+
+        public Integer getImageRef() {
+            return mImageMap.get(this);
         }
     };
 
@@ -78,11 +94,11 @@ public class Primitive implements Element {
     public int getColourArgb() {
         return mColour.toArgb();
     }
-    
+
     public void setColour(int red, int green, int blue, int alpha) {
         mColour.setColour(red, green, blue, alpha);
     }
-    
+
     public void setColour(int red, int green, int blue) {
         mColour.setColour(red, green, blue);
     }
@@ -99,7 +115,7 @@ public class Primitive implements Element {
         // TODO this is unsafe -- passing a reference to a list.
         return mVertices;
     }
-    
+
     public void setVertices(List<Float3> vertices) {
         // Probably not unsafe but investigate and discuss the mutability of Float3s.
         mVertices.clear();
@@ -115,8 +131,8 @@ public class Primitive implements Element {
     }
 
     /**
-     * Instantiates a new Drawable object which represents this element, and is
-     * ready to draw in the renderer.
+     * Instantiates a new Drawable object which represents this element, and is ready to draw in the
+     * renderer.
      * 
      * This function must be called from the render thread, not the UI thread.
      * 
@@ -124,7 +140,7 @@ public class Primitive implements Element {
      */
     @Override
     public Drawable getDrawable() {
-        
+
         // Convert vertices to float array
         int vertexCount = getVertices().size() * 3;
         float[] coords = new float[vertexCount];
@@ -136,12 +152,12 @@ public class Primitive implements Element {
             i += 3;
         }
         float[] colour = getColour().toArray();
-    
+
         return new GL_Primitive(coords, colour, vertexCount, getType().getGLPrimitive());
     }
 
     public int getIconRef() {
-        return R.drawable.ic_action_scene; // TODO
+        return mType.getImageRef();
     }
 
     @Override
@@ -188,28 +204,28 @@ public class Primitive implements Element {
 
     @Override
     public Primitive rotate(float a, float x, float y, float z) {
-        
+
         for (Float3 v : mVertices)
             v.rotate(a, x, y, z);
-        
+
         // TODO: Decide whether this (and other set operations) should instantiate a new Primitive
         // (immutable) or perform operations on itself (mutable) and document this.
-        
+
         return this;
     }
 
     @Override
     public Primitive rotate(float a, Float3 v) {
-        
+
         for (Float3 x : mVertices)
             x.rotate(a, v.getX(), v.getY(), v.getZ());
-        
+
         return this;
     }
-    
+
     @Override
     public Object clone() {
-        
+
         Colour colour = (Colour) mColour.clone();
         ArrayList<Float3> vertices = (ArrayList<Float3>) mVertices.clone();
         return new Primitive(mType, vertices, colour);

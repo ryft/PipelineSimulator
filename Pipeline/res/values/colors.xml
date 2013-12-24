@@ -15,6 +15,7 @@
   -->
 
 <resources>
-    <color name="list_item_bg">#ffcccccc</color>
+    <color name="list_item_bg">#ffdddddd</color>
+    <color name="list_item_hairline">#40000000</color>
     <color name="surface_border_edit">#ffff0000</color>
 </resources>
