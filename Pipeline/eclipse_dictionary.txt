@@ -5,3 +5,4 @@ coords
 coord
 drawables
 app
+cloneable
