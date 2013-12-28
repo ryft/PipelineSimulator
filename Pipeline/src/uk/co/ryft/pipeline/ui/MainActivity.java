@@ -8,6 +8,8 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
+import uk.co.ryft.pipeline.gl.PipelineRenderer;
+import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.annotation.TargetApi;
@@ -53,7 +55,19 @@ public class MainActivity extends Activity {
             Drawable d = e.getDrawable();
             scene.add(d);
         }
-
+        
+        // XXX Restore scene state
+        if (savedInstanceState != null) {
+            PipelineRenderer renderer = mPipelineView.getRenderer();
+            
+            mPipelineView.setEditMode(savedInstanceState.getBoolean("edit_mode"));
+            renderer.setRotation(savedInstanceState.getFloat("angle"));
+            if (savedInstanceState.getSerializable("actual_camera") != null)
+                renderer.setActualCamera((Camera) savedInstanceState.getSerializable("actual_camera"));
+            if (savedInstanceState.getSerializable("virtual_camera") != null)
+                renderer.setVirtualCamera((Camera) savedInstanceState.getSerializable("virtual_camera"));
+        }
+        
         updateScene();
         
     }
@@ -143,21 +157,25 @@ public class MainActivity extends Activity {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        // Save UI state changes to the savedInstanceState.
-        // This bundle will be passed to onCreate if the process is
-        // killed and restarted.
+        PipelineRenderer renderer = mPipelineView.getRenderer();
+        
         savedInstanceState.putSerializable("elements", mElements);
+        savedInstanceState.putBoolean("edit_mode", mPipelineView.isEditMode());
+        savedInstanceState.putFloat("angle", renderer.getRotation());
+        savedInstanceState.putSerializable("actual_camera", renderer.getActualCamera());
+        savedInstanceState.putSerializable("virtual_camera", renderer.getVirtualCamera());
+
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         mPipelineView.onPause();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         mPipelineView.onResume();
     }

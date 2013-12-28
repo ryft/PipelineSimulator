@@ -2,13 +2,14 @@ package uk.co.ryft.pipeline.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -78,6 +79,7 @@ public class SceneActivity extends Activity {
         finish();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);

@@ -15,7 +15,10 @@ import android.view.View;
 
 public class PipelineSurface extends GLSurfaceView {
 
-    final PipelineRenderer mRenderer = new PipelineRenderer();
+    private final PipelineRenderer mRenderer = new PipelineRenderer();
+    // XXX This is very unsafe but required for saving and restoring state.
+    // Can we do better by implementing it in onPause() etc here?
+    public PipelineRenderer getRenderer() { return mRenderer; }
 
     public PipelineSurface(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,7 +66,7 @@ public class PipelineSurface extends GLSurfaceView {
 
         // Render the view continuously so we can support transition effects.
         // FIXME Disabled for now, along with transitions
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
     }
 
@@ -74,9 +77,13 @@ public class PipelineSurface extends GLSurfaceView {
     }
     
     public void toggleEditMode() {
-        mEditMode = !mEditMode;
+        setEditMode(!isEditMode());
+    }
+    
+    public void setEditMode(boolean editMode) {
+        mEditMode = editMode;
 
-        if (mEditMode)
+        if (editMode)
             setBackgroundResource(R.drawable.surface_border);
         else
             setBackgroundResource(0);
@@ -95,6 +102,18 @@ public class PipelineSurface extends GLSurfaceView {
     private float mPreviousX = 0;
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mRenderer.onPause();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        mRenderer.onResume();
+    }
 
     public void onSceneMove(MotionEvent e) {
         // MotionEvent reports input details from the touch screen
@@ -121,7 +140,7 @@ public class PipelineSurface extends GLSurfaceView {
                 if (x < getWidth() / 2)
                   dy = dy * -1;
 
-                mRenderer.mAngle -= (dx + dy) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
+                mRenderer.setRotation(mRenderer.getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
                 requestRender();
         }
 

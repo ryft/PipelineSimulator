@@ -1,12 +1,16 @@
 package uk.co.ryft.pipeline.model;
 
+import java.io.Serializable;
+
 import uk.co.ryft.pipeline.gl.Float3;
 import android.opengl.Matrix;
 
 //XXX Virtual camera parameters including camera location and projection
 // Necessary because android.graphics.camera doesn't hold projection parameters
-public class Camera {
+public class Camera implements Serializable {
 
+    private static final long serialVersionUID = -2169762992472303103L;
+    
     // View parameters
     private Float3 mEye;
     private Float3 mFocus;

@@ -1,5 +1,7 @@
 package uk.co.ryft.pipeline.gl;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +12,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Rotation;
 import uk.co.ryft.pipeline.model.Transformation;
+import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
@@ -18,9 +22,12 @@ import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 import android.util.Log;
 
-public class PipelineRenderer implements Renderer {
+public class PipelineRenderer implements Renderer, Serializable {
+
+    private static final long serialVersionUID = -5651858198215667027L;
 
     private static final String TAG = "PipelineRenderer";
 
@@ -32,8 +39,6 @@ public class PipelineRenderer implements Renderer {
     private final float[] mCameraViewMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     
-    private final float[] mVPMatrix = new float[16];
-    
     private final float[] mMVMatrix = new float[16];
     private final float[] mCVMatrix = new float[16];
     
@@ -44,19 +49,34 @@ public class PipelineRenderer implements Renderer {
 
     private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
     
-    static Camera mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
-    static Camera mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
+    private Camera mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
+    private Camera mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
+
+    // TODO This is unsafe. If that's OK we can just use public variables,
+    // if not implement cloneable and clone each before returning.
+    public Camera getActualCamera() { return mActualCamera; }
+    public Camera getVirtualCamera() { return mVirtualCamera; }
+    public void setActualCamera(Camera actualCamera) { mActualCamera = actualCamera; }
+    public void setVirtualCamera(Camera virtualCamera) { mVirtualCamera = virtualCamera; }
 
     // For touch events
-    // TODO: Implement synchronised block for this.
-    public volatile float mAngle;
+    // TODO: Implement a monitor for this.
+    private volatile float mAngle;
+    
+    public float getRotation() { return mAngle; }
+    public void setRotation(float angle) { mAngle = angle; }
+    
     private final float[] mModelRotationMatrix = new float[16];
 
+    // Drawables aren't initialised, and are constructed at render time if necessary
+    private Composite mCamera = new Composite(Composite.Type.CUSTOM_SHAPE, Collections.<Element> emptyList());
+    private Drawable mCameraDrawable;
+
+    // Axes should never change between instances so they can be declared statically
     private static Composite sAxes;
-    private static Composite sCamera;
+    private static Drawable sAxesDrawable;
     static {
         LinkedList<Element> axes = new LinkedList<Element>();
-        LinkedList<Element> camera = new LinkedList<Element>();
 
         LinkedList<Float3> lineCoords = new LinkedList<Float3>();
         // XXX i < 1.1 is required to draw the edge lines
@@ -97,18 +117,13 @@ public class PipelineRenderer implements Renderer {
         arrowZ.add(new Float3(-0.1f, 0.1f, 0.8f));
         arrowZ.add(new Float3(0, 0, 0.9f));
         axes.add(new Primitive(Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
-        
-        // Add a camera located at the origin pointing along the negative z-axis
-        // to be transformed into place by the virtual camera model matrix
-        // FIXME This is proving to be problematic in terms of render time
-        camera.add(ShapeFactory.buildCamera(mVirtualCamera, 0.25f));
-        camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
 
         sAxes = new Composite(Composite.Type.CUSTOM_SHAPE, axes);
-        sCamera = new Composite(Composite.Type.CUSTOM_SHAPE, camera);
     }
 
     public void interact() {
+        mModelTransformations.add(new Translation(new Float3(0, 1, 0)));
+        mModelTransformations.add(new Rotation(90, new Float3(1, 0, 0)));
     }
 
     // TODO Should these belong here?
@@ -132,6 +147,15 @@ public class PipelineRenderer implements Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        
+        // Initialise cameras
+        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
+        mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
+        
+        LinkedList<Element> camera = new LinkedList<Element>();
+        camera.add(ShapeFactory.buildCamera(mVirtualCamera, 0.25f));
+        camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
+        mCamera = new Composite(Composite.Type.CUSTOM_SHAPE, camera);
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -150,8 +174,6 @@ public class PipelineRenderer implements Renderer {
         Matrix.setIdentityM(mModelRotationMatrix, 0);
     }
 
-    
-
     @Override
     public void onDrawFrame(GL10 unused) {
 
@@ -168,9 +190,16 @@ public class PipelineRenderer implements Renderer {
         // The camera model matrix transforms the camera to its correct position and orientation in world space
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
 
+        long time = SystemClock.uptimeMillis();
+        
         // Apply all transformations to the world, in order, in their current state
         for (Transformation t : mModelTransformations)
-            Matrix.multiplyMM(mModelMatrix, 0, t.next(), 0, mModelMatrix, 0);
+            Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
+
+        // Create a rotation transformation for the triangle
+//        time %= 4000L;
+//        float angle = 0.090f * ((int) time);
+//        Matrix.setRotateM(mModelRotationMatrix, 0, angle, 0, 0, -1.0f);
         
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
@@ -178,15 +207,21 @@ public class PipelineRenderer implements Renderer {
         Matrix.multiplyMM(mCameraModelMatrix, 0, mModelRotationMatrix, 0, mCameraModelMatrix, 0);
 
         // Calculate the projection and view transformation
-        Matrix.multiplyMM(mVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mCVMatrix, 0, mViewMatrix, 0, mCameraModelMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
 
-        // Ignore model (world) coord transformation when drawing axes
-        sAxes.getDrawable().draw(mMVPMatrix);
-        sCamera.getDrawable().draw(mCVPMatrix);
+        // Initialise axes and camera drawables if necessary
+        // Avoid object construction as much as possible at render time
+        if (sAxesDrawable == null)
+            sAxesDrawable = sAxes.getDrawable();
+        if (mCameraDrawable == null)
+            mCameraDrawable = mCamera.getDrawable();
+
+        // Draw axes and virtual camera        
+        sAxesDrawable.draw(mMVPMatrix);
+        mCameraDrawable.draw(mCVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -272,6 +307,15 @@ public class PipelineRenderer implements Renderer {
         mElements.clear();
         for (Element e : elements)
             mElements.put(e, null);
+    }
+
+    public void onPause() {
+    }
+
+    public void onResume() {
+        // Force re-initialisation of static scene objects in this new render thread context
+        sAxesDrawable = null;
+        mCameraDrawable = null;
     }
 
 }
