@@ -38,11 +38,11 @@ public class MainActivity extends Activity {
         // possible.
         Bundle extras = getIntent().getExtras();
 
-        if (extras != null && extras.containsKey("elements")) {
-            mElements = (ArrayList<Element>) extras.getSerializable("elements");
-
-        } else if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
             mElements = (ArrayList<Element>) savedInstanceState.getSerializable("elements");
+
+        } else if (extras != null && extras.containsKey("elements")) {
+            mElements = (ArrayList<Element>) extras.getSerializable("elements");
 
         } else {
             mElements = new ArrayList<Element>();

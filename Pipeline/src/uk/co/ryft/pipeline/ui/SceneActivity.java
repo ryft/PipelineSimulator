@@ -18,10 +18,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
@@ -56,11 +54,11 @@ public class SceneActivity extends ListActivity {
         Bundle extras = getIntent().getExtras();
 
         ArrayList<Element> elements;
-        if (extras != null && extras.containsKey("elements")) {
-            elements = (ArrayList<Element>) extras.getSerializable("elements");
-
-        } else if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
             elements = (ArrayList<Element>) savedInstanceState.getSerializable("elements");
+
+        } else if (extras != null && extras.containsKey("elements")) {
+            elements = (ArrayList<Element>) extras.getSerializable("elements");
 
         } else {
             elements = new ArrayList<Element>();
