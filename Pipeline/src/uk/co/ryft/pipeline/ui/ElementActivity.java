@@ -20,17 +20,18 @@ package uk.co.ryft.pipeline.ui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,7 +47,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ViewSwitcher;
-
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 import com.larswerkman.colorpicker.ColorPicker;
 import com.larswerkman.colorpicker.OpacityBar;
@@ -79,7 +79,7 @@ public class ElementActivity extends ListActivity {
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 
-        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point_view,
+        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point,
                 R.id.text_point, mElement.getVertices());
         setListAdapter(mAdapter);
 
@@ -228,6 +228,7 @@ public class ElementActivity extends ListActivity {
         finish();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -286,7 +287,7 @@ public class ElementActivity extends ListActivity {
 
             // Recycle view if possible
             if (convertView == null)
-                convertView = mInflater.inflate(R.layout.listitem_point_view, null);
+                convertView = mInflater.inflate(R.layout.listitem_point, null);
             // XXX All events are handled from the listview (parent) level.
             return convertView;
         }

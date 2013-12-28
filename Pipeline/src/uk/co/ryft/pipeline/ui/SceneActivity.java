@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -25,12 +27,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SceneActivity extends Activity {
+import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
+
+public class SceneActivity extends ListActivity {
 
     protected static final int ADD_ELEMENT_REQUEST = 2;
     protected static final int EDIT_ELEMENT_REQUEST = 3;
 
-    protected ListView mListView;
     protected ElementAdapter mAdapter;
 
     // XXX Need to store this reference to be able to update/delete.
@@ -45,26 +48,44 @@ public class SceneActivity extends Activity {
         setContentView(R.layout.activity_scene);
         setupActionBar();
 
-        mListView = (ListView) findViewById(R.id.element_list);
-        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-
         // Get elements from returning activity intent or saved state, if
         // possible.
         Bundle extras = getIntent().getExtras();
 
         ArrayList<Element> elements;
-        if (extras != null && extras.containsKey("elements")) {
-            elements = (ArrayList<Element>) extras.getSerializable("elements");
-
-        } else if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("elements")) {
             elements = (ArrayList<Element>) savedInstanceState.getSerializable("elements");
+
+        } else if (extras != null && extras.containsKey("elements")) {
+            elements = (ArrayList<Element>) extras.getSerializable("elements");
 
         } else {
             elements = new ArrayList<Element>();
         }
 
         mAdapter = new ElementAdapter(this, elements);
-        mListView.setAdapter(mAdapter);
+        setListAdapter(mAdapter);
+        
+        ListView listView = getListView();
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
+                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return true;
+                    }
+
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        for (int position : reverseSortedPositions) {
+                            mAdapter.remove((Element) mAdapter.getItem(position));
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+        listView.setOnTouchListener(touchListener);
+        // Setting this scroll listener is required to ensure that during ListView scrolling,
+        // we don't look for swipes.
+        listView.setOnScrollListener(touchListener.makeScrollListener());
     }
 
     @Override
@@ -282,21 +303,39 @@ public class SceneActivity extends Activity {
             Element elem = mElems.get(position);
 
             if (elem != null) {
+                
+                final boolean isPrimitive = elem.isPrimitive();
+                
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
-                editButton.setImageResource(R.drawable.ic_action_edit);
                 summaryTextView.setText(elem.getSummary());
+                
+                typeTextView.setClickable(false);
+                
+                if (isPrimitive)
+                    editButton.setImageResource(R.drawable.ic_action_edit);
+                else
+                    editButton.setImageResource(R.drawable.ic_action_expand);
 
                 editButton.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
                         Element elem = (Element) getItem(position);
-                        if (elem.isPrimitive())
+                        if (isPrimitive)
                             // XXX safe cast due to previous check.
                             editPrimitive((Primitive) elem);
+                        else {
+                            Collection<Element> components = ((Composite) elem).getComponents();
+                            remove(elem);
+                            addAll(components);
+                            
+                            String message = "Expanded " + components.size() + " component";
+                            if (components.size() != 1)
+                                message += "s";
+                            Toast.makeText(SceneActivity.this, message, Toast.LENGTH_SHORT).show();
+                        }
                     }
-
                 });
             }
 

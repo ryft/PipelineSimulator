@@ -41,6 +41,11 @@ public class Composite implements Element {
         mComponents = new LinkedList<Element>();
         mComponents.addAll(elements);
     }
+    
+    public Collection<Element> getComponents() {
+        // TODO decide whether or not this should be made safe
+        return mComponents;
+    }
 
     @Override
     public Drawable getDrawable() {
@@ -55,7 +60,6 @@ public class Composite implements Element {
 
     @Override
     public int getIconRef() {
-        // TODO
         return R.drawable.ic_action_element;
     }
 

@@ -7,13 +7,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
+        android:layout_height="42dp"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
-        android:layout_marginTop="4dp"
         android:baselineAligned="false"
-        android:clickable="true"
+        android:enabled="false"
         android:orientation="horizontal" >
 
         <ImageView
@@ -35,13 +33,15 @@
             android:ellipsize="end"
             android:gravity="left|center_vertical"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/primary_text_dark" />
 
         <ImageButton
             android:id="@+id/button_element_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/desc_element_edit"
             android:src="@drawable/ic_action_edit" />
     </LinearLayout>
@@ -52,16 +52,19 @@
         android:layout_height="1dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:background="#50ffffff" />
+        android:background="@color/list_item_hairline" />
 
     <TextView
         android:id="@+id/element_summary"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="wrap_content"
         android:ellipsize="end"
         android:gravity="center_vertical"
+        android:paddingBottom="4dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:singleLine="true" />
+        android:paddingTop="4dp"
+        android:singleLine="true"
+        android:textColor="@android:color/secondary_text_dark" />
 
 </LinearLayout>
