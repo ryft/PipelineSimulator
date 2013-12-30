@@ -4,12 +4,12 @@
         android:id="@+id/action_element_new"
         android:title="@string/action_element_new"
         android:icon="@drawable/ic_action_new"
-        android:showAsAction="always|withText" />
+        android:showAsAction="ifRoom|withText" />
 
     <item
         android:id="@+id/action_scene_clear"
         android:title="@string/action_scene_clear"
         android:icon="@drawable/ic_action_discard"
-        android:showAsAction="always|withText" />
+        android:showAsAction="ifRoom|withText" />
 
 </menu>

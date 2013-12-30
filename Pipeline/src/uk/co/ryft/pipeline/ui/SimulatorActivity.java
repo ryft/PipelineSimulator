@@ -21,7 +21,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class MainActivity extends Activity {
+public class SimulatorActivity extends Activity {
 
     protected PipelineSurface mPipelineView;
     protected ArrayList<Element> mElements;
@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
     @SuppressWarnings("unchecked")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_simulator);
         setupActionBar();
 
         mPipelineView = (PipelineSurface) findViewById(R.id.pipeline_surface);

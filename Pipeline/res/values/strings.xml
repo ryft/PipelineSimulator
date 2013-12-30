@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">Pipeline Simulator</string>
-    
     <string name="action_scene">Edit scene</string>
     <string name="action_element_new">New element</string>
     <string name="action_point_new">New vertex</string>
@@ -10,35 +9,30 @@
     <string name="action_element_discard">Discard element</string>
     <string name="action_draw_axes">Draw axes</string>
     <string name="action_change_perspective">Skew</string>
-    
+    <string name="title_activity_setup">Configure Pipeline</string>
+    <string name="title_activity_simulator">Pipeline Simulator</string>
     <string name="title_activity_scene">Edit Scene</string>
     <string name="title_activity_element_add">New Element</string>
     <string name="title_activity_element_edit">Edit Element</string>
-    
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
-    
     <string name="message_scene_clear">Scene cleared</string>
     <string name="message_element_clear">Vertex list cleared</string>
     <string name="message_element_added">Element added</string>
     <string name="message_element_updated">Element updated</string>
     <string name="message_element_deleted">Element deleted</string>
     <string name="message_element_discarded">Element discarded</string>
-    
     <string name="label_point_1">( X:</string>
     <string name="label_point_2">, Y:</string>
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
-    
     <string name="heading_element_type">Element type</string>
     <string name="heading_element_colour">Element colour</string>
     <string name="heading_points">Vertices</string>
     <string name="heading_colour_opacity">Opacity</string>
-    
     <string name="desc_point_new">Add new vertex</string>
     <string name="desc_point_update">Update vertex</string>
     <string name="desc_point_remove">Remove vertex</string>
-    
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_button_save">Save</string>
