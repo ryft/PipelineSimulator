@@ -269,6 +269,8 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        // other shader types, e.g. geometry, tessellation, are optional.
+        // see http://www.opengl.org/sdk/docs/man4/xhtml/glCreateShader.xml
         int shader = GLES20.glCreateShader(type);
 
         // add the source code to the shader and compile it
