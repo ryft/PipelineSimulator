@@ -67,10 +67,10 @@ public class SceneActivity extends ListActivity {
 
         mAdapter = new ElementAdapter(this, elements);
         setListAdapter(mAdapter);
-        
+
         ListView listView = getListView();
-        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
-                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView,
+                new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
                         return true;
@@ -123,7 +123,7 @@ public class SceneActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-//                NavUtils.navigateUpFromSameTask(this);
+                // NavUtils.navigateUpFromSameTask(this);
                 saveAndQuit();
 
             case R.id.action_elements_new:
@@ -176,18 +176,18 @@ public class SceneActivity extends ListActivity {
                 if (!data.getBooleanExtra("delete", false)) {
                     mAdapter.add((Primitive) data.getSerializableExtra("element"));
                     message = getString(R.string.message_element_added);
-                    
+
                 } else
                     message = getString(R.string.message_element_discarded);
             }
 
-        // If the request was EDIT_ELEMENT_REQUEST
+            // If the request was EDIT_ELEMENT_REQUEST
         } else if (requestCode == EDIT_ELEMENT_REQUEST) {
 
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.remove(mThisElement);
                 mThisElement = null;
-                
+
                 if (!data.getBooleanExtra("delete", false)) {
                     Primitive newElement = (Primitive) data.getSerializableExtra("element");
                     mAdapter.add(newElement);
@@ -195,7 +195,7 @@ public class SceneActivity extends ListActivity {
                 }
                 // Else original element has been deleted as required
                 // A suitable message has already been displayed to the user
-                
+
             } else {
                 mThisElement = null;
                 System.out.println(requestCode);
@@ -251,6 +251,14 @@ public class SceneActivity extends ListActivity {
         // The activity is about to be destroyed.
     }
 
+    // View holder stores references to the view components
+    static class ElementViewHolder {
+        ImageView elemIcon;
+        TextView typeTextView;
+        ImageButton editButton;
+        TextView summaryTextView;
+    }
+
     class ElementAdapter extends BaseAdapter {
 
         final Context mContext;
@@ -302,29 +310,41 @@ public class SceneActivity extends ListActivity {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
+            ElementViewHolder viewHolder;
+
             // Recycle view if possible
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.listitem_element, null);
+
+                // Implement the View Holder pattern
+                viewHolder = new ElementViewHolder();
+                viewHolder.elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
+                viewHolder.typeTextView = (TextView) convertView.findViewById(R.id.element_type);
+                viewHolder.editButton = (ImageButton) convertView.findViewById(R.id.button_element_edit);
+                viewHolder.summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+                convertView.setTag(viewHolder);
+
+            } else {
+                viewHolder = (ElementViewHolder) convertView.getTag();
             }
 
-            ImageView elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
-            TextView typeTextView = (TextView) convertView.findViewById(R.id.element_type);
-            ImageButton editButton = (ImageButton) convertView
-                    .findViewById(R.id.button_element_edit);
-            TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+            ImageView elemIcon = viewHolder.elemIcon;
+            TextView typeTextView = viewHolder.typeTextView;
+            ImageButton editButton = viewHolder.editButton;
+            TextView summaryTextView = viewHolder.summaryTextView;
 
             Element elem = mElems.get(position);
 
             if (elem != null) {
-                
+
                 final boolean isPrimitive = elem.isPrimitive();
-                
+
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
                 summaryTextView.setText(elem.getSummary());
-                
+
                 typeTextView.setClickable(false);
-                
+
                 if (isPrimitive)
                     editButton.setImageResource(R.drawable.ic_action_edit);
                 else
@@ -342,7 +362,7 @@ public class SceneActivity extends ListActivity {
                             Collection<Element> components = ((Composite) elem).getComponents();
                             remove(elem);
                             addAll(components);
-                            
+
                             String message = "Expanded " + components.size() + " component";
                             if (components.size() != 1)
                                 message += "s";
