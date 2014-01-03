@@ -11,6 +11,8 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.ui.builders.CylinderActivity;
+import android.app.Activity;
 
 // XXX Implementation of Drawable which uses one or more GL ES 2 primitives.
 public class Composite implements Element {
@@ -31,9 +33,25 @@ public class Composite implements Element {
             mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
         }
 
+        private static final Map<Type, Class<? extends Activity>> mEditorMap;
+        static {
+            Map<Type, Class<? extends Activity>> editorMap = new HashMap<Type, Class<? extends Activity>>();
+            editorMap.put(Type.CYLINDER, CylinderActivity.class);
+            editorMap.put(Type.CUBOID, CylinderActivity.class);
+            editorMap.put(Type.CAMERA, CylinderActivity.class);
+            editorMap.put(Type.FRUSTUM, CylinderActivity.class);
+            editorMap.put(Type.CUSTOM, CylinderActivity.class);
+            mEditorMap = Collections.unmodifiableMap(editorMap);
+        }
+
         @Override
         public String getDescription() {
             return mDescriptionMap.get(this);
+        }
+
+        @Override
+        public Class<? extends Activity> getEditorActivity() {
+            return mEditorMap.get(this);
         }
 
         @Override

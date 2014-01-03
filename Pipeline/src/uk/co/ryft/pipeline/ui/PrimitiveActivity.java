@@ -45,6 +45,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -77,6 +78,29 @@ public class PrimitiveActivity extends ListActivity {
             mElement = new Primitive(Type.GL_POINTS);
             setTitle(R.string.title_activity_primitive_add);
         }
+        
+        // Set up save / delete button listeners
+        Button saveButton = (Button) findViewById(R.id.button_element_save);
+        Button deleteButton = (Button) findViewById(R.id.button_element_delete);
+        
+        if (mEditMode)
+            deleteButton.setText(R.string.action_element_delete);
+        else
+            deleteButton.setText(R.string.action_element_discard);
+        
+        saveButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAndQuit(false);
+            }
+        });
+        
+        deleteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAndQuit(true);
+            }
+        });
 
         // Set current element properties as default selections
         mTypeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
@@ -204,7 +228,7 @@ public class PrimitiveActivity extends ListActivity {
             }
             
         });
-
+        
         setupActionBar();
     }
 
@@ -280,11 +304,10 @@ public class PrimitiveActivity extends ListActivity {
                 mAdapter.notifyDataSetChanged();
                 break;
 
-            case R.id.action_element_save:
-                saveAndQuit(false);
-
-            case R.id.action_element_remove:
-                saveAndQuit(true);
+            case R.id.action_points_discard:
+                mAdapter.clear();
+                mAdapter.notifyDataSetChanged();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

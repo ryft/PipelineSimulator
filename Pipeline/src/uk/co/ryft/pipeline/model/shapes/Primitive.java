@@ -12,6 +12,8 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.ui.PrimitiveActivity;
+import android.app.Activity;
 import android.opengl.GLES20;
 
 public class Primitive implements Element {
@@ -50,6 +52,11 @@ public class Primitive implements Element {
         @Override
         public String getDescription() {
             return mDescriptionMap.get(this);
+        }
+
+        @Override
+        public Class<? extends Activity> getEditorActivity() {
+            return PrimitiveActivity.class;
         }
 
         public Integer getGLPrimitive() {

@@ -14,13 +14,15 @@
     <string name="action_points_new">New vertex</string>
     <string name="action_points_discard">Discard vertices</string>
     <string name="action_element_save">Save</string>
-    <string name="action_element_remove">Delete</string>
+    <string name="action_element_delete">Delete</string>
+    <string name="action_element_discard">Discard</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
     <string name="title_activity_simulator">Pipeline Simulator</string>
     <string name="title_activity_scene">Edit Scene</string>
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
+    <string name="title_activity_cylinder_add">New Cylinder</string>
     
     <string name="message_scene_clear">Scene cleared</string>
     <string name="message_element_clear">Vertex list cleared</string>
@@ -49,6 +51,8 @@
     
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
+    <string name="dialogue_title_composite_new">Select Type</string>
+    
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
 

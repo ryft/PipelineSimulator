@@ -6,11 +6,14 @@ import java.util.Collection;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
+import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,8 +36,9 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 public class SceneActivity extends ListActivity {
 
     // Request values
-    protected static final int ADD_ELEMENT_REQUEST = 2;
-    protected static final int EDIT_ELEMENT_REQUEST = 3;
+    protected static final int ADD_PRIMITIVE_REQUEST = 2;
+    protected static final int EDIT_PRIMITIVE_REQUEST = 3;
+    protected static final int ADD_COMPOSITE_REQUEST = 4;
 
     protected ElementAdapter mAdapter;
 
@@ -145,7 +149,7 @@ public class SceneActivity extends ListActivity {
     protected void addPrimitive() {
         Intent intent = new Intent(this, PrimitiveActivity.class);
         intent.putExtra("edit_mode", false);
-        startActivityForResult(intent, ADD_ELEMENT_REQUEST);
+        startActivityForResult(intent, ADD_PRIMITIVE_REQUEST);
     }
 
     protected void editPrimitive(Primitive e) {
@@ -153,11 +157,29 @@ public class SceneActivity extends ListActivity {
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
         mThisElement = e;
-        startActivityForResult(intent, EDIT_ELEMENT_REQUEST);
+        startActivityForResult(intent, EDIT_PRIMITIVE_REQUEST);
     }
 
     protected void addComposite() {
-        // TODO
+        
+        final ElementType[] types = Composite.Type.values();
+        String[] typeNames = new String[types.length];
+        for (int i = 0; i < types.length; i++)
+            typeNames[i] = types[i].getDescription();
+
+        // Instantiate and display a float picker dialogue
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialogue_title_composite_new);
+
+        builder.setItems(typeNames, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int which) {
+                   startActivityForResult(new Intent(SceneActivity.this, types[which].getEditorActivity()), ADD_COMPOSITE_REQUEST);
+               }
+        });
+
+        // Get the AlertDialog, initialise values and show it.
+        AlertDialog dialogue = builder.create();
+        dialogue.show();
     }
 
     @Override
@@ -167,18 +189,22 @@ public class SceneActivity extends ListActivity {
 
         // Parameter key:
         //
-        // For adding a new element (ADD_ELEMENT_REQUEST)
+        // For adding a new primitive (ADD_PRIMITIVE_REQUEST)
         // OK result -> new element is 'element' extra
         // Otherwise -> take no action
         //
-        // For editing an element (EDIT_ELEMENT_REQUEST)
+        // For editing a primitive (EDIT_PRIMITIVE_REQUEST)
         // OK result -> new element is 'element' extra
         // >> If 'deleted' is set true, remove old element
         // >> Otherwise replace old element with new
         // Otherwise -> take no action
+        //
+        // For adding a composite (ADD_COMPOSITE_REQUEST)
+        // OK result -> new element is 'element' extra
+        // Otherwise -> take no action
 
-        // If the request was ADD_ELEMENT_REQUEST
-        if (requestCode == ADD_ELEMENT_REQUEST) {
+        // If the request was ADD_PRIMITIVE_REQUEST
+        if (requestCode == ADD_PRIMITIVE_REQUEST) {
 
             if (resultCode == Activity.RESULT_OK) {
                 if (!data.getBooleanExtra("delete", false)) {
@@ -189,8 +215,8 @@ public class SceneActivity extends ListActivity {
                     message = getString(R.string.message_element_discarded);
             }
 
-            // If the request was EDIT_ELEMENT_REQUEST
-        } else if (requestCode == EDIT_ELEMENT_REQUEST) {
+            // If the request was EDIT_PRIMITIVE_REQUEST
+        } else if (requestCode == EDIT_PRIMITIVE_REQUEST) {
 
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.remove(mThisElement);
@@ -207,10 +233,12 @@ public class SceneActivity extends ListActivity {
 
             } else {
                 mThisElement = null;
-                System.out.println(requestCode);
                 message = getString(R.string.message_element_deleted);
             }
 
+        } else if (requestCode == ADD_COMPOSITE_REQUEST) {
+            
+            
         } else {
             // Add any new result codes here.
             throw new UnsupportedOperationException();

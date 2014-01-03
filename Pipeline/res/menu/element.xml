@@ -7,14 +7,8 @@
         android:showAsAction="always|withText" />
 
     <item
-        android:id="@+id/action_element_save"
-        android:title="@string/action_element_save"
-        android:icon="@drawable/ic_action_save"
-        android:showAsAction="always|withText" />
-
-    <item
-        android:id="@+id/action_element_remove"
-        android:title="@string/action_element_remove"
+        android:id="@+id/action_points_discard"
+        android:title="@string/action_points_discard"
         android:icon="@drawable/ic_action_discard"
         android:showAsAction="always|withText" />
 

@@ -19,7 +19,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingLeft="16dp"
     android:paddingRight="16dp" >
@@ -73,6 +73,28 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="0dip"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+ 
+        <Button
+            android:id="@+id/button_element_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/action_element_discard" />
+ 
+        <Button
+            android:id="@+id/button_element_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/action_element_save" />
+        
+     </LinearLayout>
 
 </LinearLayout>
