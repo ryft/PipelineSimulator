@@ -2,6 +2,7 @@ package uk.co.ryft.pipeline.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
@@ -31,6 +32,7 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class SceneActivity extends ListActivity {
 
+    // Request values
     protected static final int ADD_ELEMENT_REQUEST = 2;
     protected static final int EDIT_ELEMENT_REQUEST = 3;
 
@@ -124,11 +126,11 @@ public class SceneActivity extends ListActivity {
 //                NavUtils.navigateUpFromSameTask(this);
                 saveAndQuit();
 
-            case R.id.action_element_new:
+            case R.id.action_elements_new:
                 addElement();
                 break;
 
-            case R.id.action_scene_clear:
+            case R.id.action_elements_discard:
                 mAdapter.clear();
                 Toast.makeText(this, R.string.message_scene_clear, Toast.LENGTH_SHORT).show();
                 break;
@@ -158,40 +160,51 @@ public class SceneActivity extends ListActivity {
         // Parameter key:
         //
         // For adding a new element (ADD_ELEMENT_REQUEST)
-        // OK result -> new element is element_new
+        // OK result -> new element is 'element' extra
         // Otherwise -> take no action
         //
         // For editing an element (EDIT_ELEMENT_REQUEST)
-        // OK result -> original is element_old, new is element_new
-        // >> If 'deleted' is set true, remove element_old
-        // >> Otherwise replace element_old with element_new
-        // Otherwise -> original element is element_old
+        // OK result -> new element is 'element' extra
+        // >> If 'deleted' is set true, remove old element
+        // >> Otherwise replace old element with new
+        // Otherwise -> take no action
 
         // If the request was ADD_ELEMENT_REQUEST
-        if (requestCode == ADD_ELEMENT_REQUEST)
+        if (requestCode == ADD_ELEMENT_REQUEST) {
 
             if (resultCode == Activity.RESULT_OK) {
-                mAdapter.add((Primitive) data.getSerializableExtra("element"));
-                message = getString(R.string.message_element_added);
-            } else
-                message = getString(R.string.message_element_discarded);
+                if (!data.getBooleanExtra("delete", false)) {
+                    mAdapter.add((Primitive) data.getSerializableExtra("element"));
+                    message = getString(R.string.message_element_added);
+                    
+                } else
+                    message = getString(R.string.message_element_discarded);
+            }
 
         // If the request was EDIT_ELEMENT_REQUEST
-        else if (requestCode == EDIT_ELEMENT_REQUEST)
+        } else if (requestCode == EDIT_ELEMENT_REQUEST) {
 
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.remove(mThisElement);
                 mThisElement = null;
-                mAdapter.add((Primitive) data.getSerializableExtra("element"));
-                message = getString(R.string.message_element_updated);
+                
+                if (!data.getBooleanExtra("delete", false)) {
+                    Primitive newElement = (Primitive) data.getSerializableExtra("element");
+                    mAdapter.add(newElement);
+                    message = getString(R.string.message_element_updated);
+                }
+                // Else original element has been deleted as required
+                // A suitable message has already been displayed to the user
+                
             } else {
-                mAdapter.remove(mThisElement);
                 mThisElement = null;
+                System.out.println(requestCode);
                 message = getString(R.string.message_element_deleted);
             }
 
-        else {
+        } else {
             // Add any new result codes here.
+            throw new UnsupportedOperationException();
         }
 
         if (message != "")

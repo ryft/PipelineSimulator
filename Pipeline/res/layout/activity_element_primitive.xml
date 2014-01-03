@@ -56,11 +56,12 @@
 
         <ImageButton
             android:id="@+id/button_element_colour"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dip"
+            android:layout_height="40dip"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/desc_element_edit"
-            android:src="@drawable/ic_action_edit" />
+            android:src="@drawable/ic_action_edit"
+            android:background="@color/action_bar" />
     </LinearLayout>
 
     <TextView

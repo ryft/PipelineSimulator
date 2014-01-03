@@ -20,6 +20,7 @@ package uk.co.ryft.pipeline.ui;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
@@ -33,6 +34,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,7 +48,8 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ViewSwitcher;
+import android.widget.Toast;
+
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 import com.larswerkman.colorpicker.ColorPicker;
 import com.larswerkman.colorpicker.OpacityBar;
@@ -56,7 +59,8 @@ public class ElementActivity extends ListActivity {
     protected ArrayAdapter<Float3> mAdapter;
     protected Primitive mElement;
     protected TypeSpinner mTypeSpinner;
-    protected ViewSwitcher mViewSwitcher;
+    
+    protected boolean mEditMode;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +68,9 @@ public class ElementActivity extends ListActivity {
 
         // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
-        if (fromScene.getBoolean("edit_mode", false)) {
+        mEditMode = fromScene.getBoolean("edit_mode", false);
+        
+        if (mEditMode) {
             mElement = (Primitive) fromScene.getSerializable("element");
             setTitle(R.string.title_activity_element_edit);
         } else {
@@ -202,22 +208,39 @@ public class ElementActivity extends ListActivity {
         setupActionBar();
     }
 
+    long mBackPressed = 0;
+    
     @Override
     public void onBackPressed() {
-        saveAndQuit();
+        long time = SystemClock.uptimeMillis();
+        long elapsed = time - mBackPressed;
+        
+        if (elapsed < 2000)
+            discardAndQuit();
+        
+        else {
+            if (mEditMode)
+                Toast.makeText(this, R.string.warning_element_discard_changes, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, R.string.warning_element_discard, Toast.LENGTH_SHORT).show();
+            mBackPressed = time;
+        }
     }
 
-    protected void saveAndQuit() {
+    protected void saveAndQuit(boolean delete) {
         Intent result = new Intent();
+        result.putExtra("delete", delete);
 
-        mElement.setType((Type) mTypeSpinner.getSelectedItem());
-        LinkedList<Float3> points = new LinkedList<Float3>();
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            points.add((Float3) mAdapter.getItem(i));
+        if (!delete) {
+            mElement.setType((Type) mTypeSpinner.getSelectedItem());
+            LinkedList<Float3> points = new LinkedList<Float3>();
+            for (int i = 0; i < mAdapter.getCount(); i++) {
+                points.add((Float3) mAdapter.getItem(i));
+            }
+            mElement.setVertices(points);
+            result.putExtra("element", mElement);
         }
-        mElement.setVertices(points);
-        result.putExtra("element", mElement);
-
+        
         setResult(RESULT_OK, result);
         finish();
     }
@@ -250,15 +273,18 @@ public class ElementActivity extends ListActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 // NavUtils.navigateUpFromSameTask(this);
-                saveAndQuit();
+                saveAndQuit(false);
 
-            case R.id.action_point_new:
+            case R.id.action_points_new:
                 mAdapter.add(new Float3(0f, 0f, 0f));
                 mAdapter.notifyDataSetChanged();
                 break;
 
-            case R.id.action_element_discard:
-                discardAndQuit();
+            case R.id.action_element_save:
+                saveAndQuit(false);
+
+            case R.id.action_element_remove:
+                saveAndQuit(true);
         }
         return super.onOptionsItemSelected(item);
     }
