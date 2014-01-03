@@ -1,9 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     
     <item
-        android:id="@+id/action_elements_new"
-        android:title="@string/action_elements_new"
+        android:id="@+id/action_primitive_new"
+        android:title="@string/action_primitive_new"
         android:icon="@drawable/ic_action_new"
+        android:showAsAction="ifRoom|withText" />
+    
+    <item
+        android:id="@+id/action_composite_new"
+        android:title="@string/action_composite_new"
+        android:icon="@drawable/ic_action_element"
         android:showAsAction="ifRoom|withText" />
 
     <item

@@ -29,8 +29,8 @@
                 android:value="uk.co.ryft.pipeline.ui.MainActivity" />
         </activity>
         <activity
-            android:name="uk.co.ryft.pipeline.ui.ElementActivity"
-            android:label="@string/title_activity_element_add" >
+            android:name="uk.co.ryft.pipeline.ui.PrimitiveActivity"
+            android:label="@string/title_activity_primitive_add" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />

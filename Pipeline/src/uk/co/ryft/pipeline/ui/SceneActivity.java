@@ -126,8 +126,12 @@ public class SceneActivity extends ListActivity {
                 // NavUtils.navigateUpFromSameTask(this);
                 saveAndQuit();
 
-            case R.id.action_elements_new:
-                addElement();
+            case R.id.action_primitive_new:
+                addPrimitive();
+                break;
+
+            case R.id.action_composite_new:
+                addComposite();
                 break;
 
             case R.id.action_elements_discard:
@@ -138,18 +142,22 @@ public class SceneActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    protected void addElement() {
-        Intent intent = new Intent(this, ElementActivity.class);
+    protected void addPrimitive() {
+        Intent intent = new Intent(this, PrimitiveActivity.class);
         intent.putExtra("edit_mode", false);
         startActivityForResult(intent, ADD_ELEMENT_REQUEST);
     }
 
     protected void editPrimitive(Primitive e) {
-        Intent intent = new Intent(this, ElementActivity.class);
+        Intent intent = new Intent(this, PrimitiveActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
         mThisElement = e;
         startActivityForResult(intent, EDIT_ELEMENT_REQUEST);
+    }
+
+    protected void addComposite() {
+        // TODO
     }
 
     @Override
@@ -195,6 +203,7 @@ public class SceneActivity extends ListActivity {
                 }
                 // Else original element has been deleted as required
                 // A suitable message has already been displayed to the user
+                // FIXME Not necessarily, if user has pressed delete
 
             } else {
                 mThisElement = null;

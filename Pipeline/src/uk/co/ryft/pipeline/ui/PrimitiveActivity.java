@@ -54,7 +54,7 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 import com.larswerkman.colorpicker.ColorPicker;
 import com.larswerkman.colorpicker.OpacityBar;
 
-public class ElementActivity extends ListActivity {
+public class PrimitiveActivity extends ListActivity {
 
     protected ArrayAdapter<Float3> mAdapter;
     protected Primitive mElement;
@@ -72,10 +72,10 @@ public class ElementActivity extends ListActivity {
         
         if (mEditMode) {
             mElement = (Primitive) fromScene.getSerializable("element");
-            setTitle(R.string.title_activity_element_edit);
+            setTitle(R.string.title_activity_primitive_edit);
         } else {
             mElement = new Primitive(Type.GL_POINTS);
-            setTitle(R.string.title_activity_element_add);
+            setTitle(R.string.title_activity_primitive_add);
         }
 
         // Set current element properties as default selections
@@ -121,10 +121,10 @@ public class ElementActivity extends ListActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
                 // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(ElementActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(PrimitiveActivity.this);
                 builder.setTitle(R.string.dialogue_title_point);
 
-                LayoutInflater inflater = ElementActivity.this.getLayoutInflater();
+                LayoutInflater inflater = PrimitiveActivity.this.getLayoutInflater();
                 View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
 
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
@@ -169,10 +169,10 @@ public class ElementActivity extends ListActivity {
             public void onClick(View v) {
 
                 // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(ElementActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(PrimitiveActivity.this);
                 builder.setTitle(R.string.dialogue_title_colour);
 
-                LayoutInflater inflater = ElementActivity.this.getLayoutInflater();
+                LayoutInflater inflater = PrimitiveActivity.this.getLayoutInflater();
                 View dialogueView = inflater.inflate(R.layout.dialogue_colour_select, null);
                 
                 builder.setView(dialogueView);

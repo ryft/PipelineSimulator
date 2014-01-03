@@ -7,7 +7,8 @@
     <string name="action_draw_axes">Draw objects</string>
     <string name="action_change_perspective">Rotate</string>
     
-    <string name="action_elements_new">New element</string>
+    <string name="action_primitive_new">New primitive</string>
+    <string name="action_composite_new">New composite</string>
     <string name="action_elements_discard">Clear scene</string>
     
     <string name="action_points_new">New vertex</string>
@@ -18,8 +19,8 @@
     <string name="title_activity_setup">Configure Pipeline</string>
     <string name="title_activity_simulator">Pipeline Simulator</string>
     <string name="title_activity_scene">Edit Scene</string>
-    <string name="title_activity_element_add">New Element</string>
-    <string name="title_activity_element_edit">Edit Element</string>
+    <string name="title_activity_primitive_add">New Primitive</string>
+    <string name="title_activity_primitive_edit">Edit Primitive</string>
     
     <string name="message_scene_clear">Scene cleared</string>
     <string name="message_element_clear">Vertex list cleared</string>
