@@ -2,6 +2,7 @@ package uk.co.ryft.pipeline.ui;
 
 import uk.co.ryft.pipeline.R;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 
@@ -11,6 +12,8 @@ public class SetupActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
+        startActivity(new Intent(this, SimulatorActivity.class));
+        finish();
     }
 
     @Override

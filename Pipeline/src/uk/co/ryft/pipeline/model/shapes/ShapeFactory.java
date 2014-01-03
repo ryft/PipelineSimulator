@@ -7,7 +7,6 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 
 // XXX Not an actual abstract factory but a collection of factory methods
 public class ShapeFactory {
@@ -64,9 +63,9 @@ public class ShapeFactory {
 
         cylinder.add(buildRegularPolygon(stepCount, true, centre, radius, rotation, capColour));
         cylinder.add(buildRegularPolygon(stepCount, false, capCentre, radius, rotation, capColour));
-        cylinder.add(new Primitive(Type.GL_TRIANGLE_STRIP, points, colour));
+        cylinder.add(new Primitive(Primitive.Type.GL_TRIANGLE_STRIP, points, colour));
 
-        return new Composite(Composite.Type.CUSTOM_SHAPE, cylinder);
+        return new Composite(Composite.Type.CYLINDER, cylinder);
     }
 
     public static Composite buildCuboid(Float3 centre, float width, float height, float depth,
@@ -131,7 +130,7 @@ public class ShapeFactory {
         bottom.add(new Float3(x0, y0, z1));
         faces.add(buildConvexPolygon(bottom, sideColour));
 
-        return new Composite(Composite.Type.CUSTOM_SHAPE, faces);
+        return new Composite(Composite.Type.CUBOID, faces);
     }
 
     public static Element buildCamera(Camera camera, float scale) {
@@ -147,7 +146,7 @@ public class ShapeFactory {
                 * scale, origin.getZ() + 0.75f * scale), 0.25f * scale, 0.125f * scale, 0.25f * scale,
                 Colour.BLACK, Colour.BLACK));
 
-        return new Composite(Composite.Type.CUSTOM_SHAPE, elems);
+        return new Composite(Composite.Type.CAMERA, elems);
     }
     
     // TODO: Create synonym with fovX, fovY?
@@ -198,17 +197,17 @@ public class ShapeFactory {
         planeFar.add(new Float3(leftFar, bottomFar, -far));
         planeFar.add(new Float3(leftFar, topFar, -far));
 
-        frustum.add(new Primitive(Type.GL_LINES, enclosure, Colour.WHITE));
-        frustum.add(new Primitive(Type.GL_LINE_LOOP, planeNear, Colour.WHITE));
-        frustum.add(new Primitive(Type.GL_LINE_LOOP, planeFar, Colour.WHITE));
+        frustum.add(new Primitive(Primitive.Type.GL_LINES, enclosure, Colour.WHITE));
+        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeNear, Colour.WHITE));
+        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeFar, Colour.WHITE));
         
-        return new Composite(Composite.Type.CUSTOM_SHAPE, frustum);
+        return new Composite(Composite.Type.FRUSTUM, frustum);
     }
 
     // XXX Points must be provided in correct winding order
     public static Primitive buildConvexPolygon(List<Float3> points, Colour colour) {
 
-        return new Primitive(Type.GL_TRIANGLE_FAN, points, colour);
+        return new Primitive(Primitive.Type.GL_TRIANGLE_FAN, points, colour);
     }
 
 }

@@ -4,8 +4,11 @@ import java.io.Serializable;
 
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
+import uk.co.ryft.pipeline.model.shapes.ElementType;
 
 public interface Element extends Serializable, Cloneable {
+
+    public ElementType getType();
     
     public Drawable getDrawable();
 

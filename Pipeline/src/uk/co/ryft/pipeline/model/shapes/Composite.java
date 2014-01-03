@@ -17,19 +17,28 @@ public class Composite implements Element {
     
     private static final long serialVersionUID = -6787922946411889774L;
 
-    public static enum Type {
-        CONVEX_POLYGON, CUSTOM_SHAPE;
+    public static enum Type implements ElementType {
+        CYLINDER, CUBOID, CAMERA, FRUSTUM, CUSTOM;
 
         private static final Map<Type, String> mDescriptionMap;
         static {
             Map<Type, String> descriptionMap = new HashMap<Type, String>();
-            descriptionMap.put(Type.CONVEX_POLYGON, "Convex Polygon");
-            descriptionMap.put(Type.CUSTOM_SHAPE, "Custom Composite");
+            descriptionMap.put(Type.CYLINDER, "Cylinder");
+            descriptionMap.put(Type.CUBOID, "Cuboid");
+            descriptionMap.put(Type.CAMERA, "Camera");
+            descriptionMap.put(Type.FRUSTUM, "Frustum outline");
+            descriptionMap.put(Type.CUSTOM, "Custom shape");
             mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
         }
-        
+
+        @Override
         public String getDescription() {
             return mDescriptionMap.get(this);
+        }
+
+        @Override
+        public boolean isPrimitive() {
+            return false;
         }
     };
     
@@ -40,6 +49,14 @@ public class Composite implements Element {
         mType = type;
         mComponents = new LinkedList<Element>();
         mComponents.addAll(elements);
+    }
+
+    public Type getType() {
+        return mType;
+    }
+
+    public void setType(Type t) {
+        mType = t;
     }
     
     public Collection<Element> getComponents() {

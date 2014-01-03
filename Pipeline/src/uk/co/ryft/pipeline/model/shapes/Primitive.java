@@ -18,7 +18,7 @@ public class Primitive implements Element {
 
     private static final long serialVersionUID = -3522126203623788186L;
 
-    public static enum Type {
+    public static enum Type implements ElementType {
         GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN;
 
         private static final Map<Type, String> mDescriptionMap;
@@ -47,12 +47,18 @@ public class Primitive implements Element {
             mPrimitiveMap = Collections.unmodifiableMap(primitiveMap);
         }
 
+        @Override
         public String getDescription() {
             return mDescriptionMap.get(this);
         }
 
         public Integer getGLPrimitive() {
             return mPrimitiveMap.get(this);
+        }
+
+        @Override
+        public boolean isPrimitive() {
+            return true;
         }
     };
 
