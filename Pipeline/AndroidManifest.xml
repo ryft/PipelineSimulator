@@ -49,7 +49,8 @@
         </activity>
         <activity
             android:name="uk.co.ryft.pipeline.ui.builders.CylinderActivity"
-            android:label="@string/title_activity_cylinder_add" >
+            android:label="@string/title_activity_cylinder_add"
+            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard opening at startup -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />

@@ -11,8 +11,7 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License.
-
+  limitations under the License
 -->
 <!-- Swipeable list adapted from https://github.com/romannurik/Android-SwipeToDismiss -->
 <!-- Colour picker adapted from https://github.com/LarsWerkman/HoloColorPicker -->
@@ -26,9 +25,7 @@
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/heading_element_type" />
+        android:text="@string/heading_primitive_type" />
 
     <uk.co.ryft.pipeline.ui.TypeSpinner
         android:id="@+id/element_type_spinner"
@@ -38,9 +35,7 @@
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/heading_element_colour" />
+        android:text="@string/heading_primitive_colour" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,23 +46,21 @@
             android:id="@+id/element_colour_swatch"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/button_element_colour"
             android:layout_width="40dip"
             android:layout_height="40dip"
             android:layout_gravity="center_vertical"
-            android:contentDescription="@string/desc_element_edit"
-            android:src="@drawable/ic_action_edit"
-            android:background="@color/action_bar" />
+            android:background="@color/action_bar"
+            android:contentDescription="@string/desc_colour_edit"
+            android:src="@drawable/ic_action_edit" />
     </LinearLayout>
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="@string/heading_points" />
 
     <ListView
@@ -80,21 +73,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
- 
+
         <Button
-            android:id="@+id/button_element_delete"
+            android:id="@+id/button_element_discard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/action_element_discard" />
- 
+
         <Button
             android:id="@+id/button_element_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/action_element_save" />
-        
-     </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

@@ -237,7 +237,10 @@ public class SceneActivity extends ListActivity {
             }
 
         } else if (requestCode == ADD_COMPOSITE_REQUEST) {
-            
+
+            if (resultCode == Activity.RESULT_OK) {
+                mAdapter.add((Composite) data.getSerializableExtra("element"));
+            }
             
         } else {
             // Add any new result codes here.
@@ -310,7 +313,7 @@ public class SceneActivity extends ListActivity {
             mElems = new ArrayList<Element>(elements);
         }
 
-        public boolean add(Primitive element) {
+        public boolean add(Element element) {
             boolean ret = mElems.add(element);
             notifyDataSetChanged();
             return ret;

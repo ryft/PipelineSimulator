@@ -34,19 +34,33 @@
     <string name="warning_element_discard_changes">Press back again to discard changes</string>
     <string name="warning_element_discard">Press back again to discard</string>
     
+    <string name="label_element_centre">Centre point</string>
+    <string name="label_element_capcolour">Cap colour</string>
+    <string name="label_element_bodycolour">Body colour</string>
+    <string name="label_element_height">Height</string>
+    <string name="label_element_radius">Radius</string>
+    <string name="label_element_stepcount">Step count</string>
+    <string name="label_element_rotation">Rotation (radians)</string>
+    
     <string name="label_point_1">( X:</string>
     <string name="label_point_2">, Y:</string>
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
     
-    <string name="heading_element_type">Element type</string>
-    <string name="heading_element_colour">Element colour</string>
+    <string name="heading_primitive_type">Primitive type</string>
+    <string name="heading_primitive_colour">Primitive colour</string>
     <string name="heading_points">Vertices</string>
     <string name="heading_colour_opacity">Opacity</string>
+    
+    <string name="heading_element_location">Location</string>
+    <string name="heading_element_colours">Colours</string>
+    <string name="heading_element_proportions">Size and proportions</string>
+    <string name="heading_element_parameters">Other parameters</string>
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
     
+    <string name="desc_colour_edit">Edit colour</string>
     <string name="desc_points_new">Add new vertex</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>

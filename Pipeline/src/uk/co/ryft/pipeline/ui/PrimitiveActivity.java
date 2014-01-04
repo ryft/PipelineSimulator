@@ -81,7 +81,7 @@ public class PrimitiveActivity extends ListActivity {
         
         // Set up save / delete button listeners
         Button saveButton = (Button) findViewById(R.id.button_element_save);
-        Button deleteButton = (Button) findViewById(R.id.button_element_delete);
+        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
         
         if (mEditMode)
             deleteButton.setText(R.string.action_element_delete);
