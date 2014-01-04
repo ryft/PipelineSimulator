@@ -152,7 +152,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
         
         LinkedList<Element> camera = new LinkedList<Element>();
-        camera.add(ShapeFactory.buildCamera(mVirtualCamera, 0.25f));
+        camera.add(ShapeFactory.buildCamera(0.25f));
         camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
         mCamera = new Composite(Composite.Type.CUSTOM, camera);
 

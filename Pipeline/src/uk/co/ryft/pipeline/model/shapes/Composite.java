@@ -11,6 +11,7 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.ui.builders.CameraActivity;
 import uk.co.ryft.pipeline.ui.builders.CuboidActivity;
 import uk.co.ryft.pipeline.ui.builders.CylinderActivity;
 import android.app.Activity;
@@ -39,7 +40,7 @@ public class Composite implements Element {
             Map<Type, Class<? extends Activity>> editorMap = new HashMap<Type, Class<? extends Activity>>();
             editorMap.put(Type.CYLINDER, CylinderActivity.class);
             editorMap.put(Type.CUBOID, CuboidActivity.class);
-            editorMap.put(Type.CAMERA, CylinderActivity.class);
+            editorMap.put(Type.CAMERA, CameraActivity.class);
             editorMap.put(Type.FRUSTUM, CylinderActivity.class);
             editorMap.put(Type.CUSTOM, CylinderActivity.class);
             mEditorMap = Collections.unmodifiableMap(editorMap);
