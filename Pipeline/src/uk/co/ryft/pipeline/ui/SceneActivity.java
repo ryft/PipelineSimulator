@@ -161,7 +161,8 @@ public class SceneActivity extends ListActivity {
     }
 
     protected void addComposite() {
-        
+
+        // Collect composite type descriptions into an array
         final ElementType[] types = Composite.Type.values();
         String[] typeNames = new String[types.length];
         for (int i = 0; i < types.length; i++)
@@ -172,9 +173,11 @@ public class SceneActivity extends ListActivity {
         builder.setTitle(R.string.dialogue_title_composite_new);
 
         builder.setItems(typeNames, new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int which) {
-                   startActivityForResult(new Intent(SceneActivity.this, types[which].getEditorActivity()), ADD_COMPOSITE_REQUEST);
-               }
+            public void onClick(DialogInterface dialog, int which) {
+                ElementType type = types[which];
+                if (type != Composite.Type.CUSTOM)
+                    startActivityForResult(new Intent(SceneActivity.this, type.getEditorActivity()), ADD_COMPOSITE_REQUEST);
+            }
         });
 
         // Get the AlertDialog, initialise values and show it.
@@ -241,7 +244,7 @@ public class SceneActivity extends ListActivity {
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.add((Composite) data.getSerializableExtra("element"));
             }
-            
+
         } else {
             // Add any new result codes here.
             throw new UnsupportedOperationException();

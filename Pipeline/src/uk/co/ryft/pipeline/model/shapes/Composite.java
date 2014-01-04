@@ -22,7 +22,7 @@ public class Composite implements Element {
     private static final long serialVersionUID = -6787922946411889774L;
 
     public static enum Type implements ElementType {
-        CYLINDER, CUBOID, CAMERA, FRUSTUM, CUSTOM;
+        CYLINDER, CUBOID, CAMERA, CUSTOM;
 
         private static final Map<Type, String> mDescriptionMap;
         static {
@@ -30,7 +30,6 @@ public class Composite implements Element {
             descriptionMap.put(Type.CYLINDER, "Cylinder");
             descriptionMap.put(Type.CUBOID, "Cuboid");
             descriptionMap.put(Type.CAMERA, "Camera");
-            descriptionMap.put(Type.FRUSTUM, "Frustum outline");
             descriptionMap.put(Type.CUSTOM, "Custom shape");
             mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
         }
@@ -41,8 +40,7 @@ public class Composite implements Element {
             editorMap.put(Type.CYLINDER, CylinderActivity.class);
             editorMap.put(Type.CUBOID, CuboidActivity.class);
             editorMap.put(Type.CAMERA, CameraActivity.class);
-            editorMap.put(Type.FRUSTUM, CylinderActivity.class);
-            editorMap.put(Type.CUSTOM, CylinderActivity.class);
+            editorMap.put(Type.CUSTOM, null); // Should never be called
             mEditorMap = Collections.unmodifiableMap(editorMap);
         }
 

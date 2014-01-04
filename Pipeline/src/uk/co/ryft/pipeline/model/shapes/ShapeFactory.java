@@ -207,7 +207,7 @@ public class ShapeFactory {
         frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeNear, Colour.WHITE));
         frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeFar, Colour.WHITE));
 
-        return new Composite(Composite.Type.FRUSTUM, frustum);
+        return new Composite(Composite.Type.CUSTOM, frustum);
     }
 
     // XXX Points must be provided in correct winding order
