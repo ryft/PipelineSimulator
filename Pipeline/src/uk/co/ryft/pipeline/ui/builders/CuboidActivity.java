@@ -18,45 +18,43 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class CylinderActivity extends Activity {
+public class CuboidActivity extends Activity {
 
     protected Float3 mPointCentre = new Float3(0, 0, 0);
 
-    protected Colour mColourCap = Colour.BLUE;
-    protected Colour mColourBody = Colour.GREEN;
+    protected Colour mColourFront = Colour.BLUE;
+    protected Colour mColourSide = Colour.GREEN;
 
     // Store references to view elements
     protected TextView mTextCentre;
 
-    protected View mSwatchCap;
-    protected View mSwatchBody;
-    protected ImageButton mButtonCap;
-    protected ImageButton mButtonBody;
+    protected View mSwatchFront;
+    protected View mSwatchSide;
+    protected ImageButton mButtonFront;
+    protected ImageButton mButtonSide;
 
+    protected EditText mTextWidth;
     protected EditText mTextHeight;
-    protected EditText mTextRadius;
-    protected EditText mTextRotation;
-    protected EditText mTextStepCount;
+    protected EditText mTextDepth;
 
     protected Button mButtonSave;
     protected Button mButtonDiscard;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_element_cylinder);
+        setContentView(R.layout.activity_element_cuboid);
 
         // Find interactive components
         mTextCentre = (TextView) findViewById(R.id.text_point);
 
-        mSwatchCap = (View) findViewById(R.id.element_capcolour_swatch);
-        mSwatchBody = (View) findViewById(R.id.element_bodycolour_swatch);
-        mButtonCap = (ImageButton) findViewById(R.id.button_element_capcolour);
-        mButtonBody = (ImageButton) findViewById(R.id.button_element_bodycolour);
+        mSwatchFront = (View) findViewById(R.id.element_frontcolour_swatch);
+        mSwatchSide = (View) findViewById(R.id.element_sidecolour_swatch);
+        mButtonFront = (ImageButton) findViewById(R.id.button_element_frontcolour);
+        mButtonSide = (ImageButton) findViewById(R.id.button_element_sidecolour);
 
+        mTextWidth = (EditText) findViewById(R.id.edit_element_width);
         mTextHeight = (EditText) findViewById(R.id.edit_element_height);
-        mTextRadius = (EditText) findViewById(R.id.edit_element_radius);
-        mTextRotation = (EditText) findViewById(R.id.edit_element_rotation);
-        mTextStepCount = (EditText) findViewById(R.id.edit_element_stepcount);
+        mTextDepth = (EditText) findViewById(R.id.edit_element_depth);
 
         mButtonSave = (Button) findViewById(R.id.button_element_save);
         mButtonDiscard = (Button) findViewById(R.id.button_element_discard);
@@ -72,22 +70,22 @@ public class CylinderActivity extends Activity {
 
         }));
 
-        mButtonCap.setOnClickListener(new EditColourHandler(this, mColourCap, new OnColourChangedListener() {
+        mButtonFront.setOnClickListener(new EditColourHandler(this, mColourFront, new OnColourChangedListener() {
 
             @Override
             public void notifyColourChanged(Colour colour) {
-                mColourCap = colour;
-                mSwatchCap.setBackgroundColor(mColourCap.toArgb());
+                mColourFront = colour;
+                mSwatchFront.setBackgroundColor(mColourFront.toArgb());
             }
 
         }));
 
-        mButtonBody.setOnClickListener(new EditColourHandler(this, mColourBody, new OnColourChangedListener() {
+        mButtonSide.setOnClickListener(new EditColourHandler(this, mColourSide, new OnColourChangedListener() {
 
             @Override
             public void notifyColourChanged(Colour colour) {
-                mColourBody = colour;
-                mSwatchBody.setBackgroundColor(mColourBody.toArgb());
+                mColourSide = colour;
+                mSwatchSide.setBackgroundColor(mColourSide.toArgb());
             }
 
         }));
@@ -99,13 +97,12 @@ public class CylinderActivity extends Activity {
                 Intent result = new Intent();
 
                 // Build element from view components
-                int stepCount = Integer.valueOf(mTextStepCount.getText().toString());
+                float width = Float.valueOf(mTextWidth.getText().toString());
                 float height = Float.valueOf(mTextHeight.getText().toString());
-                float radius = Float.valueOf(mTextRadius.getText().toString());
-                float rotation = Float.valueOf(mTextRotation.getText().toString());
+                float depth = Float.valueOf(mTextDepth.getText().toString());
 
                 result.putExtra("element",
-                        ShapeFactory.buildCylinder(stepCount, mPointCentre, height, radius, rotation, mColourBody, mColourCap));
+                        ShapeFactory.buildCuboid(mPointCentre, width, height, depth, mColourFront, mColourSide));
                 setResult(Activity.RESULT_OK, result);
                 finish();
             }
@@ -121,15 +118,14 @@ public class CylinderActivity extends Activity {
         });
 
         // Initialise sensible defaults
+        mTextWidth.setText("0.5");
         mTextHeight.setText("0.5");
-        mTextRadius.setText("0.5");
-        mTextRotation.setText("0");
-        mTextStepCount.setText("16");
+        mTextDepth.setText("0.5");
 
         // Update view components
         mTextCentre.setText(mPointCentre.toString());
-        mSwatchCap.setBackgroundColor(mColourCap.toArgb());
-        mSwatchBody.setBackgroundColor(mColourBody.toArgb());
+        mSwatchFront.setBackgroundColor(mColourFront.toArgb());
+        mSwatchSide.setBackgroundColor(mColourSide.toArgb());
     }
 
 }

@@ -50,7 +50,15 @@
         <activity
             android:name="uk.co.ryft.pipeline.ui.builders.CylinderActivity"
             android:label="@string/title_activity_cylinder_add"
-            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard opening at startup -->
+            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard spuriously opening at startup -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.co.ryft.pipeline.ui.SceneActivity" />
+        </activity>
+        <activity
+            android:name="uk.co.ryft.pipeline.ui.builders.CuboidActivity"
+            android:label="@string/title_activity_cuboid_add"
+            android:windowSoftInputMode="stateUnchanged" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />

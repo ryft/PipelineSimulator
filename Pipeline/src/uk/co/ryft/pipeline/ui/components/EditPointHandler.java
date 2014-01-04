@@ -2,6 +2,7 @@ package uk.co.ryft.pipeline.ui.components;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Float3;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
@@ -9,16 +10,22 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
-public class PointClickListener implements OnClickListener {
+public class EditPointHandler implements OnClickListener {
     
-    protected PointListener mParent;
+    protected Activity mParent;
     protected Float3 mPoint;
+    protected OnPointChangedListener mListener;
     
     // TODO this relies on the mutability of Float3s.
     // This is becoming a serious issue which needs to be resolved soon, if ever.
-    // TODO subclass Activity and augment with a callback for change notifications? (Listener pattern)
-    public PointClickListener(PointListener parent, Float3 point) {
+    public EditPointHandler(Activity parent, Float3 point, OnPointChangedListener listener) {
         mParent = parent;
+        mPoint = point;
+        mListener = listener;
+    }
+    
+    // Package visibility for ListPointHandler
+    void setPoint(Float3 point) {
         mPoint = point;
     }
 
@@ -44,7 +51,7 @@ public class PointClickListener implements OnClickListener {
                         float y = Float.valueOf(editY.getText().toString());
                         float z = Float.valueOf(editZ.getText().toString());
                         mPoint.setCoordinates(x, y, z);
-                        mParent.notifyPointChanged();
+                        mListener.notifyPointChanged(mPoint);
                     }
                 });
         builder.setNegativeButton(R.string.dialogue_button_cancel, null);

@@ -51,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:text="@string/label_element_capcolour" />
+                    android:text="@string/label_element_frontcolour" />
 
                 <LinearLayout
                     android:layout_width="0dip"
@@ -60,14 +60,14 @@
                     android:orientation="horizontal" >
 
                     <View
-                        android:id="@+id/element_capcolour_swatch"
+                        android:id="@+id/element_frontcolour_swatch"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="1" />
 
                     <ImageButton
-                        android:id="@+id/button_element_capcolour"
+                        android:id="@+id/button_element_frontcolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
                         android:layout_gravity="center_vertical"
@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:text="@string/label_element_bodycolour" />
+                    android:text="@string/label_element_sidecolour" />
 
                 <LinearLayout
                     android:layout_width="0dip"
@@ -97,14 +97,14 @@
                     android:orientation="horizontal" >
 
                     <View
-                        android:id="@+id/element_bodycolour_swatch"
+                        android:id="@+id/element_sidecolour_swatch"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="1" />
 
                     <ImageButton
-                        android:id="@+id/button_element_bodycolour"
+                        android:id="@+id/button_element_sidecolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
                         android:layout_gravity="center_vertical"
@@ -117,6 +117,26 @@
             <TextView
                 style="?android:listSeparatorTextViewStyle"
                 android:text="@string/heading_element_proportions" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    style="?android:attr/textAppearanceMedium"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/label_element_width" />
+
+                <EditText
+                    android:id="@+id/edit_element_width"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -148,58 +168,14 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/label_element_radius" />
+                    android:text="@string/label_element_depth" />
 
                 <EditText
-                    android:id="@+id/edit_element_radius"
+                    android:id="@+id/edit_element_depth"
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:inputType="numberDecimal" />
-            </LinearLayout>
-
-            <TextView
-                style="?android:listSeparatorTextViewStyle"
-                android:text="@string/heading_element_parameters" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <TextView
-                    style="?android:attr/textAppearanceMedium"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/label_element_rotation" />
-
-                <EditText
-                    android:id="@+id/edit_element_rotation"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:inputType="numberDecimal" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <TextView
-                    style="?android:attr/textAppearanceMedium"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/label_element_stepcount" />
-
-                <EditText
-                    android:id="@+id/edit_element_stepcount"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:inputType="number" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

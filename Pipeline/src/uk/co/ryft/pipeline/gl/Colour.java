@@ -56,6 +56,10 @@ public class Colour implements Serializable, Cloneable {
         return Color.argb(alpha, red, green, blue);
     }
     
+    public static Colour fromArgb(int argb) {
+        return new Colour(Color.red(argb), Color.green(argb), Color.blue(argb), Color.alpha(argb));
+    }
+    
     @Override
     public String toString() {
         return "("+red+", "+green+", "+blue+"): "+alpha;

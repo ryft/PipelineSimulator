@@ -23,6 +23,10 @@
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
     <string name="title_activity_cylinder_add">New Cylinder</string>
+    <string name="title_activity_cuboid_add">New Cuboid</string>
+    <string name="title_activity_camera_add">New Camera</string>
+    <string name="title_activity_frustum_add">New Frustum Outline</string>
+    <string name="title_activity_custom_add">New Custom Shape</string>
     
     <string name="message_scene_clear">Scene cleared</string>
     <string name="message_element_clear">Vertex list cleared</string>
@@ -35,9 +39,13 @@
     <string name="warning_element_discard">Press back again to discard</string>
     
     <string name="label_element_centre">Centre point</string>
+    <string name="label_element_frontcolour">Front colour</string>
+    <string name="label_element_sidecolour">Side colour</string>
     <string name="label_element_capcolour">Cap colour</string>
     <string name="label_element_bodycolour">Body colour</string>
+    <string name="label_element_width">Width</string>
     <string name="label_element_height">Height</string>
+    <string name="label_element_depth">Depth</string>
     <string name="label_element_radius">Radius</string>
     <string name="label_element_stepcount">Step count</string>
     <string name="label_element_rotation">Rotation (radians)</string>

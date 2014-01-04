@@ -22,16 +22,18 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
+import uk.co.ryft.pipeline.ui.components.EditColourHandler;
+import uk.co.ryft.pipeline.ui.components.OnColourChangedListener;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -52,15 +54,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
-import com.larswerkman.colorpicker.ColorPicker;
-import com.larswerkman.colorpicker.OpacityBar;
 
 public class PrimitiveActivity extends ListActivity {
 
     protected ArrayAdapter<Float3> mAdapter;
     protected Primitive mElement;
     protected TypeSpinner mTypeSpinner;
-    
+
     protected boolean mEditMode;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class PrimitiveActivity extends ListActivity {
         // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
         mEditMode = fromScene.getBoolean("edit_mode", false);
-        
+
         if (mEditMode) {
             mElement = (Primitive) fromScene.getSerializable("element");
             setTitle(R.string.title_activity_primitive_edit);
@@ -78,23 +78,23 @@ public class PrimitiveActivity extends ListActivity {
             mElement = new Primitive(Type.GL_POINTS);
             setTitle(R.string.title_activity_primitive_add);
         }
-        
+
         // Set up save / delete button listeners
         Button saveButton = (Button) findViewById(R.id.button_element_save);
         Button deleteButton = (Button) findViewById(R.id.button_element_discard);
-        
+
         if (mEditMode)
             deleteButton.setText(R.string.action_element_delete);
         else
             deleteButton.setText(R.string.action_element_discard);
-        
+
         saveButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveAndQuit(false);
             }
         });
-        
+
         deleteButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,13 +104,12 @@ public class PrimitiveActivity extends ListActivity {
 
         // Set current element properties as default selections
         mTypeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
-        TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this,
-                android.R.layout.simple_list_item_1, Primitive.Type.values());
+        TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this, android.R.layout.simple_list_item_1,
+                Primitive.Type.values());
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 
-        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point,
-                R.id.text_point, mElement.getVertices());
+        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point, R.id.text_point, mElement.getVertices());
         setListAdapter(mAdapter);
 
         // The below is copied verbatim from https://github.com/romannurik/Android-SwipeToDismiss
@@ -118,8 +117,8 @@ public class PrimitiveActivity extends ListActivity {
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing
         // the pressed state (the list selector), handling list item clicks, etc.
-        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
-                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView,
+                new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
                         return true;
@@ -157,22 +156,20 @@ public class PrimitiveActivity extends ListActivity {
                 final Float3 thisPoint = mAdapter.getItem(position);
 
                 builder.setView(dialogueView);
-                builder.setPositiveButton(R.string.dialogue_button_save,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                float x = Float.valueOf(editX.getText().toString());
-                                float y = Float.valueOf(editY.getText().toString());
-                                float z = Float.valueOf(editZ.getText().toString());
-                                thisPoint.setCoordinates(x, y, z);
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-                builder.setNegativeButton(R.string.dialogue_button_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
+                builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        float x = Float.valueOf(editX.getText().toString());
+                        float y = Float.valueOf(editY.getText().toString());
+                        float z = Float.valueOf(editZ.getText().toString());
+                        thisPoint.setCoordinates(x, y, z);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+                builder.setNegativeButton(R.string.dialogue_button_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
 
                 // Get the AlertDialog, initialise values and show it.
                 AlertDialog dialogue = builder.create();
@@ -183,65 +180,33 @@ public class PrimitiveActivity extends ListActivity {
                 dialogue.show();
             }
         });
-        
+
         final ImageButton buttonColour = (ImageButton) findViewById(R.id.button_element_colour);
         final View swatch = (View) findViewById(R.id.element_colour_swatch);
         swatch.setBackgroundColor(mElement.getColourArgb());
-        buttonColour.setOnClickListener(new OnClickListener() {
+        buttonColour.setOnClickListener(new EditColourHandler(this, mElement.getColour(), new OnColourChangedListener() {
 
             @Override
-            public void onClick(View v) {
-
-                // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(PrimitiveActivity.this);
-                builder.setTitle(R.string.dialogue_title_colour);
-
-                LayoutInflater inflater = PrimitiveActivity.this.getLayoutInflater();
-                View dialogueView = inflater.inflate(R.layout.dialogue_colour_select, null);
-                
-                builder.setView(dialogueView);
-                
-                final ColorPicker picker = (ColorPicker) dialogueView.findViewById(R.id.picker);
-                OpacityBar opacityBar = (OpacityBar) dialogueView.findViewById(R.id.opacitybar);
-                picker.addOpacityBar(opacityBar);
-                picker.setOldCenterColor(mElement.getColourArgb());
-
-                builder.setPositiveButton(R.string.dialogue_button_save,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                int color = picker.getColor();
-                                // TODO this is terrible and unsafe.
-                                mElement.setColour(Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color));
-                                swatch.setBackgroundColor(color);
-                            }
-                        });
-                builder.setNegativeButton(R.string.dialogue_button_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
-
-                // Get the AlertDialog, initialise values and show it.
-                AlertDialog dialogue = builder.create();
-                dialogue.show();
+            public void notifyColourChanged(Colour colour) {
+                mElement.setColour(colour);
+                swatch.setBackgroundColor(colour.toArgb());
             }
-            
-        });
-        
+
+        }));
+
         setupActionBar();
     }
 
     long mBackPressed = 0;
-    
+
     @Override
     public void onBackPressed() {
         long time = SystemClock.uptimeMillis();
         long elapsed = time - mBackPressed;
-        
+
         if (elapsed < 2000)
             discardAndQuit();
-        
+
         else {
             if (mEditMode)
                 Toast.makeText(this, R.string.warning_element_discard_changes, Toast.LENGTH_SHORT).show();
@@ -264,7 +229,7 @@ public class PrimitiveActivity extends ListActivity {
             mElement.setVertices(points);
             result.putExtra("element", mElement);
         }
-        
+
         setResult(RESULT_OK, result);
         finish();
     }
