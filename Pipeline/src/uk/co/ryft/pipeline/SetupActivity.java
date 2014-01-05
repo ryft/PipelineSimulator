@@ -1,6 +1,7 @@
-package uk.co.ryft.pipeline.ui;
+package uk.co.ryft.pipeline;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.ui.SimulatorActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
