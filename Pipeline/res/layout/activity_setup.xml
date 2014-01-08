@@ -1,40 +1,97 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".SetupActivity" >
+    android:layout_height="match_parent" >
 
     <LinearLayout
-        android:id="@+id/group_vertex_processing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
-        <TextView
-            style="?android:listSeparatorTextViewStyle"
-            android:text="@string/heading_group_vertex_processing" />
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context=".SetupActivity" >
 
         <LinearLayout
+            android:id="@+id/group_vertex_processing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="vertical" >
 
-            <Button
-                android:id="@+id/button_edit_scene"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/button_edit_scene" />
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:text="@string/heading_group_vertex_processing" />
 
-            <CheckBox
-                android:id="@+id/checkbox_edit_scene"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <include
+                android:id="@+id/step_scene_composition"
+                layout="@layout/component_setup_step" />
 
+            <include
+                android:id="@+id/step_vertex_shading"
+                layout="@layout/component_setup_step" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/group_primitive_processing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:text="@string/heading_group_primitive_processing" />
+
+            <include
+                android:id="@+id/step_geometry_shading"
+                layout="@layout/component_setup_step" />
+
+            <include
+                android:id="@+id/step_clipping"
+                layout="@layout/component_setup_step" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/group_rasterisation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:text="@string/heading_group_rasterisation" />
+
+            <include
+                android:id="@+id/step_culling"
+                layout="@layout/component_setup_step" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/group_fragment_processing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:text="@string/heading_group_fragment_processing" />
+
+            <include
+                android:id="@+id/step_fragment_shading"
+                layout="@layout/component_setup_step" />
+
+            <include
+                android:id="@+id/step_depth_buffer_test"
+                layout="@layout/component_setup_step" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/group_pixel_processing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:text="@string/heading_group_pixel_processing" />
         </LinearLayout>
     </LinearLayout>
 

@@ -65,6 +65,10 @@
     <string name="heading_element_parameters">Other parameters</string>
     
     <string name="heading_group_vertex_processing">Vertex Processing</string>
+    <string name="heading_group_primitive_processing">Primitive Processing</string>
+    <string name="heading_group_rasterisation">Rasterisation</string>
+    <string name="heading_group_fragment_processing">Fragment Processing</string>
+    <string name="heading_group_pixel_processing">Pixel Processing</string>
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
@@ -78,6 +82,12 @@
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
     
-    <string name="button_edit_scene">Edit Scene Composition</string>
+    <string name="button_scene_composition">Scene composition</string>
+    <string name="button_vertex_shading">Vertex shading</string>
+    <string name="button_geometry_shading">Geometry shading</string>
+    <string name="button_clipping">Clipping</string>
+    <string name="button_culling">Culling</string>
+    <string name="button_fragment_shading">Fragment shading</string>
+    <string name="button_depth_buffer_test">Depth buffer test</string>
 
 </resources>
