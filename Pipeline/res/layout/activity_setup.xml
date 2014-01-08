@@ -8,4 +8,34 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".SetupActivity" >
 
+    <LinearLayout
+        android:id="@+id/group_vertex_processing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            style="?android:listSeparatorTextViewStyle"
+            android:text="@string/heading_group_vertex_processing" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/button_edit_scene"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/button_edit_scene" />
+
+            <CheckBox
+                android:id="@+id/checkbox_edit_scene"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+
 </ScrollView>
