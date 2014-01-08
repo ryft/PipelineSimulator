@@ -18,18 +18,14 @@
     <string name="action_element_discard">Discard</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
-    <string name="title_activity_simulator">Pipeline Simulator</string>
     <string name="title_activity_scene">Edit Scene</string>
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
     <string name="title_activity_cylinder_add">New Cylinder</string>
     <string name="title_activity_cuboid_add">New Cuboid</string>
     <string name="title_activity_camera_add">New Camera</string>
-    <string name="title_activity_frustum_add">New Frustum Outline</string>
-    <string name="title_activity_custom_add">New Custom Shape</string>
     
     <string name="message_scene_clear">Scene cleared</string>
-    <string name="message_element_clear">Vertex list cleared</string>
     <string name="message_element_added">Element added</string>
     <string name="message_element_discarded">Element discarded</string>
     <string name="message_element_updated">Element updated</string>
@@ -62,7 +58,6 @@
     <string name="heading_primitive_type">Primitive type</string>
     <string name="heading_primitive_colour">Primitive colour</string>
     <string name="heading_points">Vertices</string>
-    <string name="heading_colour_opacity">Opacity</string>
     
     <string name="heading_element_location">Location</string>
     <string name="heading_element_colours">Colours</string>
@@ -73,7 +68,6 @@
     <string name="desc_element_edit">Edit Element</string>
     
     <string name="desc_colour_edit">Edit colour</string>
-    <string name="desc_points_new">Add new vertex</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>

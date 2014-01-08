@@ -156,6 +156,7 @@ public class Composite implements Element {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object clone() {
         
         LinkedList<Element> components = (LinkedList<Element>) mComponents.clone();

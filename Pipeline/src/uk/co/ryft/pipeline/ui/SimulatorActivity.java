@@ -12,10 +12,8 @@ import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,7 +30,6 @@ public class SimulatorActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simulator);
-        setupActionBar();
 
         mPipelineView = (PipelineSurface) findViewById(R.id.pipeline_surface);
 
@@ -86,18 +83,6 @@ public class SimulatorActivity extends Activity {
 //            System.out.print(v[i]+" ");
 //        System.out.println("]");
 //    }
-
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(false);
-            getActionBar().setDisplayShowHomeEnabled(false);
-        }
-    }
 
     protected void updateScene() {
         mPipelineView.updateScene(mElements);

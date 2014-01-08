@@ -220,6 +220,7 @@ public class Primitive implements Element {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object clone() {
 
         Colour colour = (Colour) mColour.clone();

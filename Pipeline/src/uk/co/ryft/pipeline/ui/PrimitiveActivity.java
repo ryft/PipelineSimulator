@@ -1,20 +1,3 @@
-/*
- * Copyright 2013 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-//  Adapted from https://github.com/romannurik/Android-SwipeToDismiss
-
 package uk.co.ryft.pipeline.ui;
 
 import java.util.ArrayList;
@@ -28,13 +11,11 @@ import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.ui.components.EditColourHandler;
 import uk.co.ryft.pipeline.ui.components.OnColourChangedListener;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
@@ -112,7 +93,7 @@ public class PrimitiveActivity extends ListActivity {
         mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point, R.id.text_point, mElement.getVertices());
         setListAdapter(mAdapter);
 
-        // The below is copied verbatim from https://github.com/romannurik/Android-SwipeToDismiss
+        // XXX reference https://github.com/romannurik/Android-SwipeToDismiss
         ListView listView = getListView();
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing
@@ -193,8 +174,6 @@ public class PrimitiveActivity extends ListActivity {
             }
 
         }));
-
-        setupActionBar();
     }
 
     long mBackPressed = 0;
@@ -240,13 +219,6 @@ public class PrimitiveActivity extends ListActivity {
         finish();
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setDisplayShowHomeEnabled(false);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -260,10 +232,6 @@ public class PrimitiveActivity extends ListActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                // NavUtils.navigateUpFromSameTask(this);
-                saveAndQuit(false);
-
             case R.id.action_points_new:
                 mAdapter.add(new Float3(0f, 0f, 0f));
                 mAdapter.notifyDataSetChanged();

@@ -17,6 +17,7 @@
 
 package com.android.settings.notificationlight;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -230,9 +231,7 @@ public class ColorPickerView extends View {
         }
 
         // On Honeycomb+ we need to use software rendering to create the shader properly
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
+        drawSatValLayer();
 
         // Get the overlaying gradients ready and create the ComposeShader
         if (mValShader == null) {
@@ -252,6 +251,13 @@ public class ColorPickerView extends View {
 
         mSatValTrackerPaint.setColor(0xffdddddd);
         canvas.drawCircle(p.x, p.y, PALETTE_CIRCLE_TRACKER_RADIUS, mSatValTrackerPaint);
+    }
+    
+    /* Added by James Nicholls (Jan 2014) */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void drawSatValLayer() {
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        
     }
 
     private void drawHuePanel(Canvas canvas) {

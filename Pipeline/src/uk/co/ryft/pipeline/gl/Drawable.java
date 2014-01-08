@@ -1,4 +1,3 @@
-
 package uk.co.ryft.pipeline.gl;
 
 public interface Drawable {
