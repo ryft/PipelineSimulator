@@ -1,17 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     
-    <item android:id="@+id/action_scene"
-        android:title="@string/action_scene"
-        android:icon="@drawable/ic_action_scene"
-        android:orderInCategory="0"
-        android:showAsAction="ifRoom|withText" />
-    
-    <item android:id="@+id/action_draw_axes"
-        android:title="@string/action_draw_axes"
-        android:icon="@drawable/ic_action_edit"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom|withText" />
-    
     <item android:id="@+id/action_change_perspective"
         android:title="@string/action_change_perspective"
         android:icon="@drawable/ic_action_refresh"

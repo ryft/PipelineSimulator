@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -34,9 +35,9 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 public class SceneActivity extends ListActivity {
 
     // Request values
-    protected static final int ADD_PRIMITIVE_REQUEST = 2;
-    protected static final int EDIT_PRIMITIVE_REQUEST = 3;
-    protected static final int ADD_COMPOSITE_REQUEST = 4;
+    protected static final int REQUEST_PRIMITIVE_ADD = 2;
+    protected static final int REQUEST_PRIMITIVE_EDIT = 3;
+    protected static final int REQUEST_COMPOSITE_ADD = 4;
 
     protected ElementAdapter mAdapter;
 
@@ -89,17 +90,41 @@ public class SceneActivity extends ListActivity {
         // Setting this scroll listener is required to ensure that during ListView scrolling,
         // we don't look for swipes.
         listView.setOnScrollListener(touchListener.makeScrollListener());
+
+        // Set up save / delete button listeners
+        Button saveButton = (Button) findViewById(R.id.button_element_save);
+        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+
+        saveButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAndQuit();
+            }
+        });
+
+        deleteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                discardAndQuit();
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
-        saveAndQuit();
+        discardAndQuit();
     }
 
     protected void saveAndQuit() {
         Intent result = new Intent();
         result.putExtra("elements", mAdapter.getAllElements());
         setResult(Activity.RESULT_OK, result);
+        finish();
+    }
+
+    protected void discardAndQuit() {
+        Intent result = new Intent();
+        setResult(RESULT_CANCELED, result);
         finish();
     }
 
@@ -135,7 +160,7 @@ public class SceneActivity extends ListActivity {
     protected void addPrimitive() {
         Intent intent = new Intent(this, PrimitiveActivity.class);
         intent.putExtra("edit_mode", false);
-        startActivityForResult(intent, ADD_PRIMITIVE_REQUEST);
+        startActivityForResult(intent, REQUEST_PRIMITIVE_ADD);
     }
 
     protected void editPrimitive(Primitive e) {
@@ -143,7 +168,7 @@ public class SceneActivity extends ListActivity {
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
         mThisElement = e;
-        startActivityForResult(intent, EDIT_PRIMITIVE_REQUEST);
+        startActivityForResult(intent, REQUEST_PRIMITIVE_EDIT);
     }
 
     protected void addComposite() {
@@ -162,7 +187,7 @@ public class SceneActivity extends ListActivity {
             public void onClick(DialogInterface dialog, int which) {
                 ElementType type = types[which];
                 if (type != Composite.Type.CUSTOM)
-                    startActivityForResult(new Intent(SceneActivity.this, type.getEditorActivity()), ADD_COMPOSITE_REQUEST);
+                    startActivityForResult(new Intent(SceneActivity.this, type.getEditorActivity()), REQUEST_COMPOSITE_ADD);
             }
         });
 
@@ -178,22 +203,22 @@ public class SceneActivity extends ListActivity {
 
         // Parameter key:
         //
-        // For adding a new primitive (ADD_PRIMITIVE_REQUEST)
+        // For adding a new primitive (REQUEST_PRIMITIVE_ADD)
         // OK result -> new element is 'element' extra
         // Otherwise -> take no action
         //
-        // For editing a primitive (EDIT_PRIMITIVE_REQUEST)
+        // For editing a primitive (REQUEST_PRIMITIVE_EDIT)
         // OK result -> new element is 'element' extra
         // >> If 'deleted' is set true, remove old element
         // >> Otherwise replace old element with new
         // Otherwise -> take no action
         //
-        // For adding a composite (ADD_COMPOSITE_REQUEST)
+        // For adding a composite (REQUEST_COMPOSITE_ADD)
         // OK result -> new element is 'element' extra
         // Otherwise -> take no action
 
-        // If the request was ADD_PRIMITIVE_REQUEST
-        if (requestCode == ADD_PRIMITIVE_REQUEST) {
+        // If the request was REQUEST_PRIMITIVE_ADD
+        if (requestCode == REQUEST_PRIMITIVE_ADD) {
 
             if (resultCode == Activity.RESULT_OK) {
                 if (!data.getBooleanExtra("delete", false)) {
@@ -204,8 +229,8 @@ public class SceneActivity extends ListActivity {
                     message = getString(R.string.message_element_discarded);
             }
 
-            // If the request was EDIT_PRIMITIVE_REQUEST
-        } else if (requestCode == EDIT_PRIMITIVE_REQUEST) {
+            // If the request was REQUEST_PRIMITIVE_EDIT
+        } else if (requestCode == REQUEST_PRIMITIVE_EDIT) {
 
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.remove(mThisElement);
@@ -225,7 +250,7 @@ public class SceneActivity extends ListActivity {
                 message = getString(R.string.message_element_deleted);
             }
 
-        } else if (requestCode == ADD_COMPOSITE_REQUEST) {
+        } else if (requestCode == REQUEST_COMPOSITE_ADD) {
 
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.add((Composite) data.getSerializableExtra("element"));

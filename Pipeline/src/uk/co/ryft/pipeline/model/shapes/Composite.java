@@ -113,6 +113,11 @@ public class Composite implements Element {
             summary += " components.";
         return summary;
     }
+
+    @Override
+    public int getSize() {
+        return mComponents.size();
+    }
     
     @Override
     public String toString() {

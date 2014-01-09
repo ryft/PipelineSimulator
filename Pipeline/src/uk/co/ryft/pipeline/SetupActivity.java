@@ -4,15 +4,20 @@ import java.util.ArrayList;
 
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.ui.SceneActivity;
+import uk.co.ryft.pipeline.ui.SimulatorActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class SetupActivity extends Activity {
+    
+    // Activity request codes
+    protected static final int REQUEST_STEP_SCENE = 2;
 
     ArrayList<Element> mSceneElements = new ArrayList<Element>();
 
@@ -63,22 +68,63 @@ public class SetupActivity extends Activity {
                 // TODO Do this for all items
                 // Change to startActivityForResult with suitable intent and request code
                 // Handle callback on activity result
-                startActivity(new Intent(SetupActivity.this, SceneActivity.class));
+                Intent intent = new Intent(SetupActivity.this, SceneActivity.class);
+                intent.putExtra("elements", mSceneElements);
+                startActivityForResult(intent, REQUEST_STEP_SCENE);
+            }
+        });
+        
+        Button buttonSimulate = (Button) findViewById(R.id.button_simulate);
+        buttonSimulate.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SetupActivity.this, SimulatorActivity.class);
+                intent.putExtra("elements", mSceneElements);
+                startActivity(intent);
             }
         });
 
         updateViews();
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        
+        switch (requestCode) {
+            case REQUEST_STEP_SCENE:
+                
+                if (resultCode == RESULT_OK)
+                    mSceneElements = ((ArrayList<Element>) data.getSerializableExtra("elements"));
+                
+                break;
+                
+            default:
+                // Add any new result codes here.
+                throw new UnsupportedOperationException();
+        }
+        
+        updateViews();
+        
+    }
 
     private void updateViews() {
 
-        String summary = mSceneElements.size() + " element";
+        String sceneCompositionSummary = mSceneElements.size() + " element";
         if (mSceneElements.size() != 1)
-            summary += "s";
+            sceneCompositionSummary += "s";
+        int primitiveCount = 0;
+        for (Element e : mSceneElements)
+            primitiveCount += e.getSize();
+        sceneCompositionSummary += " (" + primitiveCount + " primitive";
+        if (primitiveCount != 1)
+            sceneCompositionSummary += "s";
+        sceneCompositionSummary += ")";
         
         // TODO Update these properly
 
-        setText(steps.sceneComposition, android.R.id.summary, summary);
+        setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.vertexShading, android.R.id.summary, "Empty vertex shader");
         setText(steps.geometryShading, android.R.id.summary, "Empty geometry shader");
         setText(steps.clipping, android.R.id.summary, "Default clipping");

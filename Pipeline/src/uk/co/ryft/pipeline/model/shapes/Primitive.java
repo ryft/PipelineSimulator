@@ -172,6 +172,11 @@ public class Primitive implements Element {
     }
 
     @Override
+    public int getSize() {
+        return 1;
+    }
+
+    @Override
     public String toString() {
         String details = getTitle() + "\n" + getSummary() + "\n";
         for (Float3 p : mVertices)

@@ -13,4 +13,6 @@
         android:divider="@null"
         android:dividerHeight="2dp" />
 
+    <include layout="@layout/component_buttonrow" />
+
 </LinearLayout>

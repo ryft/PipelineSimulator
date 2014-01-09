@@ -89,5 +89,7 @@
     <string name="button_culling">Culling</string>
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
+    
+    <string name="button_simulate">Simulate</string>
 
 </resources>
