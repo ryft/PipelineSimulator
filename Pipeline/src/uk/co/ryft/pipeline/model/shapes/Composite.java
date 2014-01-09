@@ -11,25 +11,52 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.ui.builders.CameraActivity;
+import uk.co.ryft.pipeline.ui.builders.CuboidActivity;
+import uk.co.ryft.pipeline.ui.builders.CylinderActivity;
+import android.app.Activity;
 
 // XXX Implementation of Drawable which uses one or more GL ES 2 primitives.
 public class Composite implements Element {
     
     private static final long serialVersionUID = -6787922946411889774L;
 
-    public static enum Type {
-        CONVEX_POLYGON, CUSTOM_SHAPE;
+    public static enum Type implements ElementType {
+        CYLINDER, CUBOID, CAMERA, CUSTOM;
 
         private static final Map<Type, String> mDescriptionMap;
         static {
             Map<Type, String> descriptionMap = new HashMap<Type, String>();
-            descriptionMap.put(Type.CONVEX_POLYGON, "Convex Polygon");
-            descriptionMap.put(Type.CUSTOM_SHAPE, "Custom Composite");
+            descriptionMap.put(Type.CYLINDER, "Cylinder");
+            descriptionMap.put(Type.CUBOID, "Cuboid");
+            descriptionMap.put(Type.CAMERA, "Camera");
+            descriptionMap.put(Type.CUSTOM, "Custom shape");
             mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
         }
-        
+
+        private static final Map<Type, Class<? extends Activity>> mEditorMap;
+        static {
+            Map<Type, Class<? extends Activity>> editorMap = new HashMap<Type, Class<? extends Activity>>();
+            editorMap.put(Type.CYLINDER, CylinderActivity.class);
+            editorMap.put(Type.CUBOID, CuboidActivity.class);
+            editorMap.put(Type.CAMERA, CameraActivity.class);
+            editorMap.put(Type.CUSTOM, null); // Should never be called
+            mEditorMap = Collections.unmodifiableMap(editorMap);
+        }
+
+        @Override
         public String getDescription() {
             return mDescriptionMap.get(this);
+        }
+
+        @Override
+        public Class<? extends Activity> getEditorActivity() {
+            return mEditorMap.get(this);
+        }
+
+        @Override
+        public boolean isPrimitive() {
+            return false;
         }
     };
     
@@ -40,6 +67,14 @@ public class Composite implements Element {
         mType = type;
         mComponents = new LinkedList<Element>();
         mComponents.addAll(elements);
+    }
+
+    public Type getType() {
+        return mType;
+    }
+
+    public void setType(Type t) {
+        mType = t;
     }
     
     public Collection<Element> getComponents() {
@@ -77,6 +112,11 @@ public class Composite implements Element {
         else
             summary += " components.";
         return summary;
+    }
+
+    @Override
+    public int getSize() {
+        return mComponents.size();
     }
     
     @Override
@@ -121,6 +161,7 @@ public class Composite implements Element {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object clone() {
         
         LinkedList<Element> components = (LinkedList<Element>) mComponents.clone();

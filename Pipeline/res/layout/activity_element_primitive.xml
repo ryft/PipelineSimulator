@@ -1,34 +1,17 @@
-<!--
-  Copyright 2013 Google Inc.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
--->
 <!-- Swipeable list adapted from https://github.com/romannurik/Android-SwipeToDismiss -->
-<!-- Colour picker adapted from https://github.com/LarsWerkman/HoloColorPicker -->
+<!-- Colour picker adapted from https://github.com/CyanogenMod/android_packages_apps_Settings/tree/cm-10.2/src/com/android/settings/notificationlight -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp" >
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin" >
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/heading_element_type" />
+        android:text="@string/heading_primitive_type" />
 
     <uk.co.ryft.pipeline.ui.TypeSpinner
         android:id="@+id/element_type_spinner"
@@ -38,9 +21,7 @@
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/heading_element_colour" />
+        android:text="@string/heading_primitive_colour" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,27 +32,29 @@
             android:id="@+id/element_colour_swatch"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/button_element_colour"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dip"
+            android:layout_height="40dip"
             android:layout_gravity="center_vertical"
-            android:contentDescription="@string/desc_element_edit"
+            android:background="@color/action_bar"
+            android:contentDescription="@string/desc_colour_edit"
             android:src="@drawable/ic_action_edit" />
     </LinearLayout>
 
     <TextView
         style="?android:listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="@string/heading_points" />
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="0dip"
+        android:layout_weight="1" />
+
+    <include layout="@layout/component_buttonrow" />
 
 </LinearLayout>

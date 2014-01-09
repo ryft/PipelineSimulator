@@ -1,38 +1,23 @@
-/*
- * Copyright 2013 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-//  Adapted from https://github.com/romannurik/Android-SwipeToDismiss
-
 package uk.co.ryft.pipeline.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
-import android.annotation.TargetApi;
+import uk.co.ryft.pipeline.ui.components.EditColourHandler;
+import uk.co.ryft.pipeline.ui.components.OnColourChangedListener;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,20 +28,21 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ViewSwitcher;
-import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
-import com.larswerkman.colorpicker.ColorPicker;
-import com.larswerkman.colorpicker.OpacityBar;
+import android.widget.Toast;
 
-public class ElementActivity extends ListActivity {
+import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
+
+public class PrimitiveActivity extends ListActivity {
 
     protected ArrayAdapter<Float3> mAdapter;
     protected Primitive mElement;
     protected TypeSpinner mTypeSpinner;
-    protected ViewSwitcher mViewSwitcher;
+
+    protected boolean mEditMode;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,32 +50,56 @@ public class ElementActivity extends ListActivity {
 
         // Parse data from parent activity
         Bundle fromScene = this.getIntent().getExtras();
-        if (fromScene.getBoolean("edit_mode", false)) {
+        mEditMode = fromScene.getBoolean("edit_mode", false);
+
+        if (mEditMode) {
             mElement = (Primitive) fromScene.getSerializable("element");
-            setTitle(R.string.title_activity_element_edit);
+            setTitle(R.string.title_activity_primitive_edit);
         } else {
             mElement = new Primitive(Type.GL_POINTS);
-            setTitle(R.string.title_activity_element_add);
+            setTitle(R.string.title_activity_primitive_add);
         }
+
+        // Set up save / delete button listeners
+        Button saveButton = (Button) findViewById(R.id.button_element_save);
+        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+
+        if (mEditMode)
+            deleteButton.setText(R.string.action_element_delete);
+        else
+            deleteButton.setText(R.string.action_element_discard);
+
+        saveButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAndQuit(false);
+            }
+        });
+
+        deleteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAndQuit(true);
+            }
+        });
 
         // Set current element properties as default selections
         mTypeSpinner = (TypeSpinner) findViewById(R.id.element_type_spinner);
-        TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this,
-                android.R.layout.simple_list_item_1, Primitive.Type.values());
+        TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this, android.R.layout.simple_list_item_1,
+                Primitive.Type.values());
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 
-        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point,
-                R.id.text_point, mElement.getVertices());
+        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point, R.id.text_point, mElement.getVertices());
         setListAdapter(mAdapter);
 
-        // The below is copied verbatim from https://github.com/romannurik/Android-SwipeToDismiss
+        // XXX reference https://github.com/romannurik/Android-SwipeToDismiss
         ListView listView = getListView();
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing
         // the pressed state (the list selector), handling list item clicks, etc.
-        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
-                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView,
+                new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
                         return true;
@@ -115,10 +125,10 @@ public class ElementActivity extends ListActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
                 // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(ElementActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(PrimitiveActivity.this);
                 builder.setTitle(R.string.dialogue_title_point);
 
-                LayoutInflater inflater = ElementActivity.this.getLayoutInflater();
+                LayoutInflater inflater = PrimitiveActivity.this.getLayoutInflater();
                 View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
 
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
@@ -127,22 +137,20 @@ public class ElementActivity extends ListActivity {
                 final Float3 thisPoint = mAdapter.getItem(position);
 
                 builder.setView(dialogueView);
-                builder.setPositiveButton(R.string.dialogue_button_save,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                float x = Float.valueOf(editX.getText().toString());
-                                float y = Float.valueOf(editY.getText().toString());
-                                float z = Float.valueOf(editZ.getText().toString());
-                                thisPoint.setCoordinates(x, y, z);
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-                builder.setNegativeButton(R.string.dialogue_button_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
+                builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        float x = Float.valueOf(editX.getText().toString());
+                        float y = Float.valueOf(editY.getText().toString());
+                        float z = Float.valueOf(editZ.getText().toString());
+                        thisPoint.setCoordinates(x, y, z);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+                builder.setNegativeButton(R.string.dialogue_button_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
 
                 // Get the AlertDialog, initialise values and show it.
                 AlertDialog dialogue = builder.create();
@@ -153,70 +161,53 @@ public class ElementActivity extends ListActivity {
                 dialogue.show();
             }
         });
-        
+
         final ImageButton buttonColour = (ImageButton) findViewById(R.id.button_element_colour);
         final View swatch = (View) findViewById(R.id.element_colour_swatch);
         swatch.setBackgroundColor(mElement.getColourArgb());
-        buttonColour.setOnClickListener(new OnClickListener() {
+        buttonColour.setOnClickListener(new EditColourHandler(this, mElement.getColour(), new OnColourChangedListener() {
 
             @Override
-            public void onClick(View v) {
-
-                // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(ElementActivity.this);
-                builder.setTitle(R.string.dialogue_title_colour);
-
-                LayoutInflater inflater = ElementActivity.this.getLayoutInflater();
-                View dialogueView = inflater.inflate(R.layout.dialogue_colour_select, null);
-                
-                builder.setView(dialogueView);
-                
-                final ColorPicker picker = (ColorPicker) dialogueView.findViewById(R.id.picker);
-                OpacityBar opacityBar = (OpacityBar) dialogueView.findViewById(R.id.opacitybar);
-                picker.addOpacityBar(opacityBar);
-                picker.setOldCenterColor(mElement.getColourArgb());
-
-                builder.setPositiveButton(R.string.dialogue_button_save,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                int color = picker.getColor();
-                                // TODO this is terrible and unsafe.
-                                mElement.setColour(Color.red(color), Color.green(color), Color.blue(color), Color.alpha(color));
-                                swatch.setBackgroundColor(color);
-                            }
-                        });
-                builder.setNegativeButton(R.string.dialogue_button_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
-
-                // Get the AlertDialog, initialise values and show it.
-                AlertDialog dialogue = builder.create();
-                dialogue.show();
+            public void notifyColourChanged(Colour colour) {
+                mElement.setColour(colour);
+                swatch.setBackgroundColor(colour.toArgb());
             }
-            
-        });
 
-        setupActionBar();
+        }));
     }
+
+    long mBackPressed = 0;
 
     @Override
     public void onBackPressed() {
-        saveAndQuit();
+        long time = SystemClock.uptimeMillis();
+        long elapsed = time - mBackPressed;
+
+        if (elapsed < 2000)
+            discardAndQuit();
+
+        else {
+            if (mEditMode)
+                Toast.makeText(this, R.string.warning_element_discard_changes, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, R.string.warning_element_discard, Toast.LENGTH_SHORT).show();
+            mBackPressed = time;
+        }
     }
 
-    protected void saveAndQuit() {
+    protected void saveAndQuit(boolean delete) {
         Intent result = new Intent();
+        result.putExtra("delete", delete);
 
-        mElement.setType((Type) mTypeSpinner.getSelectedItem());
-        LinkedList<Float3> points = new LinkedList<Float3>();
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            points.add((Float3) mAdapter.getItem(i));
+        if (!delete) {
+            mElement.setType((Type) mTypeSpinner.getSelectedItem());
+            LinkedList<Float3> points = new LinkedList<Float3>();
+            for (int i = 0; i < mAdapter.getCount(); i++) {
+                points.add((Float3) mAdapter.getItem(i));
+            }
+            mElement.setVertices(points);
+            result.putExtra("element", mElement);
         }
-        mElement.setVertices(points);
-        result.putExtra("element", mElement);
 
         setResult(RESULT_OK, result);
         finish();
@@ -226,13 +217,6 @@ public class ElementActivity extends ListActivity {
         Intent result = new Intent();
         setResult(RESULT_CANCELED, result);
         finish();
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setDisplayShowHomeEnabled(false);
     }
 
     @Override
@@ -248,17 +232,15 @@ public class ElementActivity extends ListActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                // NavUtils.navigateUpFromSameTask(this);
-                saveAndQuit();
-
-            case R.id.action_point_new:
+            case R.id.action_points_new:
                 mAdapter.add(new Float3(0f, 0f, 0f));
                 mAdapter.notifyDataSetChanged();
                 break;
 
-            case R.id.action_element_discard:
-                discardAndQuit();
+            case R.id.action_points_discard:
+                mAdapter.clear();
+                mAdapter.notifyDataSetChanged();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -1,15 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     
     <item
-        android:id="@+id/action_point_new"
-        android:title="@string/action_point_new"
+        android:id="@+id/action_points_new"
+        android:title="@string/action_points_new"
         android:icon="@drawable/ic_action_new"
-        android:showAsAction="always|withText" />
+        android:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/action_element_discard"
-        android:title="@string/action_element_discard"
+        android:id="@+id/action_points_discard"
+        android:title="@string/action_points_discard"
         android:icon="@drawable/ic_action_discard"
-        android:showAsAction="always|withText" />
+        android:showAsAction="ifRoom|withText" />
 
 </menu>

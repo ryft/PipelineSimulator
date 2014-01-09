@@ -7,14 +7,13 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 
 // XXX Not an actual abstract factory but a collection of factory methods
 public class ShapeFactory {
 
     // XXX Regular polygons are created with the normal pointing along the negative z-axis
-    public static Primitive buildRegularPolygon(int vertexCount, boolean reverse,
-            Float3 centre, float radius, float rotation, Colour colour) {
+    public static Primitive buildRegularPolygon(int vertexCount, boolean reverse, Float3 centre, float radius, float rotation,
+            Colour colour) {
 
         List<Float3> points = new LinkedList<Float3>();
 
@@ -37,8 +36,8 @@ public class ShapeFactory {
 
     // XXX Builds a right circular cylinder with 'centre' as the centre of the base,
     // extending along the negative z-axis
-    public static Composite buildCylinder(int stepCount, Float3 centre, float height,
-            float radius, float rotation, Colour colour, Colour capColour) {
+    public static Composite buildCylinder(int stepCount, Float3 centre, float height, float radius, float rotation,
+            Colour colour, Colour capColour) {
 
         List<Float3> points = new LinkedList<Float3>();
 
@@ -64,13 +63,13 @@ public class ShapeFactory {
 
         cylinder.add(buildRegularPolygon(stepCount, true, centre, radius, rotation, capColour));
         cylinder.add(buildRegularPolygon(stepCount, false, capCentre, radius, rotation, capColour));
-        cylinder.add(new Primitive(Type.GL_TRIANGLE_STRIP, points, colour));
+        cylinder.add(new Primitive(Primitive.Type.GL_TRIANGLE_STRIP, points, colour));
 
-        return new Composite(Composite.Type.CUSTOM_SHAPE, cylinder);
+        return new Composite(Composite.Type.CYLINDER, cylinder);
     }
 
-    public static Composite buildCuboid(Float3 centre, float width, float height, float depth,
-            Colour frontColour, Colour sideColour) {
+    public static Composite buildCuboid(Float3 centre, float width, float height, float depth, Colour frontColour,
+            Colour sideColour) {
 
         float x = centre.getX();
         float y = centre.getY();
@@ -131,35 +130,41 @@ public class ShapeFactory {
         bottom.add(new Float3(x0, y0, z1));
         faces.add(buildConvexPolygon(bottom, sideColour));
 
-        return new Composite(Composite.Type.CUSTOM_SHAPE, faces);
+        return new Composite(Composite.Type.CUBOID, faces);
     }
 
-    public static Element buildCamera(Camera camera, float scale) {
-        
+    // XXX Eye is at the origin, focuses along negative Z
+    public static Element buildCamera(float scale) {
+        return buildCamera(scale, Colour.GREY, Colour.WHITE, Colour.BLACK);
+    }
+
+    // XXX Eye is at the origin, focuses along negative Z
+    public static Element buildCamera(float scale, Colour bodyColour, Colour lensCasingColour, Colour shutterButtonColour) {
+
         Float3 origin = new Float3(0, 0, 0);
 
         // XXX Explain what scale parameter does
+        // Scale is the height, other lengths are proportional.
         List<Element> elems = new LinkedList<Element>();
-        elems.add(buildCuboid(new Float3(origin.getX(), origin.getY(), origin.getZ() + 0.75f * scale),
-                scale * 2, scale, scale / 2, Colour.GREY, Colour.GREY));
-        elems.add(buildCylinder(10, new Float3(origin.getX(), origin.getY(), origin.getZ() + scale / 2), scale / 2, scale / 2, 0, Colour.WHITE, Colour.GREY));
-        elems.add(buildCuboid(new Float3(origin.getX() - 0.75f * scale, origin.getY() + 0.5625f
-                * scale, origin.getZ() + 0.75f * scale), 0.25f * scale, 0.125f * scale, 0.25f * scale,
-                Colour.BLACK, Colour.BLACK));
+        elems.add(buildCuboid(new Float3(origin.getX(), origin.getY(), origin.getZ() + 0.75f * scale), scale * 2, scale,
+                scale / 2, bodyColour, bodyColour));
+        elems.add(buildCylinder(10, new Float3(origin.getX(), origin.getY(), origin.getZ() + scale / 2), scale / 2, scale / 2,
+                0, lensCasingColour, bodyColour));
+        elems.add(buildCuboid(new Float3(origin.getX() - 0.75f * scale, origin.getY() + 0.5625f * scale, origin.getZ() + 0.75f
+                * scale), 0.25f * scale, 0.125f * scale, 0.25f * scale, shutterButtonColour, shutterButtonColour));
 
-        return new Composite(Composite.Type.CUSTOM_SHAPE, elems);
+        return new Composite(Composite.Type.CAMERA, elems);
     }
-    
-    // TODO: Create synonym with fovX, fovY?
-    // XXX Extends along negative Z
-//    public static Composite buildFrustum(FloatPoint eye, float left, float right, float bottom, float top, float near, float far) {
+
+    // XXX Eye is at the origin, extends along negative Z
+    // Ignores camera position
     public static Composite buildFrustum(Camera camera) {
-        
+
         List<Primitive> frustum = new LinkedList<Primitive>();
-        
+
         // Enclosing lines, clockwise from top-right
         List<Float3> enclosure = new LinkedList<Float3>();
-        
+
         float left = camera.getLeft();
         float right = camera.getRight();
         float bottom = camera.getBottom();
@@ -171,9 +176,9 @@ public class ShapeFactory {
         float rightFar = (right / near) * far;
         float bottomFar = (bottom / near) * far;
         float topFar = (top / near) * far;
-        
+
         Float3 origin = new Float3(0, 0, 0);
-        
+
         // XXX Do we need to clone the origin here?
         // XXX Decide whether to clone objects when being passed or received
         enclosure.add((Float3) origin.clone());
@@ -198,17 +203,17 @@ public class ShapeFactory {
         planeFar.add(new Float3(leftFar, bottomFar, -far));
         planeFar.add(new Float3(leftFar, topFar, -far));
 
-        frustum.add(new Primitive(Type.GL_LINES, enclosure, Colour.WHITE));
-        frustum.add(new Primitive(Type.GL_LINE_LOOP, planeNear, Colour.WHITE));
-        frustum.add(new Primitive(Type.GL_LINE_LOOP, planeFar, Colour.WHITE));
-        
-        return new Composite(Composite.Type.CUSTOM_SHAPE, frustum);
+        frustum.add(new Primitive(Primitive.Type.GL_LINES, enclosure, Colour.WHITE));
+        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeNear, Colour.WHITE));
+        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeFar, Colour.WHITE));
+
+        return new Composite(Composite.Type.CUSTOM, frustum);
     }
 
     // XXX Points must be provided in correct winding order
     public static Primitive buildConvexPolygon(List<Float3> points, Colour colour) {
 
-        return new Primitive(Type.GL_TRIANGLE_FAN, points, colour);
+        return new Primitive(Primitive.Type.GL_TRIANGLE_FAN, points, colour);
     }
 
 }

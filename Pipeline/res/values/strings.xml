@@ -4,44 +4,92 @@
     <string name="app_name">Pipeline Simulator</string>
     
     <string name="action_scene">Edit scene</string>
-    <string name="action_element_new">New element</string>
-    <string name="action_point_new">New vertex</string>
-    <string name="action_scene_clear">Clear scene</string>
-    <string name="action_element_discard">Discard element</string>
-    <string name="action_draw_axes">Draw axes</string>
-    <string name="action_change_perspective">Skew</string>
+    <string name="action_draw_axes">Draw objects</string>
+    <string name="action_change_perspective">Rotate</string>
     
+    <string name="action_primitive_new">New primitive</string>
+    <string name="action_composite_new">New composite</string>
+    <string name="action_elements_discard">Clear scene</string>
+    
+    <string name="action_points_new">New vertex</string>
+    <string name="action_points_discard">Discard vertices</string>
+    <string name="action_element_save">Save</string>
+    <string name="action_element_delete">Delete</string>
+    <string name="action_element_discard">Discard</string>
+    
+    <string name="title_activity_setup">Configure Pipeline</string>
     <string name="title_activity_scene">Edit Scene</string>
-    <string name="title_activity_element_add">New Element</string>
-    <string name="title_activity_element_edit">Edit Element</string>
-    
-    <string name="desc_element_icon">Element Icon</string>
-    <string name="desc_element_edit">Edit Element</string>
+    <string name="title_activity_primitive_add">New Primitive</string>
+    <string name="title_activity_primitive_edit">Edit Primitive</string>
+    <string name="title_activity_cylinder_add">New Cylinder</string>
+    <string name="title_activity_cuboid_add">New Cuboid</string>
+    <string name="title_activity_camera_add">New Camera</string>
     
     <string name="message_scene_clear">Scene cleared</string>
-    <string name="message_element_clear">Vertex list cleared</string>
     <string name="message_element_added">Element added</string>
+    <string name="message_element_discarded">Element discarded</string>
     <string name="message_element_updated">Element updated</string>
     <string name="message_element_deleted">Element deleted</string>
-    <string name="message_element_discarded">Element discarded</string>
+    
+    <string name="warning_element_discard_changes">Press back again to discard changes</string>
+    <string name="warning_element_discard">Press back again to discard</string>
+    
+    <string name="label_element_centre">Centre point</string>
+    <string name="label_element_eye">Eye point</string>
+    <string name="label_element_frontcolour">Front colour</string>
+    <string name="label_element_sidecolour">Side colour</string>
+    <string name="label_element_capcolour">Cap colour</string>
+    <string name="label_element_bodycolour">Body colour</string>
+    <string name="label_element_lenscolour">Lens casing colour</string>
+    <string name="label_element_shuttercolour">Shutter button colour</string>
+    <string name="label_element_width">Width</string>
+    <string name="label_element_height">Height</string>
+    <string name="label_element_depth">Depth</string>
+    <string name="label_element_scale">Scale (height)</string>
+    <string name="label_element_radius">Radius</string>
+    <string name="label_element_stepcount">Step count</string>
+    <string name="label_element_rotation">Rotation (radians)</string>
     
     <string name="label_point_1">( X:</string>
     <string name="label_point_2">, Y:</string>
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
     
-    <string name="heading_element_type">Element type</string>
-    <string name="heading_element_colour">Element colour</string>
+    <string name="heading_primitive_type">Primitive type</string>
+    <string name="heading_primitive_colour">Primitive colour</string>
     <string name="heading_points">Vertices</string>
-    <string name="heading_colour_opacity">Opacity</string>
     
-    <string name="desc_point_new">Add new vertex</string>
-    <string name="desc_point_update">Update vertex</string>
-    <string name="desc_point_remove">Remove vertex</string>
+    <string name="heading_element_location">Location</string>
+    <string name="heading_element_colours">Colours</string>
+    <string name="heading_element_proportions">Size and proportions</string>
+    <string name="heading_element_parameters">Other parameters</string>
+    
+    <string name="heading_group_vertex_processing">Vertex Processing</string>
+    <string name="heading_group_primitive_processing">Primitive Processing</string>
+    <string name="heading_group_rasterisation">Rasterisation</string>
+    <string name="heading_group_fragment_processing">Fragment Processing</string>
+    <string name="heading_group_pixel_processing">Pixel Processing</string>
+    
+    <string name="desc_element_icon">Element Icon</string>
+    <string name="desc_element_edit">Edit Element</string>
+    
+    <string name="desc_colour_edit">Edit colour</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
+    <string name="dialogue_title_composite_new">Select Type</string>
+    
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
+    
+    <string name="button_scene_composition">Scene composition</string>
+    <string name="button_vertex_shading">Vertex shading</string>
+    <string name="button_geometry_shading">Geometry shading</string>
+    <string name="button_clipping">Clipping</string>
+    <string name="button_culling">Culling</string>
+    <string name="button_fragment_shading">Fragment shading</string>
+    <string name="button_depth_buffer_test">Depth buffer test</string>
+    
+    <string name="button_simulate">Simulate</string>
 
 </resources>

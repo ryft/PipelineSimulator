@@ -1,15 +1,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     
     <item
-        android:id="@+id/action_element_new"
-        android:title="@string/action_element_new"
+        android:id="@+id/action_primitive_new"
+        android:title="@string/action_primitive_new"
         android:icon="@drawable/ic_action_new"
-        android:showAsAction="always|withText" />
+        android:showAsAction="ifRoom|withText" />
+    
+    <item
+        android:id="@+id/action_composite_new"
+        android:title="@string/action_composite_new"
+        android:icon="@drawable/ic_action_element"
+        android:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/action_scene_clear"
-        android:title="@string/action_scene_clear"
+        android:id="@+id/action_elements_discard"
+        android:title="@string/action_elements_discard"
         android:icon="@drawable/ic_action_discard"
-        android:showAsAction="always|withText" />
+        android:showAsAction="ifRoom|withText" />
 
 </menu>

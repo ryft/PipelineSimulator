@@ -2,16 +2,18 @@ package uk.co.ryft.pipeline.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
+import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
-import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +23,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -31,8 +34,10 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class SceneActivity extends ListActivity {
 
-    protected static final int ADD_ELEMENT_REQUEST = 2;
-    protected static final int EDIT_ELEMENT_REQUEST = 3;
+    // Request values
+    protected static final int REQUEST_PRIMITIVE_ADD = 2;
+    protected static final int REQUEST_PRIMITIVE_EDIT = 3;
+    protected static final int REQUEST_COMPOSITE_ADD = 4;
 
     protected ElementAdapter mAdapter;
 
@@ -46,7 +51,6 @@ public class SceneActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scene);
-        setupActionBar();
 
         // Get elements from returning activity intent or saved state, if
         // possible.
@@ -65,10 +69,10 @@ public class SceneActivity extends ListActivity {
 
         mAdapter = new ElementAdapter(this, elements);
         setListAdapter(mAdapter);
-        
+
         ListView listView = getListView();
-        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(
-                listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView,
+                new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
                         return true;
@@ -86,11 +90,29 @@ public class SceneActivity extends ListActivity {
         // Setting this scroll listener is required to ensure that during ListView scrolling,
         // we don't look for swipes.
         listView.setOnScrollListener(touchListener.makeScrollListener());
+
+        // Set up save / delete button listeners
+        Button saveButton = (Button) findViewById(R.id.button_element_save);
+        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+
+        saveButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAndQuit();
+            }
+        });
+
+        deleteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                discardAndQuit();
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
-        saveAndQuit();
+        discardAndQuit();
     }
 
     protected void saveAndQuit() {
@@ -100,11 +122,10 @@ public class SceneActivity extends ListActivity {
         finish();
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setDisplayShowHomeEnabled(false);
+    protected void discardAndQuit() {
+        Intent result = new Intent();
+        setResult(RESULT_CANCELED, result);
+        finish();
     }
 
     @Override
@@ -120,15 +141,15 @@ public class SceneActivity extends ListActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-//                NavUtils.navigateUpFromSameTask(this);
-                saveAndQuit();
-
-            case R.id.action_element_new:
-                addElement();
+            case R.id.action_primitive_new:
+                addPrimitive();
                 break;
 
-            case R.id.action_scene_clear:
+            case R.id.action_composite_new:
+                addComposite();
+                break;
+
+            case R.id.action_elements_discard:
                 mAdapter.clear();
                 Toast.makeText(this, R.string.message_scene_clear, Toast.LENGTH_SHORT).show();
                 break;
@@ -136,18 +157,43 @@ public class SceneActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    protected void addElement() {
-        Intent intent = new Intent(this, ElementActivity.class);
+    protected void addPrimitive() {
+        Intent intent = new Intent(this, PrimitiveActivity.class);
         intent.putExtra("edit_mode", false);
-        startActivityForResult(intent, ADD_ELEMENT_REQUEST);
+        startActivityForResult(intent, REQUEST_PRIMITIVE_ADD);
     }
 
     protected void editPrimitive(Primitive e) {
-        Intent intent = new Intent(this, ElementActivity.class);
+        Intent intent = new Intent(this, PrimitiveActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
         mThisElement = e;
-        startActivityForResult(intent, EDIT_ELEMENT_REQUEST);
+        startActivityForResult(intent, REQUEST_PRIMITIVE_EDIT);
+    }
+
+    protected void addComposite() {
+
+        // Collect composite type descriptions into an array
+        final ElementType[] types = Composite.Type.values();
+        String[] typeNames = new String[types.length];
+        for (int i = 0; i < types.length; i++)
+            typeNames[i] = types[i].getDescription();
+
+        // Instantiate and display a float picker dialogue
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialogue_title_composite_new);
+
+        builder.setItems(typeNames, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                ElementType type = types[which];
+                if (type != Composite.Type.CUSTOM)
+                    startActivityForResult(new Intent(SceneActivity.this, type.getEditorActivity()), REQUEST_COMPOSITE_ADD);
+            }
+        });
+
+        // Get the AlertDialog, initialise values and show it.
+        AlertDialog dialogue = builder.create();
+        dialogue.show();
     }
 
     @Override
@@ -157,41 +203,62 @@ public class SceneActivity extends ListActivity {
 
         // Parameter key:
         //
-        // For adding a new element (ADD_ELEMENT_REQUEST)
-        // OK result -> new element is element_new
+        // For adding a new primitive (REQUEST_PRIMITIVE_ADD)
+        // OK result -> new element is 'element' extra
         // Otherwise -> take no action
         //
-        // For editing an element (EDIT_ELEMENT_REQUEST)
-        // OK result -> original is element_old, new is element_new
-        // >> If 'deleted' is set true, remove element_old
-        // >> Otherwise replace element_old with element_new
-        // Otherwise -> original element is element_old
+        // For editing a primitive (REQUEST_PRIMITIVE_EDIT)
+        // OK result -> new element is 'element' extra
+        // >> If 'deleted' is set true, remove old element
+        // >> Otherwise replace old element with new
+        // Otherwise -> take no action
+        //
+        // For adding a composite (REQUEST_COMPOSITE_ADD)
+        // OK result -> new element is 'element' extra
+        // Otherwise -> take no action
 
-        // If the request was ADD_ELEMENT_REQUEST
-        if (requestCode == ADD_ELEMENT_REQUEST)
+        // If the request was REQUEST_PRIMITIVE_ADD
+        if (requestCode == REQUEST_PRIMITIVE_ADD) {
 
             if (resultCode == Activity.RESULT_OK) {
-                mAdapter.add((Primitive) data.getSerializableExtra("element"));
-                message = getString(R.string.message_element_added);
-            } else
-                message = getString(R.string.message_element_discarded);
+                if (!data.getBooleanExtra("delete", false)) {
+                    mAdapter.add((Primitive) data.getSerializableExtra("element"));
+                    message = getString(R.string.message_element_added);
 
-        // If the request was EDIT_ELEMENT_REQUEST
-        else if (requestCode == EDIT_ELEMENT_REQUEST)
+                } else
+                    message = getString(R.string.message_element_discarded);
+            }
+
+            // If the request was REQUEST_PRIMITIVE_EDIT
+        } else if (requestCode == REQUEST_PRIMITIVE_EDIT) {
 
             if (resultCode == Activity.RESULT_OK) {
                 mAdapter.remove(mThisElement);
                 mThisElement = null;
-                mAdapter.add((Primitive) data.getSerializableExtra("element"));
-                message = getString(R.string.message_element_updated);
+
+                if (!data.getBooleanExtra("delete", false)) {
+                    Primitive newElement = (Primitive) data.getSerializableExtra("element");
+                    mAdapter.add(newElement);
+                    message = getString(R.string.message_element_updated);
+                }
+                // Else original element has been deleted as required
+                // A suitable message has already been displayed to the user
+                // FIXME Not necessarily, if user has pressed delete
+
             } else {
-                mAdapter.remove(mThisElement);
                 mThisElement = null;
                 message = getString(R.string.message_element_deleted);
             }
 
-        else {
+        } else if (requestCode == REQUEST_COMPOSITE_ADD) {
+
+            if (resultCode == Activity.RESULT_OK) {
+                mAdapter.add((Composite) data.getSerializableExtra("element"));
+            }
+
+        } else {
             // Add any new result codes here.
+            throw new UnsupportedOperationException();
         }
 
         if (message != "")
@@ -238,6 +305,14 @@ public class SceneActivity extends ListActivity {
         // The activity is about to be destroyed.
     }
 
+    // View holder stores references to the view components
+    static class ElementViewHolder {
+        ImageView elemIcon;
+        TextView typeTextView;
+        ImageButton editButton;
+        TextView summaryTextView;
+    }
+
     class ElementAdapter extends BaseAdapter {
 
         final Context mContext;
@@ -252,7 +327,7 @@ public class SceneActivity extends ListActivity {
             mElems = new ArrayList<Element>(elements);
         }
 
-        public boolean add(Primitive element) {
+        public boolean add(Element element) {
             boolean ret = mElems.add(element);
             notifyDataSetChanged();
             return ret;
@@ -289,29 +364,41 @@ public class SceneActivity extends ListActivity {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
+            ElementViewHolder viewHolder;
+
             // Recycle view if possible
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.listitem_element, null);
+
+                // Implement the View Holder pattern
+                viewHolder = new ElementViewHolder();
+                viewHolder.elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
+                viewHolder.typeTextView = (TextView) convertView.findViewById(R.id.element_type);
+                viewHolder.editButton = (ImageButton) convertView.findViewById(R.id.button_element_edit);
+                viewHolder.summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+                convertView.setTag(viewHolder);
+
+            } else {
+                viewHolder = (ElementViewHolder) convertView.getTag();
             }
 
-            ImageView elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
-            TextView typeTextView = (TextView) convertView.findViewById(R.id.element_type);
-            ImageButton editButton = (ImageButton) convertView
-                    .findViewById(R.id.button_element_edit);
-            TextView summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+            ImageView elemIcon = viewHolder.elemIcon;
+            TextView typeTextView = viewHolder.typeTextView;
+            ImageButton editButton = viewHolder.editButton;
+            TextView summaryTextView = viewHolder.summaryTextView;
 
             Element elem = mElems.get(position);
 
             if (elem != null) {
-                
+
                 final boolean isPrimitive = elem.isPrimitive();
-                
+
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
                 summaryTextView.setText(elem.getSummary());
-                
+
                 typeTextView.setClickable(false);
-                
+
                 if (isPrimitive)
                     editButton.setImageResource(R.drawable.ic_action_edit);
                 else
@@ -329,7 +416,7 @@ public class SceneActivity extends ListActivity {
                             Collection<Element> components = ((Composite) elem).getComponents();
                             remove(elem);
                             addAll(components);
-                            
+
                             String message = "Expanded " + components.size() + " component";
                             if (components.size() != 1)
                                 message += "s";

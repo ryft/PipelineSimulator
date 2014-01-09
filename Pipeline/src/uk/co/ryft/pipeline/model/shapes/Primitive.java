@@ -12,13 +12,15 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.ui.PrimitiveActivity;
+import android.app.Activity;
 import android.opengl.GLES20;
 
 public class Primitive implements Element {
 
     private static final long serialVersionUID = -3522126203623788186L;
 
-    public static enum Type {
+    public static enum Type implements ElementType {
         GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN;
 
         private static final Map<Type, String> mDescriptionMap;
@@ -47,12 +49,23 @@ public class Primitive implements Element {
             mPrimitiveMap = Collections.unmodifiableMap(primitiveMap);
         }
 
+        @Override
         public String getDescription() {
             return mDescriptionMap.get(this);
         }
 
+        @Override
+        public Class<? extends Activity> getEditorActivity() {
+            return PrimitiveActivity.class;
+        }
+
         public Integer getGLPrimitive() {
             return mPrimitiveMap.get(this);
+        }
+
+        @Override
+        public boolean isPrimitive() {
+            return true;
         }
     };
 
@@ -159,6 +172,11 @@ public class Primitive implements Element {
     }
 
     @Override
+    public int getSize() {
+        return 1;
+    }
+
+    @Override
     public String toString() {
         String details = getTitle() + "\n" + getSummary() + "\n";
         for (Float3 p : mVertices)
@@ -207,6 +225,7 @@ public class Primitive implements Element {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object clone() {
 
         Colour colour = (Colour) mColour.clone();

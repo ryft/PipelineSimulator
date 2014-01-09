@@ -17,7 +17,6 @@ import uk.co.ryft.pipeline.model.Transformation;
 import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
@@ -69,7 +68,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mModelRotationMatrix = new float[16];
 
     // Drawables aren't initialised, and are constructed at render time if necessary
-    private Composite mCamera = new Composite(Composite.Type.CUSTOM_SHAPE, Collections.<Element> emptyList());
+    private Composite mCamera = new Composite(Composite.Type.CAMERA, Collections.<Element> emptyList());
     private Drawable mCameraDrawable;
 
     // Axes should never change between instances so they can be declared statically
@@ -86,7 +85,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             lineCoords.add(new Float3(-1, 0, i));
             lineCoords.add(new Float3(1, 0, i));
         }
-        axes.add(new Primitive(Type.GL_LINES, lineCoords, Colour.GREY));
+        axes.add(new Primitive(Primitive.Type.GL_LINES, lineCoords, Colour.GREY));
         
         LinkedList<Float3> points = new LinkedList<Float3>();
         points.add(new Float3(0, 0, 0));
@@ -95,30 +94,30 @@ public class PipelineRenderer implements Renderer, Serializable {
         points.add(new Float3(0, 1, 0));
         points.add(new Float3(0, 0, 0));
         points.add(new Float3(0, 0, 1));
-        axes.add(new Primitive(Type.GL_LINES, points, Colour.WHITE));
+        axes.add(new Primitive(Primitive.Type.GL_LINES, points, Colour.WHITE));
 
         LinkedList<Float3> arrowX = new LinkedList<Float3>();
         arrowX.add(new Float3(0.8f, 0.1f, -0.1f));
         arrowX.add(new Float3(1, 0, 0));
         arrowX.add(new Float3(0.8f, -0.1f, 0.1f));
         arrowX.add(new Float3(0.9f, 0, 0));
-        axes.add(new Primitive(Type.GL_LINE_LOOP, arrowX, Colour.RED));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowX, Colour.RED));
 
         LinkedList<Float3> arrowY = new LinkedList<Float3>();
         arrowY.add(new Float3(-0.1f, 0.8f, 0.1f));
         arrowY.add(new Float3(0, 1, 0));
         arrowY.add(new Float3(0.1f, 0.8f, -0.1f));
         arrowY.add(new Float3(0, 0.9f, 0));
-        axes.add(new Primitive(Type.GL_LINE_LOOP, arrowY, Colour.GREEN));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowY, Colour.GREEN));
 
         LinkedList<Float3> arrowZ = new LinkedList<Float3>();
         arrowZ.add(new Float3(0.1f, -0.1f, 0.8f));
         arrowZ.add(new Float3(0, 0, 1));
         arrowZ.add(new Float3(-0.1f, 0.1f, 0.8f));
         arrowZ.add(new Float3(0, 0, 0.9f));
-        axes.add(new Primitive(Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
 
-        sAxes = new Composite(Composite.Type.CUSTOM_SHAPE, axes);
+        sAxes = new Composite(Composite.Type.CUSTOM, axes);
     }
 
     public void interact() {
@@ -153,9 +152,9 @@ public class PipelineRenderer implements Renderer, Serializable {
         mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
         
         LinkedList<Element> camera = new LinkedList<Element>();
-        camera.add(ShapeFactory.buildCamera(mVirtualCamera, 0.25f));
+        camera.add(ShapeFactory.buildCamera(0.25f));
         camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
-        mCamera = new Composite(Composite.Type.CUSTOM_SHAPE, camera);
+        mCamera = new Composite(Composite.Type.CUSTOM, camera);
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -269,6 +268,8 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        // other shader types, e.g. geometry, tessellation, are optional.
+        // see http://www.opengl.org/sdk/docs/man4/xhtml/glCreateShader.xml
         int shader = GLES20.glCreateShader(type);
 
         // add the source code to the shader and compile it
