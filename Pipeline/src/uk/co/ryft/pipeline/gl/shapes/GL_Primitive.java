@@ -3,7 +3,6 @@ package uk.co.ryft.pipeline.gl.shapes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
@@ -16,20 +15,14 @@ public class GL_Primitive implements Drawable {
     // Bytes between consecutive vertices
     protected final int vertexStride = COORDS_PER_VERTEX * 4;
 
-    // Variables set by the subclasses
-    // XXX this won't be subclassed
-    protected float mCoords[];
-    protected float mColour[];
+    protected float[] mPositions;
+    protected float[] mColour;
 
     protected FloatBuffer mVertexBuffer;
-    protected ShortBuffer drawListBuffer;
-    protected int mProgram;
+    
     protected int mPositionHandle;
     protected int mColourHandle;
     protected int mMVPMatrixHandle;
-
-    protected String mVertexShaderCode = PipelineRenderer.VERTEX_SHADER_EMPTY;
-    protected String mFragmentShaderCode = PipelineRenderer.FRAGMENT_SHADER_EMPTY;
 
     private final int mVertexCount;
     private final int mVertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -37,43 +30,32 @@ public class GL_Primitive implements Drawable {
 
     public GL_Primitive(float[] coords, float[] colour, int vertexCount, int primitiveType) {
 
-        mCoords = coords;
+        mPositions = coords;
         mColour = colour;
         mPrimitiveType = primitiveType;
 
-        mVertexCount = mCoords.length / COORDS_PER_VERTEX;
+        mVertexCount = mPositions.length / COORDS_PER_VERTEX;
 
-        // initialize vertex byte buffer for shape coordinates
-        ByteBuffer bb = ByteBuffer.allocateDirect(
-        // (number of coordinate values * 4 bytes per float)
-                mCoords.length * 4);
+        // Initialise vertex byte buffer for shape coordinates
+        ByteBuffer vb = ByteBuffer.allocateDirect(mPositions.length * 4);
         // use the device hardware's native byte order
-        bb.order(ByteOrder.nativeOrder());
+        vb.order(ByteOrder.nativeOrder());
 
         // create a floating point buffer from the ByteBuffer
-        mVertexBuffer = bb.asFloatBuffer();
+        mVertexBuffer = vb.asFloatBuffer();
         // add the coordinates to the FloatBuffer
-        mVertexBuffer.put(mCoords);
+        mVertexBuffer.put(mPositions);
         // set the buffer to read the first coordinate
         mVertexBuffer.position(0);
 
-        int vertexShader = PipelineRenderer.loadShader(GLES20.GL_VERTEX_SHADER, mVertexShaderCode);
-        int fragmentShader = PipelineRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
-                mFragmentShaderCode);
-
-        mProgram = GLES20.glCreateProgram(); // create empty OpenGL ES Program
-        GLES20.glAttachShader(mProgram, vertexShader); // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES20.glLinkProgram(mProgram); // creates OpenGL ES program executables
-
     }
 
-    public void draw(float[] mvpMatrix) {
+    public void draw(int glProgram, float[] mvpMatrix) {
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
+        GLES20.glUseProgram(glProgram);
 
         // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
+        mPositionHandle = GLES20.glGetAttribLocation(glProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -83,13 +65,13 @@ public class GL_Primitive implements Drawable {
                 mVertexStride, mVertexBuffer);
 
         // get handle to fragment shader's vColor member
-        mColourHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+        mColourHandle = GLES20.glGetUniformLocation(glProgram, "vColor");
 
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColourHandle, 1, mColour, 0);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "uMVPMatrix");
         PipelineRenderer.checkGlError("glGetUniformLocation");
 
         // Apply the projection and view transformation

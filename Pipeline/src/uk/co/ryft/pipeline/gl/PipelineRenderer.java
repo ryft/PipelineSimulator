@@ -125,24 +125,27 @@ public class PipelineRenderer implements Renderer, Serializable {
         mModelTransformations.add(new Rotation(90, new Float3(1, 0, 0)));
     }
 
-    // TODO Should these belong here?
-    public static final String VERTEX_SHADER_EMPTY =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-                    "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // the order must be matrix * vector as the matrix is in col-major order.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
-                    "}";
+    private String getVertexShader() {
+        // This matrix member variable provides a hook to manipulate
+        // the coordinates of the objects that use this vertex shader
+        return "uniform mat4 uMVPMatrix;" +
+                "attribute vec4 vPosition;" +
+                "void main() {" +
+                // the matrix must be included as a modifier of gl_Position
+                // the order must be matrix * vector as the matrix is in col-major order.
+                "    gl_Position = uMVPMatrix * vPosition;" +
+                "}";
+    }
 
-    public static final String FRAGMENT_SHADER_EMPTY =
-                    "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
+    private String getFragmentShader() {
+        return "precision mediump float;" +
+                "uniform vec4 vColor;" +
+                "void main() {" +
+                "    gl_FragColor = vColor;" +
+                "}";
+    }
+    
+    private int mProgram;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -171,8 +174,24 @@ public class PipelineRenderer implements Renderer, Serializable {
         
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
+        
+        final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader());        
+        final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader());      
+        
+        mProgram = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
+                new String[] {"vPosition"});
     }
 
+    @Override
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+    
+        // Adjust the viewport based on geometry changes,
+        // such as screen rotation
+        GLES20.glViewport(0, 0, width, height);
+        
+        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
+    
+    }
     @Override
     public void onDrawFrame(GL10 unused) {
 
@@ -194,11 +213,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Apply all transformations to the world, in order, in their current state
         for (Transformation t : mModelTransformations)
             Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
-
-        // Create a rotation transformation for the triangle
-//        time %= 4000L;
-//        float angle = 0.090f * ((int) time);
-//        Matrix.setRotateM(mModelRotationMatrix, 0, angle, 0, 0, -1.0f);
         
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
@@ -219,8 +233,8 @@ public class PipelineRenderer implements Renderer, Serializable {
             mCameraDrawable = mCamera.getDrawable();
 
         // Draw axes and virtual camera        
-        sAxesDrawable.draw(mMVPMatrix);
-        mCameraDrawable.draw(mCVPMatrix);
+        sAxesDrawable.draw(mProgram, mMVPMatrix);
+        mCameraDrawable.draw(mProgram, mCVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -228,7 +242,7 @@ public class PipelineRenderer implements Renderer, Serializable {
                 mElements.put(e, e.getDrawable());
             Drawable d = mElements.get(e);
             if (d != null)
-                d.draw(mMVPMatrix);
+                d.draw(mProgram, mMVPMatrix);
             else
                 // Occasionally happens when app is quitting
                 // TODO: Investigate turning off continuous rendering when quitting
@@ -253,32 +267,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         }
     }
 
-    @Override
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-
-        // Adjust the viewport based on geometry changes,
-        // such as screen rotation
-        GLES20.glViewport(0, 0, width, height);
-        
-        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
-
-    }
-
-    public static int loadShader(int type, String shaderCode) {
-
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        // other shader types, e.g. geometry, tessellation, are optional.
-        // see http://www.opengl.org/sdk/docs/man4/xhtml/glCreateShader.xml
-        int shader = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-
-        return shader;
-    }
-
     /**
      * Utility method for debugging OpenGL calls. Provide the name of the call just after making it:
      * 
@@ -298,6 +286,100 @@ public class PipelineRenderer implements Renderer, Serializable {
             Log.e(TAG, glOperation + ": glError " + error);
             throw new RuntimeException(glOperation + ": glError " + error);
         }
+    }
+    
+    /** 
+     * Helper function to compile a shader.
+     * 
+     * @param shaderType The shader type.
+     * @param shaderSource The shader source code.
+     * @return An OpenGL handle to the shader.
+     */
+    private int compileShader(final int shaderType, final String shaderSource) 
+    {
+        int shaderHandle = GLES20.glCreateShader(shaderType);
+
+        if (shaderHandle != 0) 
+        {
+            // Pass in the shader source.
+            GLES20.glShaderSource(shaderHandle, shaderSource);
+
+            // Compile the shader.
+            GLES20.glCompileShader(shaderHandle);
+
+            // Get the compilation status.
+            final int[] compileStatus = new int[1];
+            GLES20.glGetShaderiv(shaderHandle, GLES20.GL_COMPILE_STATUS, compileStatus, 0);
+
+            // If the compilation failed, delete the shader.
+            if (compileStatus[0] == 0) 
+            {
+                Log.e(TAG, "Error compiling shader: " + GLES20.glGetShaderInfoLog(shaderHandle));
+                GLES20.glDeleteShader(shaderHandle);
+                shaderHandle = 0;
+            }
+        }
+
+        if (shaderHandle == 0)
+        {           
+            throw new RuntimeException("Error creating shader.");
+        }
+        
+        return shaderHandle;
+    }   
+    
+    /**
+     * Helper function to compile and link a program.
+     * 
+     * @param vertexShaderHandle An OpenGL handle to an already-compiled vertex shader.
+     * @param fragmentShaderHandle An OpenGL handle to an already-compiled fragment shader.
+     * @param attributes Attributes that need to be bound to the program.
+     * @return An OpenGL handle to the program.
+     */
+    private int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle, final String[] attributes) 
+    {
+        int programHandle = GLES20.glCreateProgram();
+        
+        if (programHandle != 0) 
+        {
+            // Bind the vertex shader to the program.
+            GLES20.glAttachShader(programHandle, vertexShaderHandle);           
+
+            // Bind the fragment shader to the program.
+            GLES20.glAttachShader(programHandle, fragmentShaderHandle);
+            
+            // Bind attributes
+            if (attributes != null)
+            {
+                final int size = attributes.length;
+                for (int i = 0; i < size; i++)
+                {
+                    GLES20.glBindAttribLocation(programHandle, i, attributes[i]);
+                }                       
+            }
+            
+            // Link the two shaders together into a program.
+            GLES20.glLinkProgram(programHandle);
+
+            // Get the link status.
+            final int[] linkStatus = new int[1];
+            GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
+
+            // If the link failed, delete the program.
+            if (linkStatus[0] == 0) 
+            {               
+                Log.e(TAG, "Error compiling program: " + GLES20.glGetProgramInfoLog(programHandle));
+                GLES20.glDeleteProgram(programHandle);
+                programHandle = 0;
+            }
+        }
+        
+        if (programHandle == 0)
+        {
+            throw new RuntimeException("Error creating program.");
+        }
+        
+        return programHandle;
     }
 
     public void addToScene(Element e) {
