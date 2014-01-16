@@ -16,8 +16,8 @@ public class GL_Composite implements Drawable {
         mComponents.addAll(drawables);
     }
 
-    public void draw(int glProgram, float[] mvpMatrix) {
+    public void draw(int glProgram, float[] mvMatrix, float[] mvpMatrix) {
         for (Drawable d : mComponents)
-            d.draw(glProgram, mvpMatrix);
+            d.draw(glProgram, mvMatrix, mvpMatrix);
     }
 }

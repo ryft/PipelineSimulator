@@ -30,7 +30,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private static final String TAG = "PipelineRenderer";
     
-    public static boolean LAMBERT = false;
+    public static boolean LAMBERT = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -59,6 +59,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     public Camera getVirtualCamera() { return mVirtualCamera; }
     public void setActualCamera(Camera actualCamera) { mActualCamera = actualCamera; }
     public void setVirtualCamera(Camera virtualCamera) { mVirtualCamera = virtualCamera; }
+    
+    // Light position, for implementing lighting models
+    public static Float3 lightPosition = new Float3(0, 5, 0);
 
     // For touch events
     // TODO: Implement a monitor for this.
@@ -277,10 +280,22 @@ public class PipelineRenderer implements Renderer, Serializable {
             mCameraDrawable = mCamera.getDrawable();
 
         // Draw axes and virtual camera        
-        sAxesDrawable.draw(mProgram, mMVPMatrix);
-        mCameraDrawable.draw(mProgram, mCVPMatrix);
+        sAxesDrawable.draw(mProgram, mMVMatrix, mMVPMatrix);
+        mCameraDrawable.draw(mProgram, mCVMatrix, mCVPMatrix);
         
-        cube.draw(mProgram, mMVPMatrix);
+        // Debugging elements
+//        List<Float3> points = new LinkedList<Float3>();
+//        points.add(new Float3(-1, 0, -1));
+//        points.add(new Float3(-1, 0, 1));
+//        points.add(new Float3(1, 0, 1));
+//        points.add(new Float3(-1, 0, -1));
+//        points.add(new Float3(1, 0, 1));
+//        points.add(new Float3(1, 0, -1));
+//        Primitive p = new Primitive(Primitive.Type.GL_TRIANGLES, points, Colour.WHITE);
+//        p.getDrawable().draw(mProgram, mMVMatrix, mMVPMatrix);
+//        new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(new Float3(0, 0, 0)), Colour.WHITE).getDrawable().draw(mProgram, mMVMatrix, mMVPMatrix);
+        
+        cube.draw(mProgram, mMVMatrix, mMVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -288,7 +303,7 @@ public class PipelineRenderer implements Renderer, Serializable {
                 mElements.put(e, e.getDrawable());
             Drawable d = mElements.get(e);
             if (d != null)
-                d.draw(mProgram, mMVPMatrix);
+                d.draw(mProgram, mMVMatrix, mMVPMatrix);
             else
                 // Occasionally happens when app is quitting
                 // TODO: Investigate turning off continuous rendering when quitting

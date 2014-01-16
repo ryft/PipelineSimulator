@@ -7,7 +7,6 @@ import java.nio.FloatBuffer;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.model.shapes.Primitive;
 import android.opengl.GLES20;
 
 public class GL_Primitive implements Drawable {
@@ -27,10 +26,8 @@ public class GL_Primitive implements Drawable {
     protected float[] mNormals;
 
     protected FloatBuffer mVertexBuffer;
-
-    protected int mPositionHandle;
-    protected int mColourHandle;
-    protected int mMVPMatrixHandle;
+    protected FloatBuffer mColourBuffer;
+    protected FloatBuffer mNormalBuffer;
 
     private final int mVertexCount;
     private final int mVertexStride = COORDS_PER_VERTEX * BYTES_PER_FLOAT;
@@ -52,24 +49,37 @@ public class GL_Primitive implements Drawable {
         mPrimitiveType = primitiveType;
 
         // Initialise vertex byte buffer for shape coordinates
-        ByteBuffer vb = ByteBuffer.allocateDirect(mPositions.length * 4);
+        ByteBuffer vertexBuffer = ByteBuffer.allocateDirect(mPositions.length * BYTES_PER_FLOAT);
         // use the device hardware's native byte order
-        vb.order(ByteOrder.nativeOrder());
+        vertexBuffer.order(ByteOrder.nativeOrder());
 
         // create a floating point buffer from the ByteBuffer
-        mVertexBuffer = vb.asFloatBuffer();
+        mVertexBuffer = vertexBuffer.asFloatBuffer();
         // add the coordinates to the FloatBuffer
         mVertexBuffer.put(mPositions);
         // set the buffer to read the first coordinate
         mVertexBuffer.position(0);
 
+        // Colour and normal direction buffers used for Lambertian reflectance
+
+        ByteBuffer colourBuffer = ByteBuffer.allocateDirect(mColours.length * BYTES_PER_FLOAT);
+        colourBuffer.order(ByteOrder.nativeOrder());
+        mColourBuffer = colourBuffer.asFloatBuffer();
+        mColourBuffer.put(mColours);
+        mColourBuffer.position(0);
+
+        ByteBuffer normalBuffer = ByteBuffer.allocateDirect(mNormals.length * BYTES_PER_FLOAT);
+        normalBuffer.order(ByteOrder.nativeOrder());
+        mNormalBuffer = normalBuffer.asFloatBuffer();
+        mNormalBuffer.put(mNormals);
+        mNormalBuffer.position(0);
     }
 
     private void calculateNormals() {
 
         float[] normal = new float[] { 0, 1, 0 };
 
-        if (mPositions.length >= 3) {
+        if (mPositions.length >= 9) {
             // Primitives are at most 2D shapes (triangle based primitives)
             // We can calculate the normal direction using the cross product of two vectors;
 
@@ -91,38 +101,87 @@ public class GL_Primitive implements Drawable {
 
     }
 
-    public void draw(int glProgram, float[] mvpMatrix) {
-        // Add program to OpenGL ES environment
-        GLES20.glUseProgram(glProgram);
+    public void draw(int glProgram, float[] mvMatrix, float[] mvpMatrix) {
 
-        // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation(glProgram, "vPosition");
+        if (!PipelineRenderer.LAMBERT) {
 
-        // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+            // Add program to OpenGL ES environment
+            GLES20.glUseProgram(glProgram);
 
-        // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride, mVertexBuffer);
+            // get handle to vertex shader's vPosition member
+            int mPositionHandle = GLES20.glGetAttribLocation(glProgram, "vPosition");
 
-        // get handle to fragment shader's vColor member
-        mColourHandle = GLES20.glGetUniformLocation(glProgram, "vColor");
+            // Enable a handle to the triangle vertices
+            GLES20.glEnableVertexAttribArray(mPositionHandle);
 
-        // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColourHandle, 1, mColour, 0);
+            // Prepare the triangle coordinate data
+            GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride,
+                    mVertexBuffer);
 
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "uMVPMatrix");
-        PipelineRenderer.checkGlError("glGetUniformLocation");
+            // get handle to fragment shader's vColor member
+            int mColourHandle = GLES20.glGetUniformLocation(glProgram, "vColor");
 
-        // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        PipelineRenderer.checkGlError("glUniformMatrix4fv");
+            // Set color for drawing the triangle
+            GLES20.glUniform4fv(mColourHandle, 1, mColour, 0);
 
-        // Draw the line(s)
-        // TODO: Consider using glDrawElements
-        GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+            // get handle to shape's transformation matrix
+            int mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "uMVPMatrix");
+            PipelineRenderer.checkGlError("glGetUniformLocation");
 
-        // Disable vertex array
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+            // Apply the projection and view transformation
+            GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+            PipelineRenderer.checkGlError("glUniformMatrix4fv");
+
+            // Draw the line(s)
+            // TODO: Consider using glDrawElements
+            GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+
+            // Disable vertex array
+            GLES20.glDisableVertexAttribArray(mPositionHandle);
+
+        } else {
+
+            // Set our Lambertian lighting program.
+            GLES20.glUseProgram(glProgram);
+
+            // Set program handles for cube drawing.
+            int mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
+            int mMVMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVMatrix");
+            int mLightPosHandle = GLES20.glGetUniformLocation(glProgram, "u_LightPos");
+            int mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
+            int mColorHandle = GLES20.glGetAttribLocation(glProgram, "a_Color");
+            int mNormalHandle = GLES20.glGetAttribLocation(glProgram, "a_Normal");
+
+            // Pass in the position information
+            mVertexBuffer.position(0);
+            GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
+
+            GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+            // Pass in the color information
+            mColourBuffer.position(0);
+            GLES20.glVertexAttribPointer(mColorHandle, COORDS_PER_COLOUR, GLES20.GL_FLOAT, false, 0, mColourBuffer);
+
+            GLES20.glEnableVertexAttribArray(mColorHandle);
+
+            // Pass in the normal information
+            mNormalBuffer.position(0);
+            GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mNormalBuffer);
+
+            GLES20.glEnableVertexAttribArray(mNormalHandle);
+
+            // Pass in the modelview matrix.
+            GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mvMatrix, 0);
+
+            // Pass in the combined matrix.
+            GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+            // Pass in the light position in eye space.
+            GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.lightPosition.getX(), PipelineRenderer.lightPosition.getY(), PipelineRenderer.lightPosition.getZ());
+
+            // Draw the primitive.
+            GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+
+        }
     }
 }
