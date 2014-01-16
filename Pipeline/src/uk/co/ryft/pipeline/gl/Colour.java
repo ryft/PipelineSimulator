@@ -1,6 +1,7 @@
 package uk.co.ryft.pipeline.gl;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import android.graphics.Color;
 
@@ -27,6 +28,9 @@ public class Colour implements Serializable, Cloneable {
     public static final Colour WHITE = new Colour(255, 255, 255);
     public static final Colour GREY = new Colour(127, 127, 127);
     public static final Colour BLACK = new Colour(0, 0, 0);
+    
+    // Randomised colour, for testing purposes
+    public static final Colour RANDOM = new RandomColour();
 
     public Colour(int red, int green, int blue) {
         setColour(red, green, blue);
@@ -87,6 +91,30 @@ public class Colour implements Serializable, Cloneable {
     @Override
     public Object clone() {
         return new Colour(red, green, blue, alpha);
+    }
+    
+    // Randomises its colour on each call of toArray()
+    static class RandomColour extends Colour {
+
+        private static final long serialVersionUID = -5270392509485931336L;
+        private static Random r = new Random();
+
+        public RandomColour() {
+            super(r.nextInt(256), r.nextInt(256), r.nextInt(256));
+        }
+        
+        @Override
+        public float[] toArray() {
+            randomise();
+            return super.toArray();
+        }
+        
+        private void randomise() {
+            red = r.nextInt(256);
+            blue = r.nextInt(256);
+            green = r.nextInt(256);
+        }
+        
     }
 
 }

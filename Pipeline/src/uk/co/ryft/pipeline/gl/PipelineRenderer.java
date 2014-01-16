@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Rotation;
@@ -31,7 +30,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private static final String TAG = "PipelineRenderer";
     
-    public static boolean LAMBERT = true;
+    public static boolean LAMBERT = false;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -216,9 +215,16 @@ public class PipelineRenderer implements Renderer, Serializable {
         final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader());        
         final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader());      
         
-        mProgram = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
-                new String[] {"vPosition"});
+        String[] attributes;
+        if (!LAMBERT)
+            attributes = new String[] {"vPosition"};
+        else
+            attributes = new String[] {"a_Position",  "a_Color", "a_Normal"};
+            
+        mProgram = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, attributes);
     }
+    
+    Drawable cube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1f, 1f, 1f, Colour.RANDOM, Colour.RANDOM).getDrawable();
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -291,7 +297,8 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     }
     
-    protected void printMatrix(float[] m, int cols, int rows) {
+    // XXX Prints matrices in OpenGL-style column-major order.
+    public static void printMatrix(float[] m, int cols, int rows) {
         for (int i = 0; i < rows; i++) {
             if (i == 0)
                 System.out.print("[");
@@ -440,60 +447,5 @@ public class PipelineRenderer implements Renderer, Serializable {
         sAxesDrawable = null;
         mCameraDrawable = null;
     }
-    
-    private static GL_Primitive cube = new GL_Primitive(new float[] {
-            // In OpenGL counter-clockwise winding is default. This means that when we look at a triangle, 
-            // if the points are counter-clockwise we are looking at the "front". If not we are looking at
-            // the back. OpenGL has an optimization where all back-facing triangles are culled, since they
-            // usually represent the backside of an object and aren't visible anyways.
-            
-            // Front face
-            -0.5f, 0.5f, 0.5f,              
-            -0.5f, -0.5f, 0.5f,
-            0.5f, 0.5f, 0.5f, 
-            -0.5f, -0.5f, 0.5f,                 
-            0.5f, -0.5f, 0.5f,
-            0.5f, 0.5f, 0.5f,
-            
-            // Right face
-            0.5f, 0.5f, 0.5f,               
-            0.5f, -0.5f, 0.5f,
-            0.5f, 0.5f, -0.5f,
-            0.5f, -0.5f, 0.5f,              
-            0.5f, -0.5f, -0.5f,
-            0.5f, 0.5f, -0.5f,
-            
-            // Back face
-            0.5f, 0.5f, -0.5f,              
-            0.5f, -0.5f, -0.5f,
-            -0.5f, 0.5f, -0.5f,
-            0.5f, -0.5f, -0.5f,             
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, 0.5f, -0.5f,
-            
-            // Left face
-            -0.5f, 0.5f, -0.5f,             
-            -0.5f, -0.5f, -0.5f,
-            -0.5f, 0.5f, 0.5f, 
-            -0.5f, -0.5f, -0.5f,                
-            -0.5f, -0.5f, 0.5f, 
-            -0.5f, 0.5f, 0.5f, 
-            
-            // Top face
-            -0.5f, 0.5f, -0.5f,             
-            -0.5f, 0.5f, 0.5f, 
-            0.5f, 0.5f, -0.5f, 
-            -0.5f, 0.5f, 0.5f,              
-            0.5f, 0.5f, 0.5f, 
-            0.5f, 0.5f, -0.5f,
-            
-            // Bottom face
-            0.5f, -0.5f, -0.5f,             
-            0.5f, -0.5f, 0.5f, 
-            -0.5f, -0.5f, -0.5f,
-            0.5f, -0.5f, 0.5f,              
-            -0.5f, -0.5f, 0.5f,
-            -0.5f, -0.5f, -0.5f,
-    }, Colour.RED.toArray(), Primitive.Type.GL_TRIANGLES.getGLPrimitive());
 
 }

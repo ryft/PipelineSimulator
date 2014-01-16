@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
+import uk.co.ryft.pipeline.model.shapes.Primitive;
 import android.opengl.GLES20;
 
 public class GL_Primitive implements Drawable {
@@ -45,7 +46,7 @@ public class GL_Primitive implements Drawable {
         mColours = new float[mVertexCount * COORDS_PER_COLOUR];
         for (int i = 0; i < mVertexCount * COORDS_PER_COLOUR; i++)
             mColours[i] = colour[i % COORDS_PER_COLOUR];
-        
+
         calculateNormals();
 
         mPrimitiveType = primitiveType;
