@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import uk.co.ryft.pipeline.gl.Drawable;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import android.opengl.GLES20;
 
@@ -20,10 +21,12 @@ public class GL_Primitive implements Drawable {
 
     protected float[] mPositions;
     protected float[] mColour;
+
     protected float[] mColours;
+    protected float[] mNormals;
 
     protected FloatBuffer mVertexBuffer;
-    
+
     protected int mPositionHandle;
     protected int mColourHandle;
     protected int mMVPMatrixHandle;
@@ -37,12 +40,14 @@ public class GL_Primitive implements Drawable {
         mVertexCount = coords.length / COORDS_PER_VERTEX;
 
         mPositions = coords;
-        
+
         mColour = colour;
         mColours = new float[mVertexCount * COORDS_PER_COLOUR];
         for (int i = 0; i < mVertexCount * COORDS_PER_COLOUR; i++)
             mColours[i] = colour[i % COORDS_PER_COLOUR];
         
+        calculateNormals();
+
         mPrimitiveType = primitiveType;
 
         // Initialise vertex byte buffer for shape coordinates
@@ -59,6 +64,32 @@ public class GL_Primitive implements Drawable {
 
     }
 
+    private void calculateNormals() {
+
+        float[] normal = new float[] { 0, 1, 0 };
+
+        if (mPositions.length >= 3) {
+            // Primitives are at most 2D shapes (triangle based primitives)
+            // We can calculate the normal direction using the cross product of two vectors;
+
+            // However large the 2D polygon, the triangle consisting of the first 3 vertices
+            // will have the same surface normal as the whole shape
+            Float3 x = new Float3(mPositions[0], mPositions[1], mPositions[2]);
+            Float3 y = new Float3(mPositions[3], mPositions[4], mPositions[5]);
+            Float3 z = new Float3(mPositions[6], mPositions[7], mPositions[8]);
+
+            Float3 u = y.minus(x);
+            Float3 v = z.minus(x);
+
+            normal = u.cross(v).normalised().toArray();
+        }
+
+        mNormals = new float[mVertexCount * COORDS_PER_VERTEX];
+        for (int i = 0; i < mVertexCount * COORDS_PER_VERTEX; i++)
+            mNormals[i] = normal[i % COORDS_PER_VERTEX];
+
+    }
+
     public void draw(int glProgram, float[] mvpMatrix) {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(glProgram);
@@ -70,8 +101,7 @@ public class GL_Primitive implements Drawable {
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false,
-                mVertexStride, mVertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride, mVertexBuffer);
 
         // get handle to fragment shader's vColor member
         mColourHandle = GLES20.glGetUniformLocation(glProgram, "vColor");

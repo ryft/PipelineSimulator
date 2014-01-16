@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Rotation;
@@ -29,6 +30,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static final long serialVersionUID = -5651858198215667027L;
 
     private static final String TAG = "PipelineRenderer";
+    
+    public static boolean LAMBERT = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -126,23 +129,58 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private String getVertexShader() {
-        // This matrix member variable provides a hook to manipulate
-        // the coordinates of the objects that use this vertex shader
-        return "uniform mat4 uMVPMatrix;" +
-                "attribute vec4 vPosition;" +
-                "void main() {" +
-                // the matrix must be included as a modifier of gl_Position
-                // the order must be matrix * vector as the matrix is in col-major order.
-                "    gl_Position = uMVPMatrix * vPosition;" +
-                "}";
+        
+        if (!LAMBERT)
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            return "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    // the matrix must be included as a modifier of gl_Position
+                    // the order must be matrix * vector as the matrix is in col-major order.
+                    "    gl_Position = uMVPMatrix * vPosition;" +
+                    "}";
+        
+        else
+            return   "uniform mat4 u_MVPMatrix;      \n"     // A constant representing the combined model/view/projection matrix.
+                    + "uniform mat4 u_MVMatrix;       \n"     // A constant representing the combined model/view matrix.
+                    + "uniform vec3 u_LightPos;       \n"     // The position of the light in eye space.
+                   
+                    + "attribute vec4 a_Position;     \n"     // Per-vertex position information we will pass in.
+                    + "attribute vec4 a_Color;        \n"     // Per-vertex color information we will pass in.
+                    + "attribute vec3 a_Normal;       \n"     // Per-vertex normal information we will pass in.
+                   
+                    + "varying vec4 v_Color;          \n"     // This will be passed into the fragment shader.
+                   
+                    + "void main()                    \n"     // The entry point for our vertex shader.
+                    + "{                              \n"
+                    + "   vec3 modelViewVertex = vec3(u_MVMatrix * a_Position);              \n"
+                    + "   vec3 modelViewNormal = vec3(u_MVMatrix * vec4(a_Normal, 0.0));     \n"
+                    + "   float distance = length(u_LightPos - modelViewVertex);             \n"
+                    + "   vec3 lightVector = normalize(u_LightPos - modelViewVertex);        \n"
+                    + "   float diffuse = max(dot(modelViewNormal, lightVector), 0.1);       \n"
+                    + "   diffuse = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));  \n"
+                    + "   v_Color = a_Color * diffuse;                                       \n"
+                    + "   gl_Position = u_MVPMatrix * a_Position;                            \n"
+                    + "}                                                                     \n";
     }
 
     private String getFragmentShader() {
-        return "precision mediump float;" +
-                "uniform vec4 vColor;" +
-                "void main() {" +
-                "    gl_FragColor = vColor;" +
-                "}";
+        
+        if (!LAMBERT)
+            return "precision mediump float;" +
+                    "uniform vec4 vColor;" +
+                    "void main() {" +
+                    "    gl_FragColor = vColor;" +
+                    "}";
+        
+        else
+            return   "precision mediump float;       \n"
+                    + "varying vec4 v_Color;          \n"
+                    + "void main()                    \n"     // The entry point for our fragment shader.
+                    + "{                              \n"
+                    + "   gl_FragColor = v_Color;     \n"     // Pass the color directly through the pipeline.
+                    + "}                              \n";
     }
     
     private int mProgram;
@@ -235,6 +273,8 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Draw axes and virtual camera        
         sAxesDrawable.draw(mProgram, mMVPMatrix);
         mCameraDrawable.draw(mProgram, mCVPMatrix);
+        
+        cube.draw(mProgram, mMVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -400,5 +440,60 @@ public class PipelineRenderer implements Renderer, Serializable {
         sAxesDrawable = null;
         mCameraDrawable = null;
     }
+    
+    private static GL_Primitive cube = new GL_Primitive(new float[] {
+            // In OpenGL counter-clockwise winding is default. This means that when we look at a triangle, 
+            // if the points are counter-clockwise we are looking at the "front". If not we are looking at
+            // the back. OpenGL has an optimization where all back-facing triangles are culled, since they
+            // usually represent the backside of an object and aren't visible anyways.
+            
+            // Front face
+            -0.5f, 0.5f, 0.5f,              
+            -0.5f, -0.5f, 0.5f,
+            0.5f, 0.5f, 0.5f, 
+            -0.5f, -0.5f, 0.5f,                 
+            0.5f, -0.5f, 0.5f,
+            0.5f, 0.5f, 0.5f,
+            
+            // Right face
+            0.5f, 0.5f, 0.5f,               
+            0.5f, -0.5f, 0.5f,
+            0.5f, 0.5f, -0.5f,
+            0.5f, -0.5f, 0.5f,              
+            0.5f, -0.5f, -0.5f,
+            0.5f, 0.5f, -0.5f,
+            
+            // Back face
+            0.5f, 0.5f, -0.5f,              
+            0.5f, -0.5f, -0.5f,
+            -0.5f, 0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,             
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, 0.5f, -0.5f,
+            
+            // Left face
+            -0.5f, 0.5f, -0.5f,             
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, 0.5f, 0.5f, 
+            -0.5f, -0.5f, -0.5f,                
+            -0.5f, -0.5f, 0.5f, 
+            -0.5f, 0.5f, 0.5f, 
+            
+            // Top face
+            -0.5f, 0.5f, -0.5f,             
+            -0.5f, 0.5f, 0.5f, 
+            0.5f, 0.5f, -0.5f, 
+            -0.5f, 0.5f, 0.5f,              
+            0.5f, 0.5f, 0.5f, 
+            0.5f, 0.5f, -0.5f,
+            
+            // Bottom face
+            0.5f, -0.5f, -0.5f,             
+            0.5f, -0.5f, 0.5f, 
+            -0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, 0.5f,              
+            -0.5f, -0.5f, 0.5f,
+            -0.5f, -0.5f, -0.5f,
+    }, Colour.RED.toArray(), Primitive.Type.GL_TRIANGLES.getGLPrimitive());
 
 }

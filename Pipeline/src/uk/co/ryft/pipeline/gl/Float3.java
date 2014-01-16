@@ -109,6 +109,11 @@ public class Float3 implements Serializable, Cloneable {
         return new Float3(getX() / norm, getY() / norm, getZ() / norm);
     }
 
+    public float[] toArray() {
+        float[] a = { x, y, z };
+        return a;
+    }
+
     @Override
     public String toString() {
         return "(" + getX() + ", " + getY() + ", " + getZ() + ")";
