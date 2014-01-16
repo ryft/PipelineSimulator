@@ -149,7 +149,7 @@ public class Primitive implements Element {
         }
         float[] colour = getColour().toArray();
 
-        return new GL_Primitive(coords, colour, vertexCount, getType().getGLPrimitive());
+        return new GL_Primitive(coords, colour, getType().getGLPrimitive());
     }
 
     public int getIconRef() {

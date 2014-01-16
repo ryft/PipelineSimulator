@@ -10,13 +10,17 @@ import android.opengl.GLES20;
 
 public class GL_Primitive implements Drawable {
 
-    // Number of coordinates per vertex in the provided array
+    // Number of coordinates per item in the provided array
     protected final int COORDS_PER_VERTEX = 3;
+    protected final int COORDS_PER_COLOUR = 4;
+    // Bytes in a float
+    protected final int BYTES_PER_FLOAT = 4;
     // Bytes between consecutive vertices
     protected final int vertexStride = COORDS_PER_VERTEX * 4;
 
     protected float[] mPositions;
     protected float[] mColour;
+    protected float[] mColours;
 
     protected FloatBuffer mVertexBuffer;
     
@@ -25,16 +29,21 @@ public class GL_Primitive implements Drawable {
     protected int mMVPMatrixHandle;
 
     private final int mVertexCount;
-    private final int mVertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    private final int mVertexStride = COORDS_PER_VERTEX * BYTES_PER_FLOAT;
     private final int mPrimitiveType;
 
-    public GL_Primitive(float[] coords, float[] colour, int vertexCount, int primitiveType) {
+    public GL_Primitive(float[] coords, float[] colour, int primitiveType) {
+
+        mVertexCount = coords.length / COORDS_PER_VERTEX;
 
         mPositions = coords;
+        
         mColour = colour;
+        mColours = new float[mVertexCount * COORDS_PER_COLOUR];
+        for (int i = 0; i < mVertexCount * COORDS_PER_COLOUR; i++)
+            mColours[i] = colour[i % COORDS_PER_COLOUR];
+        
         mPrimitiveType = primitiveType;
-
-        mVertexCount = mPositions.length / COORDS_PER_VERTEX;
 
         // Initialise vertex byte buffer for shape coordinates
         ByteBuffer vb = ByteBuffer.allocateDirect(mPositions.length * 4);
