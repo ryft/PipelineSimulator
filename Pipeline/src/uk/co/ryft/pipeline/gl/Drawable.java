@@ -1,6 +1,7 @@
 package uk.co.ryft.pipeline.gl;
 
-import uk.co.ryft.pipeline.gl.shapes.LightingModel;
+import uk.co.ryft.pipeline.gl.lighting.LightingModel;
+
 
 public interface Drawable {
     

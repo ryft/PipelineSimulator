@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
+import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import android.opengl.GLES20;
 
 public class GL_Primitive implements Drawable {
@@ -101,6 +102,7 @@ public class GL_Primitive implements Drawable {
 
     }
 
+    // TODO This is heavily coupled with the lighting models. Consider moving into LightingModel classes.
     public void draw(LightingModel lighting, float[] mvMatrix, float[] mvpMatrix) {
 
         // Add our shader program to the OpenGL ES environment
