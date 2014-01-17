@@ -101,86 +101,101 @@ public class GL_Primitive implements Drawable {
 
     }
 
-    public void draw(int glProgram, float[] mvMatrix, float[] mvpMatrix) {
+    public void draw(LightingModel lightingModel, float[] mvMatrix, float[] mvpMatrix) {
 
-        if (!PipelineRenderer.LAMBERT) {
+        // Add our shader program to the OpenGL ES environment
+        int glProgram = lightingModel.getGLProgram();
+        GLES20.glUseProgram(glProgram);
 
-            // Add program to OpenGL ES environment
-            GLES20.glUseProgram(glProgram);
+        // Set program handles for drawing
+        int mMVPMatrixHandle;
+        int mMVMatrixHandle;
+        int mLightPosHandle;
+        int mPositionHandle;
+        int mColourHandle;
+        int mNormalHandle;
 
-            // get handle to vertex shader's vPosition member
-            int mPositionHandle = GLES20.glGetAttribLocation(glProgram, "vPosition");
+        switch (lightingModel) {
 
-            // Enable a handle to the triangle vertices
-            GLES20.glEnableVertexAttribArray(mPositionHandle);
+            case UNIFORM:
 
-            // Prepare the triangle coordinate data
-            GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride,
-                    mVertexBuffer);
+                // Get handle to vertex shader's position member
+                mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
 
-            // get handle to fragment shader's vColor member
-            int mColourHandle = GLES20.glGetUniformLocation(glProgram, "vColor");
+                // Enable a handle to the triangle vertices
+                GLES20.glEnableVertexAttribArray(mPositionHandle);
 
-            // Set color for drawing the triangle
-            GLES20.glUniform4fv(mColourHandle, 1, mColour, 0);
+                // Prepare the triangle coordinate data
+                GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride,
+                        mVertexBuffer);
 
-            // get handle to shape's transformation matrix
-            int mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "uMVPMatrix");
-            PipelineRenderer.checkGlError("glGetUniformLocation");
+                // Get handle to fragment shader's colour member
+                mColourHandle = GLES20.glGetUniformLocation(glProgram, "a_Color");
 
-            // Apply the projection and view transformation
-            GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-            PipelineRenderer.checkGlError("glUniformMatrix4fv");
+                // Set colour for drawing the primitive
+                GLES20.glUniform4fv(mColourHandle, 1, mColour, 0);
 
-            // Draw the line(s)
-            // TODO: Consider using glDrawElements
-            GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+                // Get handle to shape's transformation matrix
+                mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
+                PipelineRenderer.checkGlError("glGetUniformLocation");
 
-            // Disable vertex array
-            GLES20.glDisableVertexAttribArray(mPositionHandle);
+                // Apply the projection and view transformation
+                GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+                PipelineRenderer.checkGlError("glUniformMatrix4fv");
 
-        } else {
+                // Draw the primitive
+                GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
 
-            // Set our Lambertian lighting program.
-            GLES20.glUseProgram(glProgram);
+                // Disable vertex array
+                GLES20.glDisableVertexAttribArray(mPositionHandle);
 
-            // Set program handles for cube drawing.
-            int mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
-            int mMVMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVMatrix");
-            int mLightPosHandle = GLES20.glGetUniformLocation(glProgram, "u_LightPos");
-            int mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
-            int mColorHandle = GLES20.glGetAttribLocation(glProgram, "a_Color");
-            int mNormalHandle = GLES20.glGetAttribLocation(glProgram, "a_Normal");
+                break;
 
-            // Pass in the position information
-            mVertexBuffer.position(0);
-            GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
+            case LAMBERTIAN:
 
-            GLES20.glEnableVertexAttribArray(mPositionHandle);
+                // Get handles to shader members
+                mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
+                mMVMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVMatrix");
+                mLightPosHandle = GLES20.glGetUniformLocation(glProgram, "u_LightPos");
+                mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
+                mColourHandle = GLES20.glGetAttribLocation(glProgram, "a_Color");
+                mNormalHandle = GLES20.glGetAttribLocation(glProgram, "a_Normal");
 
-            // Pass in the color information
-            mColourBuffer.position(0);
-            GLES20.glVertexAttribPointer(mColorHandle, COORDS_PER_COLOUR, GLES20.GL_FLOAT, false, 0, mColourBuffer);
+                // Pass in the position information
+                mVertexBuffer.position(0);
+                GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
 
-            GLES20.glEnableVertexAttribArray(mColorHandle);
+                GLES20.glEnableVertexAttribArray(mPositionHandle);
 
-            // Pass in the normal information
-            mNormalBuffer.position(0);
-            GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mNormalBuffer);
+                // Pass in the colour information
+                mColourBuffer.position(0);
+                GLES20.glVertexAttribPointer(mColourHandle, COORDS_PER_COLOUR, GLES20.GL_FLOAT, false, 0, mColourBuffer);
 
-            GLES20.glEnableVertexAttribArray(mNormalHandle);
+                GLES20.glEnableVertexAttribArray(mColourHandle);
 
-            // Pass in the modelview matrix.
-            GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mvMatrix, 0);
+                // Pass in the normal information
+                mNormalBuffer.position(0);
+                GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mNormalBuffer);
 
-            // Pass in the combined matrix.
-            GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+                GLES20.glEnableVertexAttribArray(mNormalHandle);
 
-            // Pass in the light position in eye space.
-            GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.lightPosition.getX(), PipelineRenderer.lightPosition.getY(), PipelineRenderer.lightPosition.getZ());
+                // Pass in the model-view matrix
+                GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mvMatrix, 0);
 
-            // Draw the primitive.
-            GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+                // Pass in the combined matrix
+                GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+                // Pass in the light position in eye space
+                GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.lightPosition.getX(),
+                        PipelineRenderer.lightPosition.getY(), PipelineRenderer.lightPosition.getZ());
+
+                // Draw the primitive
+                GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Cannot draw primitives with lighting model (" + this + ")");
 
         }
     }

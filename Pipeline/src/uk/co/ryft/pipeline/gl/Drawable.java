@@ -1,7 +1,9 @@
 package uk.co.ryft.pipeline.gl;
 
+import uk.co.ryft.pipeline.gl.shapes.LightingModel;
+
 public interface Drawable {
     
-    public abstract void draw(int glProgram, float[] mvMatrix, float[] mvpMatrix);
+    public abstract void draw(LightingModel lightingModel, float[] mvMatrix, float[] mvpMatrix);
 
 }
