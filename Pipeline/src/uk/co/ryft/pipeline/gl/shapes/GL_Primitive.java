@@ -101,10 +101,10 @@ public class GL_Primitive implements Drawable {
 
     }
 
-    public void draw(LightingModel lightingModel, float[] mvMatrix, float[] mvpMatrix) {
+    public void draw(LightingModel lighting, float[] mvMatrix, float[] mvpMatrix) {
 
         // Add our shader program to the OpenGL ES environment
-        int glProgram = lightingModel.getGLProgram();
+        int glProgram = lighting.getGLProgram();
         GLES20.glUseProgram(glProgram);
 
         // Set program handles for drawing
@@ -115,7 +115,7 @@ public class GL_Primitive implements Drawable {
         int mColourHandle;
         int mNormalHandle;
 
-        switch (lightingModel) {
+        switch (lighting.getModel()) {
 
             case UNIFORM:
 
@@ -228,7 +228,7 @@ public class GL_Primitive implements Drawable {
                 break;
 
             default:
-                throw new UnsupportedOperationException("Cannot draw primitives with lighting model (" + this + ")");
+                throw new UnsupportedOperationException("Cannot draw primitives with lighting model (" + lighting + ")");
 
         }
     }
