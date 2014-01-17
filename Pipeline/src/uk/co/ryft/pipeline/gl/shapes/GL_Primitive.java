@@ -122,33 +122,32 @@ public class GL_Primitive implements Drawable {
                 // Get handle to vertex shader's position member
                 mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
 
-                // Enable a handle to the triangle vertices
+                // Enable a handle to the vertices
                 GLES20.glEnableVertexAttribArray(mPositionHandle);
 
-                // Prepare the triangle coordinate data
+                // Prepare coordinate data
                 GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride,
                         mVertexBuffer);
 
                 // Get handle to fragment shader's colour member
-                mColourHandle = GLES20.glGetUniformLocation(glProgram, "a_Color");
+                mColourHandle = GLES20.glGetUniformLocation(glProgram, "u_Color");
 
                 // Set colour for drawing the primitive
                 GLES20.glUniform4fv(mColourHandle, 1, mColour, 0);
 
                 // Get handle to shape's transformation matrix
                 mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
-                PipelineRenderer.checkGlError("glGetUniformLocation");
 
                 // Apply the projection and view transformation
                 GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-                PipelineRenderer.checkGlError("glUniformMatrix4fv");
 
                 // Draw the primitive
                 GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
 
                 // Disable vertex array
                 GLES20.glDisableVertexAttribArray(mPositionHandle);
-
+                
+                PipelineRenderer.checkGlError();
                 break;
 
             case LAMBERTIAN:
@@ -186,12 +185,46 @@ public class GL_Primitive implements Drawable {
                 GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
                 // Pass in the light position in eye space
-                GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.lightPosition.getX(),
-                        PipelineRenderer.lightPosition.getY(), PipelineRenderer.lightPosition.getZ());
+                GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.sLightPosition.getX(),
+                        PipelineRenderer.sLightPosition.getY(), PipelineRenderer.sLightPosition.getZ());
+
+                // Draw the primitive
+                GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
+                
+                // Disable the attribute arrays
+                GLES20.glDisableVertexAttribArray(mPositionHandle);
+                GLES20.glDisableVertexAttribArray(mColourHandle);
+                GLES20.glDisableVertexAttribArray(mNormalHandle);
+                
+                PipelineRenderer.checkGlError();
+                break;
+                
+            case POINT_SOURCE:
+
+                // Get handle to vertex shader's position member
+                mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
+                GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+                // Enable a handle to the vertices
+                GLES20.glEnableVertexAttribArray(mPositionHandle);
+
+                // Prepare coordinate data
+                GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, mVertexStride,
+                        mVertexBuffer);
+
+                // Get handle to shape's transformation matrix
+                mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
+
+                // Apply the projection and view transformation
+                GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
                 // Draw the primitive
                 GLES20.glDrawArrays(mPrimitiveType, 0, mVertexCount);
 
+                // Disable vertex array
+                GLES20.glDisableVertexAttribArray(mPositionHandle);
+                
+                PipelineRenderer.checkGlError();
                 break;
 
             default:

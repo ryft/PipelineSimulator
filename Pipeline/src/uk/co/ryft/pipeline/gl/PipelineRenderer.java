@@ -62,7 +62,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     public void setVirtualCamera(Camera virtualCamera) { mVirtualCamera = virtualCamera; }
     
     // Light position, for implementing lighting models
-    public static Float3 lightPosition = new Float3(2, 2, 2);
+    public static Float3 sLightPosition = new Float3(0, 2, 0);
+    private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE);
+    private Drawable sLightDrawable;
 
     // For touch events
     // TODO: Implement a monitor for this.
@@ -242,25 +244,10 @@ public class PipelineRenderer implements Renderer, Serializable {
                 // TODO: Investigate turning off continuous rendering when quitting
                 System.out.println("Ruh-roh, null drawable!");
         }
-        
-        
-        // Draw light point
-        int lightProgram = LightingModel.POINT_SOURCE.getGLProgram();  
 
-        final int mvpMatrixHandle = GLES20.glGetUniformLocation(lightProgram, "u_MVPMatrix");
-        final int lightPositionHandle = GLES20.glGetAttribLocation(lightProgram, "a_Position");
-        
-        // Pass in the position.
-        GLES20.glVertexAttrib3f(lightPositionHandle, lightPosition.getX(), lightPosition.getY(), lightPosition.getZ());
-
-        // Since we are not using a buffer object, disable vertex arrays for this attribute.
-        GLES20.glDisableVertexAttribArray(lightPositionHandle);  
-        
-        // Pass in the transformation matrix.
-        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mCVPMatrix, 0);
-        
-        // Draw the point.
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
+        if (sLightDrawable == null)
+            sLightDrawable = sLightPoint.getDrawable();
+        sLightDrawable.draw(LightingModel.POINT_SOURCE, mMVMatrix, mMVPMatrix);
 
     }
     
@@ -282,23 +269,20 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     /**
-     * Utility method for debugging OpenGL calls. Provide the name of the call just after making it:
+     * Utility method for debugging OpenGL calls:
      * 
      * <pre>
      * mColorHandle = GLES20.glGetUniformLocation(mProgram, &quot;vColor&quot;);
-     * MyGLRenderer.checkGlError(&quot;glGetUniformLocation&quot;);
+     * MyGLRenderer.checkGlError();
      * </pre>
      * 
      * If the operation is not successful, the check throws an error.
-     * 
-     * @param glOperation
-     *            - Name of the OpenGL call to check.
      */
-    public static void checkGlError(String glOperation) {
+    public static void checkGlError() {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e(TAG, glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
+            Log.e(TAG, "glError " + error);
+            throw new RuntimeException("glError " + error);
         }
     }
 
