@@ -36,7 +36,7 @@ public class Lambertian extends LightingModel {
                 //      Calculate the Lambertian reflectance coefficient
                 + "     float diffuse = max(dot(modelViewNormal, lightVector), 0.1);       \n"
                 //      Calculate luminosity using inverse square law attenuation
-                + "     diffuse = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));  \n"
+//                + "     diffuse = diffuse * (1.0 / (1.0 + (0.25 * distance * distance)));  \n"
                 + "                                                                        \n"
                 //      Get the illuminated colour to be interpolated across the shape
                 + "     v_Color = a_Color * diffuse;                                       \n"

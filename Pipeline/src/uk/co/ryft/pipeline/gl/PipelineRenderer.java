@@ -36,6 +36,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
     private final float[] mCameraModelMatrix = new float[16];
+    private final float[] mLightModelMatrix = new float[16];
 
     private final float[] mViewMatrix = new float[16];
     private final float[] mCameraViewMatrix = new float[16];
@@ -43,16 +44,18 @@ public class PipelineRenderer implements Renderer, Serializable {
     
     private final float[] mMVMatrix = new float[16];
     private final float[] mCVMatrix = new float[16];
+    private final float[] mLVMatrix = new float[16];
     
     private final float[] mMVPMatrix = new float[16];
     private final float[] mCVPMatrix = new float[16];
+    private final float[] mLVPMatrix = new float[16];
 
     private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
 
     private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
     
-    private Camera mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
-    private Camera mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
+    private Camera mActualCamera;
+    private Camera mVirtualCamera;
 
     // TODO This is unsafe. If that's OK we can just use public variables,
     // if not implement cloneable and clone each before returning.
@@ -76,8 +79,10 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mModelRotationMatrix = new float[16];
 
     // Drawables aren't initialised, and are constructed at render time if necessary
-    private Composite mCamera = new Composite(Composite.Type.CAMERA, Collections.<Element> emptyList());
+    private Element mCameraElement;
     private Drawable mCameraDrawable;
+    private Element mFrustumElement;
+    private Drawable mFrustumDrawable;
 
     // Axes should never change between instances so they can be declared statically
     private static Composite sAxes;
@@ -140,10 +145,8 @@ public class PipelineRenderer implements Renderer, Serializable {
         mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
         mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
         
-        LinkedList<Element> camera = new LinkedList<Element>();
-        camera.add(ShapeFactory.buildCamera(0.25f));
-        camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
-        mCamera = new Composite(Composite.Type.CUSTOM, camera);
+        mCameraElement = ShapeFactory.buildCamera(0.25f);
+        mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -161,8 +164,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
     }
-    
-    Drawable cube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1f, 1f, 1f, Colour.WHITE, Colour.WHITE).getDrawable();
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -180,12 +181,13 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        // Set up the model (world transformation) matrix
-        Matrix.setIdentityM(mModelMatrix, 0);
-
         // Get the current camera view matrices
         mActualCamera.setViewMatrix(mViewMatrix, 0);
         mVirtualCamera.setViewMatrix(mCameraViewMatrix, 0);
+
+        // Set up the model (world transformation) matrix
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.setIdentityM(mLightModelMatrix, 0);
         
         // The camera model matrix transforms the camera to its correct position and orientation in world space
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
@@ -203,8 +205,11 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        Matrix.multiplyMM(mLVMatrix, 0, mViewMatrix, 0, mLightModelMatrix, 0);
         Matrix.multiplyMM(mCVMatrix, 0, mViewMatrix, 0, mCameraModelMatrix, 0);
+
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVMatrix, 0);
+        Matrix.multiplyMM(mLVPMatrix, 0, mProjectionMatrix, 0, mLVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
 
         // Initialise axes and camera drawables if necessary
@@ -212,13 +217,14 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (sAxesDrawable == null)
             sAxesDrawable = sAxes.getDrawable();
         if (mCameraDrawable == null)
-            mCameraDrawable = mCamera.getDrawable();
+            mCameraDrawable = mCameraElement.getDrawable();
+        if (mFrustumDrawable == null)
+            mFrustumDrawable = mFrustumElement.getDrawable();
 
         // Draw axes and virtual camera        
-        sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
+        sAxesDrawable.draw(LightingModel.UNIFORM, mMVMatrix, mMVPMatrix);
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
-        
-        cube.draw(LightingModel.UNIFORM, mMVMatrix, mMVPMatrix);
+        mFrustumDrawable.draw(LightingModel.UNIFORM, mCVMatrix, mCVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -235,7 +241,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         if (sLightDrawable == null)
             sLightDrawable = sLightPoint.getDrawable();
-        sLightDrawable.draw(LightingModel.POINT_SOURCE, mMVMatrix, mMVPMatrix);
+        sLightDrawable.draw(LightingModel.POINT_SOURCE, mLVMatrix, mLVPMatrix);
 
     }
     

@@ -11,3 +11,4 @@ tessellation
 lambertian
 reflectance
 luminosity
+polygonal
