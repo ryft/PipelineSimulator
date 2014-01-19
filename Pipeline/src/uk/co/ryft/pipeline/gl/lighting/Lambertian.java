@@ -82,10 +82,12 @@ public class Lambertian extends LightingModel {
                     //      Calculate the Lambertian reflectance coefficient
                     + "     float diffuse = max(dot(modelViewNormal, lightVector), 0.1);       \n"
                     //      Calculate luminosity using inverse square law attenuation
-                    + "     diffuse = diffuse * (1.0 / (1.0 + (0.0125 * distance * distance)));  \n"
+                    + "     diffuse = diffuse * (15.0 / (1.0 + (distance * distance)));        \n"
+                    //      Add an ambient lighting level term
+                    + "     float ambient = 0.25;                                              \n"
                     + "                                                                        \n"
                     //      Get the illuminated colour to be interpolated across the shape
-                    + "     v_Color = a_Color * diffuse;                                       \n"
+                    + "     v_Color = a_Color * (diffuse + ambient);                           \n"
                     //      Pass on the position of the projected vertex in screen coordinates
                     + "     gl_Position = u_MVPMatrix * a_Position;                            \n"
                     + "}                                                                       \n";
@@ -114,10 +116,12 @@ public class Lambertian extends LightingModel {
                     + "     vec3 lightVector = normalize(u_LightPos - modelViewVertex);        \n"
                     + "                                                                        \n"
                     //      Calculate luminosity using inverse square law attenuation
-                    + "     float diffuse = 1.0 / (1.0 + (0.0125 * distance * distance));      \n"
+                    + "     float diffuse = 10.0 / (1.0 + (distance * distance));              \n"
+                    //      Ambient coefficient is penalised here to compensate for the uniformity
+                    + "     float ambient = 0.1;                                               \n"
                     + "                                                                        \n"
                     //      Get the illuminated colour to be interpolated across the shape
-                    + "     v_Color = a_Color * diffuse;                                       \n"
+                    + "     v_Color = a_Color * (diffuse + ambient);                           \n"
                     //      Pass on the position of the projected vertex in screen coordinates
                     + "     gl_Position = u_MVPMatrix * a_Position;                            \n"
                     + "}                                                                       \n";
@@ -195,5 +199,11 @@ public class Lambertian extends LightingModel {
         GLES20.glDisableVertexAttribArray(mNormalHandle);
         
         PipelineRenderer.checkGlError();
+    }
+    
+    @Override
+    public void reset() {
+        mProgram2D = 0;
+        mProgram3D = 0;
     }
 }

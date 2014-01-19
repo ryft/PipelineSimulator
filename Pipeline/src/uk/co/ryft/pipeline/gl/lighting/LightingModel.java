@@ -56,6 +56,17 @@ public abstract class LightingModel {
 
     public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
     
+    public static void resetAll() {
+        UNIFORM.reset();
+        LAMBERTIAN.reset();
+        POINT_SOURCE.reset();
+    }
+    
+    // XXX Clears the GL program for use in a new render thread
+    public void reset() {
+        mProgram = 0;
+    }
+    
     @Override
     public String toString() {
         return mModel.name();

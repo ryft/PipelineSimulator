@@ -163,6 +163,13 @@ public class PipelineRenderer implements Renderer, Serializable {
         
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
+        
+        // Force re-initialisation of static scene objects in this new render thread context
+        sAxesDrawable = null;
+        sLightDrawable = null;
+        mCameraDrawable = null;
+        mFrustumDrawable = null;
+        LightingModel.resetAll();
     }
 
     @Override
@@ -175,6 +182,9 @@ public class PipelineRenderer implements Renderer, Serializable {
         mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
     
     }
+    
+    Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
+    
     @Override
     public void onDrawFrame(GL10 unused) {
 
@@ -288,15 +298,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         mElements.clear();
         for (Element e : elements)
             mElements.put(e, null);
-    }
-
-    public void onPause() {
-    }
-
-    public void onResume() {
-        // Force re-initialisation of static scene objects in this new render thread context
-        sAxesDrawable = null;
-        mCameraDrawable = null;
     }
 
 }
