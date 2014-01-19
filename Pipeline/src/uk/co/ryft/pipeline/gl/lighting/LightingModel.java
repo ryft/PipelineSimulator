@@ -16,11 +16,11 @@ public abstract class LightingModel {
     // Bytes between consecutive vertices
     protected static final int vertexStride = COORDS_PER_VERTEX * 4;
     
-    public static enum Model { UNIFORM, LAMBERTIAN, PHONG, POINT_SOURCE; }
+    public static enum Model { UNIFORM, GOURAUD, PHONG, POINT_SOURCE; }
 
     public static LightingModel UNIFORM = new Uniform();
-    public static LightingModel LAMBERTIAN = new Lambertian(Model.LAMBERTIAN);
-    public static LightingModel PHONG = new Lambertian(Model.PHONG);
+    public static LightingModel GOURAUD = new Gouraud();
+    public static LightingModel PHONG = new Phong();
     public static LightingModel POINT_SOURCE = new PointSource();
     
     private final String TAG = "LightingModel";
@@ -59,7 +59,8 @@ public abstract class LightingModel {
     
     public static void resetAll() {
         UNIFORM.reset();
-        LAMBERTIAN.reset();
+        GOURAUD.reset();
+        PHONG.reset();
         POINT_SOURCE.reset();
     }
     

@@ -21,21 +21,20 @@ public class PointSource extends LightingModel {
                 + "attribute vec4 a_Position;     \n"
                 + "                               \n"
                 + "void main() {                  \n"
-                + "                               \n"
-                + "    gl_Position = u_MVPMatrix  \n"
-                + "                * a_Position;  \n"
-                + "    gl_PointSize = 10.0;        \n"
-                + "}                              \n";
+                + "                                             \n"
+                //     The order must be matrix * vector as the matrix is in col-major order
+                + "    gl_Position = u_MVPMatrix * a_Position;  \n"
+                + "    gl_PointSize = 10.0;                     \n"
+                + "}                                            \n";
     }
 
     @Override
     public String getFragmentShader(int primitiveType) {
         return   "precision mediump float;       \n"
-                + "void main() {                  \n"
                 + "                               \n"
-                + "    gl_FragColor = vec4(1.0,   \n"
-                + "    1.0, 1.0, 1.0);            \n"
-                + "}                              \n";
+                + "void main() {                                \n"
+                + "    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); \n"
+                + "}                                            \n";
     }
 
     @Override

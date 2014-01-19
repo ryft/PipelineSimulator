@@ -21,10 +21,10 @@ public class Uniform extends LightingModel {
                 + "attribute vec4 a_Position;     \n"
                 + "                               \n"
                 + "void main() {                  \n"
-                + "                               \n"
-                //      The order must be matrix * vector as the matrix is in col-major order.
-                + "     gl_Position = u_MVPMatrix * a_Position; \n"
-                + "}                              \n";
+                + "                                             \n"
+                //     The order must be matrix * vector as the matrix is in col-major order
+                + "    gl_Position = u_MVPMatrix * a_Position;  \n"
+                + "}                                            \n";
     }
 
     @Override

@@ -7,11 +7,6 @@ public class Phong extends Lambertian {
     }
 
     @Override
-    protected String[] getVertexShaderAttributes() {
-        return new String[] {"a_Position", "a_Color", "a_Normal"};
-    }
-
-    @Override
     // Define a vertex shader for 2D and 3D primitives
     // 2D primitives have uniform lighting attenuated over distance
     // This is because 2D primitives have no notion of a normal direction
@@ -27,7 +22,7 @@ public class Phong extends Lambertian {
                 + "varying vec4 v_Color;          \n"
                 + "varying vec3 v_Normal;         \n"
                 + "                               \n"
-                + "void main() {                                              \n"
+                + "void main() {                  \n"
                 + "                                                           \n"
                 + "    v_Position = vec3(u_MVMatrix * a_Position);            \n" // Transform the vertex into eye space
                 + "    v_Color = a_Color;                                     \n" // Pass through the colour
@@ -51,12 +46,12 @@ public class Phong extends Lambertian {
                     + "varying vec3 v_Normal;         \n"     // Interpolated normal for this fragment
                     + "                               \n"
                     + "void main() {                  \n"
-                    + "                               \n"
+                    + "                                                                       \n"
                     + "    float distance = length(u_LightPos - v_Position);                  \n" // Will be used for attenuation
                     + "    vec3 lightVector = normalize(u_LightPos - v_Position);             \n" // Get a lighting direction vector from the light to the vertex
                     + "                                                                       \n"
                     + "    float diffuse = max(dot(v_Normal, lightVector), 0.1);              \n" // Calculate the Lambertian reflectance coefficient
-                    + "    diffuse = diffuse * (15.0 / (1.0 + (distance * distance)));        \n" // Add attenuation
+                    + "    diffuse = diffuse * (15.0 / (1.0 + (distance * distance)));        \n" // Add attenuation using the inverse square law
                     + "    float ambient = 0.25;                                              \n" // Add an ambient lighting level term
                     + "                                                                       \n"
                     + "    gl_FragColor = v_Color * (diffuse + ambient);                      \n" // Multiply the colour by the diffuse illumination level
@@ -72,12 +67,10 @@ public class Phong extends Lambertian {
                     + "varying vec3 v_Normal;         \n"     // Interpolated normal for this fragment
                     + "                               \n"
                     + "void main() {                  \n"
-                    + "                               \n"
-                    + "    float distance = length(u_LightPos - v_Position);                  \n" // Will be used for attenuation
-                    + "    vec3 lightVector = normalize(u_LightPos - v_Position);             \n" // Get a lighting direction vector from the light to the vertex
                     + "                                                                       \n"
-                    + "    float diffuse = max(dot(v_Normal, lightVector), 0.1);              \n" // Calculate the Lambertian reflectance coefficient
-                    + "    diffuse = diffuse * (10.0 / (1.0 + (distance * distance)));        \n" // Add attenuation
+                    + "    float distance = length(u_LightPos - v_Position);                  \n" // Will be used for attenuation
+                    + "                                                                       \n"
+                    + "    float diffuse = 10.0 / (1.0 + (distance * distance));              \n" // Add attenuation using the inverse square law
                     + "    float ambient = 0.1;                                               \n" // Add an ambient lighting level term
                     + "                                                                       \n"
                     + "    gl_FragColor = v_Color * (diffuse + ambient);                      \n" // Multiply the colour by the diffuse illumination level
