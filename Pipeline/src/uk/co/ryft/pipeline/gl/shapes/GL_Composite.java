@@ -17,6 +17,7 @@ public class GL_Composite implements Drawable {
         mComponents.addAll(drawables);
     }
 
+    @Override
     public void draw(LightingModel lighting, float[] mvMatrix, float[] mvpMatrix) {
         for (Drawable d : mComponents)
             d.draw(lighting, mvMatrix, mvpMatrix);
