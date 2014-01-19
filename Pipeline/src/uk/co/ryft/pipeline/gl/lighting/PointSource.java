@@ -29,7 +29,7 @@ public class PointSource extends LightingModel {
     }
 
     @Override
-    public String getFragmentShader() {
+    public String getFragmentShader(int primitiveType) {
         return   "precision mediump float;       \n"
                 + "void main() {                  \n"
                 + "                               \n"

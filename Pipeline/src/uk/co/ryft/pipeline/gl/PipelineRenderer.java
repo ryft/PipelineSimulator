@@ -31,7 +31,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private static final String TAG = "PipelineRenderer";
     
-    public static LightingModel mLighting = LightingModel.LAMBERTIAN;
+    public static LightingModel mLighting = LightingModel.PHONG;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];

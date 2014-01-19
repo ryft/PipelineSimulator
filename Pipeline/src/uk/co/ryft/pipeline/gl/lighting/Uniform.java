@@ -28,7 +28,7 @@ public class Uniform extends LightingModel {
     }
 
     @Override
-    public String getFragmentShader() {
+    public String getFragmentShader(int primitiveType) {
         return   "precision mediump float;       \n"
                 + "uniform vec4 u_Color;          \n"
                 + "                               \n"

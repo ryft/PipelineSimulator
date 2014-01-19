@@ -11,8 +11,9 @@ public class Lambertian extends LightingModel {
     
     List<Integer> types3D = Arrays.asList(new Integer[] {GLES20.GL_TRIANGLES, GLES20.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_STRIP});
     
-    protected Lambertian() {
-        super(Model.LAMBERTIAN);
+    // XXX Passing in the shading model allows phong shading to subclass this
+    protected Lambertian(Model m) {
+        super(m);
     }
     
     private int mProgram3D;
@@ -26,14 +27,14 @@ public class Lambertian extends LightingModel {
         
         if (is3DPrimitive && mProgram3D == 0) {
             final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader(primitiveType));        
-            final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader());      
+            final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader(primitiveType));      
             
             String[] attributes = getVertexShaderAttributes();
             mProgram3D = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, attributes);
             
         } else if (!is3DPrimitive && mProgram2D == 0) {
             final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader(primitiveType));        
-            final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader());      
+            final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader(primitiveType));      
             
             String[] attributes = getVertexShaderAttributes();
             mProgram2D = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, attributes);
@@ -56,7 +57,7 @@ public class Lambertian extends LightingModel {
     // This is because 2D primitives have no notion of a normal direction
     public String getVertexShader(int primitiveType) {
         
-        if (primitiveType == GLES20.GL_TRIANGLES || primitiveType == GLES20.GL_TRIANGLE_STRIP || primitiveType == GLES20.GL_TRIANGLE_FAN) {
+        if (types3D.contains(primitiveType))
             return   "uniform mat4 u_MVPMatrix;      \n"     // A constant representing the combined model/view/projection matrix.
                     + "uniform mat4 u_MVMatrix;       \n"     // A constant representing the combined model/view matrix.
                     + "uniform vec3 u_LightPos;       \n"     // The position of the light source in eye space.
@@ -92,7 +93,7 @@ public class Lambertian extends LightingModel {
                     + "     gl_Position = u_MVPMatrix * a_Position;                            \n"
                     + "}                                                                       \n";
         
-        } else {
+        else
             return   "uniform mat4 u_MVPMatrix;      \n"     // A constant representing the combined model/view/projection matrix.
                     + "uniform mat4 u_MVMatrix;       \n"     // A constant representing the combined model/view matrix.
                     + "uniform vec3 u_LightPos;       \n"     // The position of the light source in eye space.
@@ -125,11 +126,10 @@ public class Lambertian extends LightingModel {
                     //      Pass on the position of the projected vertex in screen coordinates
                     + "     gl_Position = u_MVPMatrix * a_Position;                            \n"
                     + "}                                                                       \n";
-        }
     }
 
     @Override
-    public String getFragmentShader() {
+    public String getFragmentShader(int primitiveType) {
         return   "precision mediump float;       \n"
                 + "varying vec4 v_Color;          \n"
                 + "                               \n"

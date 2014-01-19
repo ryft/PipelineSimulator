@@ -16,10 +16,11 @@ public abstract class LightingModel {
     // Bytes between consecutive vertices
     protected static final int vertexStride = COORDS_PER_VERTEX * 4;
     
-    public static enum Model { UNIFORM, LAMBERTIAN, POINT_SOURCE; }
+    public static enum Model { UNIFORM, LAMBERTIAN, PHONG, POINT_SOURCE; }
 
     public static LightingModel UNIFORM = new Uniform();
-    public static LightingModel LAMBERTIAN = new Lambertian();
+    public static LightingModel LAMBERTIAN = new Lambertian(Model.LAMBERTIAN);
+    public static LightingModel PHONG = new Lambertian(Model.PHONG);
     public static LightingModel POINT_SOURCE = new PointSource();
     
     private final String TAG = "LightingModel";
@@ -39,7 +40,7 @@ public abstract class LightingModel {
         
         if (mProgram == 0) {
             final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader(primitiveType));        
-            final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader());      
+            final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader(primitiveType));      
             
             String[] attributes = getVertexShaderAttributes();
             mProgram = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, attributes);
@@ -52,7 +53,7 @@ public abstract class LightingModel {
     
     public abstract String getVertexShader(int primitiveType);
     
-    public abstract String getFragmentShader();
+    public abstract String getFragmentShader(int primitiveType);
 
     public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
     
