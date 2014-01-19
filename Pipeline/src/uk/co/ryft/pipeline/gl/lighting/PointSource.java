@@ -5,12 +5,14 @@ public class PointSource extends LightingModel {
     protected PointSource() {
         super(Model.POINT_SOURCE);
     }
-    
+
+    @Override
     protected String[] getVertexShaderAttributes() {
         return new String[] {"a_Position"};
     }
 
-    public String getVertexShader() {
+    @Override
+    public String getVertexShader(int primitiveType) {
         return   "uniform mat4 u_MVPMatrix;      \n"
                 + "attribute vec4 a_Position;     \n"
                 + "                               \n"
@@ -22,6 +24,7 @@ public class PointSource extends LightingModel {
                 + "}                              \n";
     }
 
+    @Override
     public String getFragmentShader() {
         return   "precision mediump float;       \n"
                 + "void main() {                  \n"

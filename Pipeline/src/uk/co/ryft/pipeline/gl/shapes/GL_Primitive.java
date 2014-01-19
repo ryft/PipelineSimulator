@@ -106,7 +106,7 @@ public class GL_Primitive implements Drawable {
     public void draw(LightingModel lighting, float[] mvMatrix, float[] mvpMatrix) {
 
         // Add our shader program to the OpenGL ES environment
-        int glProgram = lighting.getGLProgram();
+        int glProgram = lighting.getGLProgram(mPrimitiveType);
         GLES20.glUseProgram(glProgram);
 
         // Set program handles for drawing

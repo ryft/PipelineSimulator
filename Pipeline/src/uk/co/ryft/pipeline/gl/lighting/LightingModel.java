@@ -24,10 +24,10 @@ public abstract class LightingModel {
         return mModel;
     }
     
-    public int getGLProgram() {
+    public int getGLProgram(int primitiveType) {
         
         if (mProgram == 0) {
-            final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader());        
+            final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader(primitiveType));        
             final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader());      
             
             String[] attributes = getVertexShaderAttributes();
@@ -39,7 +39,7 @@ public abstract class LightingModel {
     
     protected abstract String[] getVertexShaderAttributes();
     
-    public abstract String getVertexShader();
+    public abstract String getVertexShader(int primitiveType);
     
     public abstract String getFragmentShader();
     

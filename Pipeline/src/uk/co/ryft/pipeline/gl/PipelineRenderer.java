@@ -222,9 +222,9 @@ public class PipelineRenderer implements Renderer, Serializable {
             mFrustumDrawable = mFrustumElement.getDrawable();
 
         // Draw axes and virtual camera        
-        sAxesDrawable.draw(LightingModel.UNIFORM, mMVMatrix, mMVPMatrix);
+        sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
-        mFrustumDrawable.draw(LightingModel.UNIFORM, mCVMatrix, mCVPMatrix);
+        mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
