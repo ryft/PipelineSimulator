@@ -66,6 +66,7 @@
     <string name="heading_element_proportions">Size and proportions</string>
     <string name="heading_element_parameters">Other parameters</string>
     
+    <string name="heading_group_scene_definition">Scene Definition</string>
     <string name="heading_group_vertex_processing">Vertex Processing</string>
     <string name="heading_group_primitive_processing">Primitive Processing</string>
     <string name="heading_group_rasterisation">Rasterisation</string>
@@ -91,6 +92,8 @@
     <string name="dialogue_button_cancel">Cancel</string>
     
     <string name="button_scene_composition">Scene composition</string>
+    <string name="button_lighting_model">Lighting model</string>
+    <string name="button_vertex_processing">Vertex processing</string>
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_geometry_shading">Geometry shading</string>
     <string name="button_clipping">Clipping</string>
