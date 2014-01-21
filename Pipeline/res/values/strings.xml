@@ -85,6 +85,7 @@
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_title_composite_new">Select Type</string>
+    <string name="dialogue_title_face_culling">Select Winding Direction</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
@@ -93,7 +94,7 @@
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_geometry_shading">Geometry shading</string>
     <string name="button_clipping">Clipping</string>
-    <string name="button_culling">Face Culling</string>
+    <string name="button_culling">Face culling</string>
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
     

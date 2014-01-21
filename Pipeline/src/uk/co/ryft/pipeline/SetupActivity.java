@@ -3,16 +3,21 @@ package uk.co.ryft.pipeline;
 import java.util.ArrayList;
 
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.ui.setup.SetupCullingActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupSceneActivity;
 import uk.co.ryft.pipeline.ui.simulator.SimulatorActivity;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class SetupActivity extends Activity {
@@ -27,6 +32,8 @@ public class SetupActivity extends Activity {
     // Face culling
     protected boolean mCullingEnabled = true;
     protected boolean mCullingClockwise = false;
+    // Depth buffer test
+    protected boolean mDepthBufferEnabled = true;
     
     ViewHolder steps = new ViewHolder();
 
@@ -59,6 +66,7 @@ public class SetupActivity extends Activity {
         initialiseViews();
     }
 
+    // XXX To be called one, sets up listeners
     private void initialiseViews() {
 
         setText(steps.sceneComposition, android.R.id.title, R.string.button_scene_composition);
@@ -69,6 +77,7 @@ public class SetupActivity extends Activity {
         setText(steps.fragmentShading, android.R.id.title, R.string.button_fragment_shading);
         setText(steps.depthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
 
+        ((LinearLayout) steps.sceneComposition).removeView(steps.sceneComposition.findViewById(R.id.checkbox));
         steps.sceneComposition.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,10 +93,39 @@ public class SetupActivity extends Activity {
         steps.culling.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SetupActivity.this, SetupCullingActivity.class);
-                intent.putExtra("enabled", mCullingEnabled);
-                intent.putExtra("clockwise", mCullingClockwise);
-                startActivityForResult(intent, REQUEST_STEP_CULLING);
+                // Instantiate and display a configuration dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                builder.setTitle(R.string.dialogue_title_face_culling);
+                builder.setItems(new CharSequence[] {"Wind faces clockwise", "Wind faces counter-clockwise"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mCullingClockwise = (which == 0);
+                        updateViews();
+                    }});
+
+                // Get the AlertDialog, initialise values and show it.
+                AlertDialog dialogue = builder.create();
+                dialogue.show();
+            }
+        });
+        
+        CheckBox checkBoxFaceCulling = (CheckBox) steps.culling.findViewById(R.id.checkbox);
+        checkBoxFaceCulling.setChecked(mCullingEnabled);
+        checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mCullingEnabled = isChecked;
+                updateViews();
+            }
+        });
+        
+        CheckBox checkBoxDepthBuffer = (CheckBox) steps.depthBufferTest.findViewById(R.id.checkbox);
+        checkBoxDepthBuffer.setChecked(mDepthBufferEnabled);
+        checkBoxDepthBuffer.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mDepthBufferEnabled = isChecked;
+                updateViews();
             }
         });
         
@@ -168,6 +206,13 @@ public class SetupActivity extends Activity {
         } else
             cullingSummary += "disabled";
         
+        // Generate depth buffer summary
+        String depthBufferSummary;
+        if (mDepthBufferEnabled)
+            depthBufferSummary = "Depth buffer test enabled";
+        else
+            depthBufferSummary = "Depth buffer test disabled";
+        
         // TODO Update these properly
 
         setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
@@ -176,7 +221,7 @@ public class SetupActivity extends Activity {
         setText(steps.clipping, android.R.id.summary, "Default clipping");
         setText(steps.culling, android.R.id.summary, cullingSummary);
         setText(steps.fragmentShading, android.R.id.summary, "Empty fragment shader");
-        setText(steps.depthBufferTest, android.R.id.summary, "Default depth buffer test");
+        setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
 
     }
 
