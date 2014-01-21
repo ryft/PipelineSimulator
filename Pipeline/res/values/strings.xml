@@ -13,12 +13,14 @@
     
     <string name="action_points_new">New vertex</string>
     <string name="action_points_discard">Discard vertices</string>
-    <string name="action_element_save">Save</string>
-    <string name="action_element_delete">Delete</string>
-    <string name="action_element_discard">Discard</string>
+    <string name="action_button_save">Save</string>
+    <string name="action_button_delete">Delete</string>
+    <string name="action_button_discard">Discard</string>
+    <string name="action_button_cancel">Cancel</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
-    <string name="title_activity_scene">Edit Scene</string>
+    <string name="title_activity_scene">Configure Scene</string>
+    <string name="title_activity_culling">Configure Face Culling</string>
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
     <string name="title_activity_cylinder_add">New Cylinder</string>
@@ -70,6 +72,11 @@
     <string name="heading_group_fragment_processing">Fragment Processing</string>
     <string name="heading_group_pixel_processing">Pixel Processing</string>
     
+    <string name="heading_culling_face_winding">Surface direction</string>
+    <string name="label_culling_enable">Enable face culling</string>
+    <string name="label_culling_cw">Wind faces clockwise</string>
+    <string name="label_culling_ccw">Wind faces counter-clockwise</string>
+    
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
     
@@ -86,7 +93,7 @@
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_geometry_shading">Geometry shading</string>
     <string name="button_clipping">Clipping</string>
-    <string name="button_culling">Culling</string>
+    <string name="button_culling">Face Culling</string>
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
     

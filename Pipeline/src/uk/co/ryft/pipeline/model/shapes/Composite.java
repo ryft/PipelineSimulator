@@ -11,9 +11,9 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Composite;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.ui.builders.CameraActivity;
-import uk.co.ryft.pipeline.ui.builders.CuboidActivity;
-import uk.co.ryft.pipeline.ui.builders.CylinderActivity;
+import uk.co.ryft.pipeline.ui.setup.builders.BuildCameraActivity;
+import uk.co.ryft.pipeline.ui.setup.builders.BuildCuboidActivity;
+import uk.co.ryft.pipeline.ui.setup.builders.BuildCylinderActivity;
 import android.app.Activity;
 
 // XXX Implementation of Drawable which uses one or more GL ES 2 primitives.
@@ -37,9 +37,9 @@ public class Composite implements Element {
         private static final Map<Type, Class<? extends Activity>> mEditorMap;
         static {
             Map<Type, Class<? extends Activity>> editorMap = new HashMap<Type, Class<? extends Activity>>();
-            editorMap.put(Type.CYLINDER, CylinderActivity.class);
-            editorMap.put(Type.CUBOID, CuboidActivity.class);
-            editorMap.put(Type.CAMERA, CameraActivity.class);
+            editorMap.put(Type.CYLINDER, BuildCylinderActivity.class);
+            editorMap.put(Type.CUBOID, BuildCuboidActivity.class);
+            editorMap.put(Type.CAMERA, BuildCameraActivity.class);
             editorMap.put(Type.CUSTOM, null); // Should never be called
             mEditorMap = Collections.unmodifiableMap(editorMap);
         }
@@ -115,8 +115,19 @@ public class Composite implements Element {
     }
 
     @Override
-    public int getSize() {
-        return mComponents.size();
+    public int getPrimitiveCount() {
+        int size = 0;
+        for (Element e : mComponents)
+            size += e.getPrimitiveCount();
+        return size;
+    }
+
+    @Override
+    public int getVertexCount() {
+        int size = 0;
+        for (Element e : mComponents)
+            size += e.getVertexCount();
+        return size;
     }
     
     @Override

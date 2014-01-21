@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui.builders;
+package uk.co.ryft.pipeline.ui.setup.builders;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class CylinderActivity extends Activity {
+public class BuildCylinderActivity extends Activity {
 
     protected Float3 mPointCentre = new Float3(0, 0, 0);
 
@@ -96,18 +96,7 @@ public class CylinderActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                Intent result = new Intent();
-
-                // Build element from view components
-                int stepCount = Integer.valueOf(mTextStepCount.getText().toString());
-                float height = Float.valueOf(mTextHeight.getText().toString());
-                float radius = Float.valueOf(mTextRadius.getText().toString());
-                float rotation = Float.valueOf(mTextRotation.getText().toString());
-
-                result.putExtra("element",
-                        ShapeFactory.buildCylinder(stepCount, mPointCentre, height, radius, rotation, mColourBody, mColourCap));
-                setResult(Activity.RESULT_OK, result);
-                finish();
+                saveAndQuit();
             }
 
         });
@@ -115,8 +104,7 @@ public class CylinderActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                setResult(Activity.RESULT_CANCELED);
-                finish();
+                discardAndQuit();
             }
         });
 
@@ -130,6 +118,28 @@ public class CylinderActivity extends Activity {
         mTextCentre.setText(mPointCentre.toString());
         mSwatchCap.setBackgroundColor(mColourCap.toArgb());
         mSwatchBody.setBackgroundColor(mColourBody.toArgb());
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveAndQuit();
+    }
+
+    protected void saveAndQuit() {
+        Intent result = new Intent();
+        // Build element from view components
+        int stepCount = Integer.valueOf(mTextStepCount.getText().toString());
+        float height = Float.valueOf(mTextHeight.getText().toString());
+        float radius = Float.valueOf(mTextRadius.getText().toString());
+        float rotation = Float.valueOf(mTextRotation.getText().toString());
+        result.putExtra("element", ShapeFactory.buildCylinder(stepCount, mPointCentre, height, radius, rotation, mColourBody, mColourCap));
+        setResult(Activity.RESULT_OK, result);
+        finish();
+    }
+
+    protected void discardAndQuit() {
+        setResult(RESULT_CANCELED);
+        finish();
     }
 
 }
