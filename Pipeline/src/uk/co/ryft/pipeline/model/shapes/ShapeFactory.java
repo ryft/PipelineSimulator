@@ -39,31 +39,39 @@ public class ShapeFactory {
     public static Composite buildCylinder(int stepCount, Float3 centre, float height, float radius, float rotation,
             Colour colour, Colour capColour) {
 
-        List<Float3> points = new LinkedList<Float3>();
-
         float angle = rotation;
         float bottom = centre.getZ();
         float top = centre.getZ() - height;
         double step = 2 * Math.PI / stepCount;
 
-        // Note the '<=' to complete the ring of triangles
-        for (int i = 0; i <= stepCount; i++) {
-            float x = (float) (Math.cos(angle) * radius + centre.getX());
-            float y = (float) (Math.sin(angle) * radius + centre.getY());
+        List<Primitive> cylinder = new LinkedList<Primitive>();
 
-            points.add(new Float3(x, y, bottom));
-            points.add(new Float3(x, y, top));
+        // Build columns of the cylinder with polygonal strips
+        // This is so that we can reliably calculate the surface normals
+        for (int i = 0; i < stepCount; i++) {
+
+            List<Float3> points = new LinkedList<Float3>();
+            
+            float x0 = (float) (Math.cos(angle) * radius + centre.getX());
+            float y0 = (float) (Math.sin(angle) * radius + centre.getY());
+            float x1 = (float) (Math.cos(angle + step) * radius + centre.getX());
+            float y1 = (float) (Math.sin(angle + step) * radius + centre.getY());
+
+            points.add(new Float3(x0, y0, bottom));
+            points.add(new Float3(x0, y0, top));
+            points.add(new Float3(x1, y1, top));
+            points.add(new Float3(x1, y1, bottom));
+            
+            cylinder.add(buildConvexPolygon(points, colour));
 
             // To wind correctly, we need to iterate anti-clockwise around the cylinder
             angle += step;
         }
-
-        List<Primitive> cylinder = new LinkedList<Primitive>();
+        
         Float3 capCentre = new Float3(centre.getX(), centre.getY(), centre.getZ() - height);
 
         cylinder.add(buildRegularPolygon(stepCount, true, centre, radius, rotation, capColour));
         cylinder.add(buildRegularPolygon(stepCount, false, capCentre, radius, rotation, capColour));
-        cylinder.add(new Primitive(Primitive.Type.GL_TRIANGLE_STRIP, points, colour));
 
         return new Composite(Composite.Type.CYLINDER, cylinder);
     }
@@ -148,7 +156,7 @@ public class ShapeFactory {
         List<Element> elems = new LinkedList<Element>();
         elems.add(buildCuboid(new Float3(origin.getX(), origin.getY(), origin.getZ() + 0.75f * scale), scale * 2, scale,
                 scale / 2, bodyColour, bodyColour));
-        elems.add(buildCylinder(10, new Float3(origin.getX(), origin.getY(), origin.getZ() + scale / 2), scale / 2, scale / 2,
+        elems.add(buildCylinder(32, new Float3(origin.getX(), origin.getY(), origin.getZ() + scale / 2), scale / 2, scale / 2,
                 0, lensCasingColour, bodyColour));
         elems.add(buildCuboid(new Float3(origin.getX() - 0.75f * scale, origin.getY() + 0.5625f * scale, origin.getZ() + 0.75f
                 * scale), 0.25f * scale, 0.125f * scale, 0.25f * scale, shutterButtonColour, shutterButtonColour));

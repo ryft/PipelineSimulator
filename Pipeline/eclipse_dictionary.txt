@@ -8,3 +8,7 @@ drawables
 app
 cloneable
 tessellation
+lambertian
+reflectance
+luminosity
+polygonal

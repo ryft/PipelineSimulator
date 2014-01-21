@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.co.ryft.pipeline.gl.Drawable;
+import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 
 public class GL_Composite implements Drawable {
 
@@ -16,8 +17,9 @@ public class GL_Composite implements Drawable {
         mComponents.addAll(drawables);
     }
 
-    public void draw(float[] mvpMatrix) {
+    @Override
+    public void draw(LightingModel lighting, float[] mvMatrix, float[] mvpMatrix) {
         for (Drawable d : mComponents)
-            d.draw(mvpMatrix);
+            d.draw(lighting, mvMatrix, mvpMatrix);
     }
 }

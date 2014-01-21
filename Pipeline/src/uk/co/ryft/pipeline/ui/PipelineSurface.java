@@ -4,6 +4,7 @@ import java.util.List;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
+import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -12,6 +13,7 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class PipelineSurface extends GLSurfaceView {
 
@@ -19,6 +21,8 @@ public class PipelineSurface extends GLSurfaceView {
     // XXX This is very unsafe but required for saving and restoring state.
     // Can we do better by implementing it in onPause() etc here?
     public PipelineRenderer getRenderer() { return mRenderer; }
+    
+    Context mContext;
 
     public PipelineSurface(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,6 +35,8 @@ public class PipelineSurface extends GLSurfaceView {
     }
 
     private void construct(Context context) {
+        
+        mContext = context;
         
         final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
@@ -89,8 +95,25 @@ public class PipelineSurface extends GLSurfaceView {
             setBackgroundResource(0);
     }
 
+    static int mCurrentModel = 0;
+
     public void toggle() {
-        mRenderer.interact();
+        mCurrentModel = (mCurrentModel + 1) % 3;
+
+        switch (mCurrentModel) {
+            case 0:
+                PipelineRenderer.mLighting = LightingModel.UNIFORM;
+                break;
+            case 1:
+                PipelineRenderer.mLighting = LightingModel.GOURAUD;
+                break;
+            case 2:
+                PipelineRenderer.mLighting = LightingModel.PHONG;
+                break;
+        }
+        
+        Toast.makeText(mContext, PipelineRenderer.mLighting.toString(), Toast.LENGTH_SHORT).show();
+            
         requestRender();
     }
 
@@ -102,18 +125,6 @@ public class PipelineSurface extends GLSurfaceView {
     private float mPreviousX = 0;
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mRenderer.onPause();
-    }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-        mRenderer.onResume();
-    }
 
     public void onSceneMove(MotionEvent e) {
         // MotionEvent reports input details from the touch screen

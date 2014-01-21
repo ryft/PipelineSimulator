@@ -10,11 +10,10 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Rotation;
 import uk.co.ryft.pipeline.model.Transformation;
-import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
@@ -29,10 +28,13 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static final long serialVersionUID = -5651858198215667027L;
 
     private static final String TAG = "PipelineRenderer";
+    
+    public static LightingModel mLighting = LightingModel.UNIFORM;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
     private final float[] mCameraModelMatrix = new float[16];
+    private final float[] mLightModelMatrix = new float[16];
 
     private final float[] mViewMatrix = new float[16];
     private final float[] mCameraViewMatrix = new float[16];
@@ -40,16 +42,18 @@ public class PipelineRenderer implements Renderer, Serializable {
     
     private final float[] mMVMatrix = new float[16];
     private final float[] mCVMatrix = new float[16];
+    private final float[] mLVMatrix = new float[16];
     
     private final float[] mMVPMatrix = new float[16];
     private final float[] mCVPMatrix = new float[16];
+    private final float[] mLVPMatrix = new float[16];
 
     private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
 
     private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
     
-    private Camera mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
-    private Camera mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
+    private Camera mActualCamera;
+    private Camera mVirtualCamera;
 
     // TODO This is unsafe. If that's OK we can just use public variables,
     // if not implement cloneable and clone each before returning.
@@ -57,6 +61,11 @@ public class PipelineRenderer implements Renderer, Serializable {
     public Camera getVirtualCamera() { return mVirtualCamera; }
     public void setActualCamera(Camera actualCamera) { mActualCamera = actualCamera; }
     public void setVirtualCamera(Camera virtualCamera) { mVirtualCamera = virtualCamera; }
+    
+    // Light position, for implementing lighting models
+    public static Float3 sLightPosition = new Float3(2, 0, 0);
+    private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE);
+    private Drawable sLightDrawable;
 
     // For touch events
     // TODO: Implement a monitor for this.
@@ -68,8 +77,10 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mModelRotationMatrix = new float[16];
 
     // Drawables aren't initialised, and are constructed at render time if necessary
-    private Composite mCamera = new Composite(Composite.Type.CAMERA, Collections.<Element> emptyList());
+    private Element mCameraElement;
     private Drawable mCameraDrawable;
+    private Element mFrustumElement;
+    private Drawable mFrustumDrawable;
 
     // Axes should never change between instances so they can be declared statically
     private static Composite sAxes;
@@ -120,30 +131,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         sAxes = new Composite(Composite.Type.CUSTOM, axes);
     }
 
-    public void interact() {
-        mModelTransformations.add(new Translation(new Float3(0, 1, 0)));
-        mModelTransformations.add(new Rotation(90, new Float3(1, 0, 0)));
-    }
-
-    // TODO Should these belong here?
-    public static final String VERTEX_SHADER_EMPTY =
-            // This matrix member variable provides a hook to manipulate
-            // the coordinates of the objects that use this vertex shader
-                    "uniform mat4 uMVPMatrix;" +
-                    "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    // the matrix must be included as a modifier of gl_Position
-                    // the order must be matrix * vector as the matrix is in col-major order.
-                    "  gl_Position = uMVPMatrix * vPosition;" +
-                    "}";
-
-    public static final String FRAGMENT_SHADER_EMPTY =
-                    "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
-
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         
@@ -151,10 +138,8 @@ public class PipelineRenderer implements Renderer, Serializable {
         mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
         mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
         
-        LinkedList<Element> camera = new LinkedList<Element>();
-        camera.add(ShapeFactory.buildCamera(0.25f));
-        camera.add(ShapeFactory.buildFrustum(mVirtualCamera));
-        mCamera = new Composite(Composite.Type.CUSTOM, camera);
+        mCameraElement = ShapeFactory.buildCamera(0.25f);
+        mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -171,20 +156,41 @@ public class PipelineRenderer implements Renderer, Serializable {
         
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
+        
+        // Force re-initialisation of static scene objects in this new render thread context
+        sAxesDrawable = null;
+        sLightDrawable = null;
+        mCameraDrawable = null;
+        mFrustumDrawable = null;
+        LightingModel.resetAll();
     }
 
+    @Override
+    public void onSurfaceChanged(GL10 unused, int width, int height) {
+    
+        // Adjust the viewport based on geometry changes,
+        // such as screen rotation
+        GLES20.glViewport(0, 0, width, height);
+        
+        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
+    
+    }
+    
+    Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
+    
     @Override
     public void onDrawFrame(GL10 unused) {
 
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        // Set up the model (world transformation) matrix
-        Matrix.setIdentityM(mModelMatrix, 0);
-
         // Get the current camera view matrices
         mActualCamera.setViewMatrix(mViewMatrix, 0);
         mVirtualCamera.setViewMatrix(mCameraViewMatrix, 0);
+
+        // Set up the model (world transformation) matrix
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.setIdentityM(mLightModelMatrix, 0);
         
         // The camera model matrix transforms the camera to its correct position and orientation in world space
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
@@ -194,11 +200,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Apply all transformations to the world, in order, in their current state
         for (Transformation t : mModelTransformations)
             Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
-
-        // Create a rotation transformation for the triangle
-//        time %= 4000L;
-//        float angle = 0.090f * ((int) time);
-//        Matrix.setRotateM(mModelRotationMatrix, 0, angle, 0, 0, -1.0f);
         
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
@@ -207,8 +208,11 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+        Matrix.multiplyMM(mLVMatrix, 0, mViewMatrix, 0, mLightModelMatrix, 0);
         Matrix.multiplyMM(mCVMatrix, 0, mViewMatrix, 0, mCameraModelMatrix, 0);
+
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVMatrix, 0);
+        Matrix.multiplyMM(mLVPMatrix, 0, mProjectionMatrix, 0, mLVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
 
         // Initialise axes and camera drawables if necessary
@@ -216,11 +220,14 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (sAxesDrawable == null)
             sAxesDrawable = sAxes.getDrawable();
         if (mCameraDrawable == null)
-            mCameraDrawable = mCamera.getDrawable();
+            mCameraDrawable = mCameraElement.getDrawable();
+        if (mFrustumDrawable == null)
+            mFrustumDrawable = mFrustumElement.getDrawable();
 
         // Draw axes and virtual camera        
-        sAxesDrawable.draw(mMVPMatrix);
-        mCameraDrawable.draw(mCVPMatrix);
+        sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
+        mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+        mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
@@ -228,16 +235,21 @@ public class PipelineRenderer implements Renderer, Serializable {
                 mElements.put(e, e.getDrawable());
             Drawable d = mElements.get(e);
             if (d != null)
-                d.draw(mMVPMatrix);
+                d.draw(mLighting, mMVMatrix, mMVPMatrix);
             else
                 // Occasionally happens when app is quitting
                 // TODO: Investigate turning off continuous rendering when quitting
                 System.out.println("Ruh-roh, null drawable!");
         }
 
+        if (sLightDrawable == null)
+            sLightDrawable = sLightPoint.getDrawable();
+        sLightDrawable.draw(LightingModel.POINT_SOURCE, mLVMatrix, mLVPMatrix);
+
     }
     
-    protected void printMatrix(float[] m, int cols, int rows) {
+    // XXX Prints matrices in OpenGL-style column-major order.
+    public static void printMatrix(float[] m, int cols, int rows) {
         for (int i = 0; i < rows; i++) {
             if (i == 0)
                 System.out.print("[");
@@ -253,50 +265,21 @@ public class PipelineRenderer implements Renderer, Serializable {
         }
     }
 
-    @Override
-    public void onSurfaceChanged(GL10 unused, int width, int height) {
-
-        // Adjust the viewport based on geometry changes,
-        // such as screen rotation
-        GLES20.glViewport(0, 0, width, height);
-        
-        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
-
-    }
-
-    public static int loadShader(int type, String shaderCode) {
-
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        // other shader types, e.g. geometry, tessellation, are optional.
-        // see http://www.opengl.org/sdk/docs/man4/xhtml/glCreateShader.xml
-        int shader = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-
-        return shader;
-    }
-
     /**
-     * Utility method for debugging OpenGL calls. Provide the name of the call just after making it:
+     * Utility method for debugging OpenGL calls:
      * 
      * <pre>
      * mColorHandle = GLES20.glGetUniformLocation(mProgram, &quot;vColor&quot;);
-     * MyGLRenderer.checkGlError(&quot;glGetUniformLocation&quot;);
+     * MyGLRenderer.checkGlError();
      * </pre>
      * 
      * If the operation is not successful, the check throws an error.
-     * 
-     * @param glOperation
-     *            - Name of the OpenGL call to check.
      */
-    public static void checkGlError(String glOperation) {
+    public static void checkGlError() {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e(TAG, glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
+            Log.e(TAG, "glError " + error);
+            throw new RuntimeException("glError " + error);
         }
     }
 
@@ -308,15 +291,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         mElements.clear();
         for (Element e : elements)
             mElements.put(e, null);
-    }
-
-    public void onPause() {
-    }
-
-    public void onResume() {
-        // Force re-initialisation of static scene objects in this new render thread context
-        sAxesDrawable = null;
-        mCameraDrawable = null;
     }
 
 }
