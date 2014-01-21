@@ -29,6 +29,8 @@ public class SetupActivity extends Activity {
     // Global state set by step configuration
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
+    // Lighting model
+    protected LightingModel mLightingModel = LightingModel.UNIFORM;
     // Face culling
     protected boolean mCullingEnabled = true;
     protected boolean mCullingClockwise = false;
@@ -39,10 +41,12 @@ public class SetupActivity extends Activity {
 
     static class ViewHolder {
         View sceneComposition;
+        View lightingModel;
+        View vertexProcessing;
         View vertexShading;
         View geometryShading;
         View clipping;
-        View culling;
+        View faceCulling;
         View fragmentShading;
         View depthBufferTest;
     }
@@ -56,10 +60,12 @@ public class SetupActivity extends Activity {
 
         // Find all views associated with individual pipeline steps
         steps.sceneComposition = findViewById(R.id.step_scene_composition);
+        steps.lightingModel = findViewById(R.id.step_lighting_model);
+        steps.vertexProcessing = findViewById(R.id.step_vertex_processing);
         steps.vertexShading = findViewById(R.id.step_vertex_shading);
         steps.geometryShading = findViewById(R.id.step_geometry_shading);
         steps.clipping = findViewById(R.id.step_clipping);
-        steps.culling = findViewById(R.id.step_culling);
+        steps.faceCulling = findViewById(R.id.step_culling);
         steps.fragmentShading = findViewById(R.id.step_fragment_shading);
         steps.depthBufferTest = findViewById(R.id.step_depth_buffer_test);
 
@@ -70,10 +76,12 @@ public class SetupActivity extends Activity {
     private void initialiseViews() {
 
         setText(steps.sceneComposition, android.R.id.title, R.string.button_scene_composition);
+        setText(steps.lightingModel, android.R.id.title, R.string.button_lighting_model);
+        setText(steps.vertexProcessing, android.R.id.title, R.string.button_vertex_processing);
         setText(steps.vertexShading, android.R.id.title, R.string.button_vertex_shading);
         setText(steps.geometryShading, android.R.id.title, R.string.button_geometry_shading);
         setText(steps.clipping, android.R.id.title, R.string.button_clipping);
-        setText(steps.culling, android.R.id.title, R.string.button_culling);
+        setText(steps.faceCulling, android.R.id.title, R.string.button_culling);
         setText(steps.fragmentShading, android.R.id.title, R.string.button_fragment_shading);
         setText(steps.depthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
 
@@ -89,8 +97,8 @@ public class SetupActivity extends Activity {
                 startActivityForResult(intent, REQUEST_STEP_SCENE);
             }
         });
-
-        steps.culling.setOnClickListener(new OnClickListener() {
+        
+        steps.lightingModel.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Instantiate and display a configuration dialogue
@@ -102,14 +110,29 @@ public class SetupActivity extends Activity {
                         mCullingClockwise = (which == 0);
                         updateViews();
                     }});
+                AlertDialog dialogue = builder.create();
+                dialogue.show();
+            }
+        });
 
-                // Get the AlertDialog, initialise values and show it.
+        steps.faceCulling.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Instantiate and display a configuration dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                builder.setTitle(R.string.dialogue_title_face_culling);
+                builder.setItems(new CharSequence[] {"Wind faces clockwise", "Wind faces counter-clockwise"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mCullingClockwise = (which == 0);
+                        updateViews();
+                    }});
                 AlertDialog dialogue = builder.create();
                 dialogue.show();
             }
         });
         
-        CheckBox checkBoxFaceCulling = (CheckBox) steps.culling.findViewById(R.id.checkbox);
+        CheckBox checkBoxFaceCulling = (CheckBox) steps.faceCulling.findViewById(R.id.checkbox);
         checkBoxFaceCulling.setChecked(mCullingEnabled);
         checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
@@ -178,23 +201,26 @@ public class SetupActivity extends Activity {
         if (mSceneElements.size() != 1)
             sceneCompositionSummary += "s";
         
+        // Generate lighting model summary
+        String lightingModelSummary;
+        
+        // Generate vertex processing summary
+        String vertexProcessingSummary;
         int primitiveCount = 0;
         for (Element e : mSceneElements)
             primitiveCount += e.getPrimitiveCount();
-        
         int vertexCount = 0;
         for (Element e : mSceneElements)
             vertexCount += e.getVertexCount();
         
-        sceneCompositionSummary += " (" + primitiveCount + " primitive";
+        vertexProcessingSummary = primitiveCount + " primitive";
         if (primitiveCount != 1)
-            sceneCompositionSummary += "s";
-        
-        sceneCompositionSummary += ", " + vertexCount;
+            vertexProcessingSummary += "s";
+        vertexProcessingSummary += " (" + vertexCount;
         if (vertexCount == 1)
-            sceneCompositionSummary += " vertex)";
+            vertexProcessingSummary += " vertex)";
         else
-            sceneCompositionSummary += " vertices)";
+            vertexProcessingSummary += " vertices)";
         
         // Generate face culling summary
         String cullingSummary = "Culling ";
@@ -216,10 +242,12 @@ public class SetupActivity extends Activity {
         // TODO Update these properly
 
         setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
+        setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
+        setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
         setText(steps.vertexShading, android.R.id.summary, "Empty vertex shader");
         setText(steps.geometryShading, android.R.id.summary, "Empty geometry shader");
         setText(steps.clipping, android.R.id.summary, "Default clipping");
-        setText(steps.culling, android.R.id.summary, cullingSummary);
+        setText(steps.faceCulling, android.R.id.summary, cullingSummary);
         setText(steps.fragmentShading, android.R.id.summary, "Empty fragment shader");
         setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
 
