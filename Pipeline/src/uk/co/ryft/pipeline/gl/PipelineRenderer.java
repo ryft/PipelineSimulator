@@ -13,9 +13,7 @@ import javax.microedition.khronos.opengles.GL10;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Rotation;
 import uk.co.ryft.pipeline.model.Transformation;
-import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
@@ -31,7 +29,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private static final String TAG = "PipelineRenderer";
     
-    public static LightingModel mLighting = LightingModel.GOURAUD;
+    public static LightingModel mLighting = LightingModel.UNIFORM;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -131,11 +129,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
 
         sAxes = new Composite(Composite.Type.CUSTOM, axes);
-    }
-
-    public void interact() {
-        mModelTransformations.add(new Translation(new Float3(0, 1, 0)));
-        mModelTransformations.add(new Rotation(90, new Float3(1, 0, 0)));
     }
 
     @Override
