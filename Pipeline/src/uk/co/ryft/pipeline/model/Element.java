@@ -18,7 +18,9 @@ public interface Element extends Serializable, Cloneable {
 
     public CharSequence getSummary();
 
-    public int getSize();
+    public int getPrimitiveCount();
+
+    public int getVertexCount();
     
     @Override
     public String toString();

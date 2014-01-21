@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui.builders;
+package uk.co.ryft.pipeline.ui.setup.builders;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class CuboidActivity extends Activity {
+public class BuildCuboidActivity extends Activity {
 
     protected Float3 mPointCentre = new Float3(0, 0, 0);
 
@@ -94,17 +94,7 @@ public class CuboidActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                Intent result = new Intent();
-
-                // Build element from view components
-                float width = Float.valueOf(mTextWidth.getText().toString());
-                float height = Float.valueOf(mTextHeight.getText().toString());
-                float depth = Float.valueOf(mTextDepth.getText().toString());
-
-                result.putExtra("element",
-                        ShapeFactory.buildCuboid(mPointCentre, width, height, depth, mColourFront, mColourSide));
-                setResult(Activity.RESULT_OK, result);
-                finish();
+                saveAndQuit();
             }
 
         });
@@ -112,8 +102,7 @@ public class CuboidActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                setResult(Activity.RESULT_CANCELED);
-                finish();
+                discardAndQuit();
             }
         });
 
@@ -126,6 +115,27 @@ public class CuboidActivity extends Activity {
         mTextCentre.setText(mPointCentre.toString());
         mSwatchFront.setBackgroundColor(mColourFront.toArgb());
         mSwatchSide.setBackgroundColor(mColourSide.toArgb());
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveAndQuit();
+    }
+
+    protected void saveAndQuit() {
+        Intent result = new Intent();
+        // Build element from view components
+        float width = Float.valueOf(mTextWidth.getText().toString());
+        float height = Float.valueOf(mTextHeight.getText().toString());
+        float depth = Float.valueOf(mTextDepth.getText().toString());
+        result.putExtra("element", ShapeFactory.buildCuboid(mPointCentre, width, height, depth, mColourFront, mColourSide));
+        setResult(Activity.RESULT_OK, result);
+        finish();
+    }
+
+    protected void discardAndQuit() {
+        setResult(Activity.RESULT_CANCELED);
+        finish();
     }
 
 }

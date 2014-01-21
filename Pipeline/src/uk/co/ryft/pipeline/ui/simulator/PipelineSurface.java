@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui;
+package uk.co.ryft.pipeline.ui.simulator;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui.builders;
+package uk.co.ryft.pipeline.ui.setup.builders;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class CameraActivity extends Activity {
+public class BuildCameraActivity extends Activity {
 
     protected Float3 mPointEye = new Float3(0, 0, 0);
 
@@ -105,15 +105,7 @@ public class CameraActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                Intent result = new Intent();
-
-                // Build element from view components
-                float scale = Float.valueOf(mTextScale.getText().toString());
-
-                result.putExtra("element",
-                        ShapeFactory.buildCamera(scale, mColourBody, mColourLens, mColourShutter).translate(mPointEye));
-                setResult(Activity.RESULT_OK, result);
-                finish();
+                saveAndQuit();
             }
 
         });
@@ -121,8 +113,7 @@ public class CameraActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                setResult(Activity.RESULT_CANCELED);
-                finish();
+                discardAndQuit();
             }
         });
 
@@ -134,6 +125,25 @@ public class CameraActivity extends Activity {
         mSwatchBody.setBackgroundColor(mColourBody.toArgb());
         mSwatchLens.setBackgroundColor(mColourLens.toArgb());
         mSwatchShutter.setBackgroundColor(mColourShutter.toArgb());
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveAndQuit();
+    }
+
+    protected void saveAndQuit() {
+        Intent result = new Intent();
+        // Build element from view components
+        float scale = Float.valueOf(mTextScale.getText().toString());
+        result.putExtra("element", ShapeFactory.buildCamera(scale, mColourBody, mColourLens, mColourShutter).translate(mPointEye));
+        setResult(Activity.RESULT_OK, result);
+        finish();
+    }
+
+    protected void discardAndQuit() {
+        setResult(Activity.RESULT_CANCELED);
+        finish();
     }
 
 }
