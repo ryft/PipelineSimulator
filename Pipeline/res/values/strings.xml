@@ -68,7 +68,7 @@
     <string name="label_camera_projection_far">Far clip plane</string>
     
     <string name="heading_camera_view">View parameters</string>
-    <string name="heading_camera_projection">Projection parameters (Frustum)</string>
+    <string name="heading_camera_projection">Projection (Frustum definition)</string>
     
     <string name="heading_primitive_type">Primitive type</string>
     <string name="heading_primitive_colour">Primitive colour</string>
@@ -85,12 +85,6 @@
     <string name="heading_group_rasterisation">Rasterisation</string>
     <string name="heading_group_fragment_processing">Fragment Processing</string>
     <string name="heading_group_pixel_processing">Pixel Processing</string>
-    
-    <string name="label_clipping">Clip planes defined by camera frustum</string>
-    <string name="heading_culling_face_winding">Surface direction</string>
-    <string name="label_culling_enable">Enable face culling</string>
-    <string name="label_culling_cw">Wind faces clockwise</string>
-    <string name="label_culling_ccw">Wind faces counter-clockwise</string>
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
@@ -118,6 +112,8 @@
     <string name="button_culling">Face culling</string>
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
+    
+    <string name="label_clipping">Clip planes defined by camera frustum</string>
     
     <string name="button_simulate">Simulate</string>
 

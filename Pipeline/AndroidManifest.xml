@@ -41,7 +41,7 @@
         <activity
             android:name="uk.co.ryft.pipeline.ui.setup.SetupCameraActivity"
             android:label="@string/title_activity_setup_camera"
-            android:windowSoftInputMode="stateUnchanged" >
+            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard incorrectly opening at startup -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.MainActivity" />
@@ -57,7 +57,7 @@
         <activity
             android:name="uk.co.ryft.pipeline.ui.setup.builders.BuildCylinderActivity"
             android:label="@string/title_activity_cylinder_add"
-            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard spuriously opening at startup -->
+            android:windowSoftInputMode="stateUnchanged" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />

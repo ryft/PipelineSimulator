@@ -145,22 +145,22 @@ public class SetupActivity extends Activity {
         ((LinearLayout) steps.vertexProcessing).removeView(steps.vertexProcessing.findViewById(R.id.checkbox));
         TextView titleVertexProcessing = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
         titleVertexProcessing.setEnabled(false);
-        
+
         ((LinearLayout) steps.vertexShading).removeView(steps.vertexShading.findViewById(R.id.checkbox));
         steps.vertexShading.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                
+
                 View view = SetupActivity.this.getLayoutInflater().inflate(R.layout.component_shader_dialogue, null);
                 builder.setView(view);
-                
+
                 TextView messageView = (TextView) view.findViewById(android.R.id.message);
                 messageView.setText(mLightingModel.getVertexShader(GLES20.GL_TRIANGLES));
                 messageView.setTextIsSelectable(true);
                 messageView.setHorizontallyScrolling(true);
-                
+
                 builder.setTitle(R.string.dialogue_title_vertex_shading);
                 builder.setPositiveButton(R.string.dialogue_button_close, null);
                 builder.show();
@@ -172,6 +172,16 @@ public class SetupActivity extends Activity {
         ((LinearLayout) steps.clipping).removeView(steps.clipping.findViewById(R.id.checkbox));
         TextView titleClipping = (TextView) steps.clipping.findViewById(android.R.id.title);
         titleClipping.setEnabled(false);
+
+        CheckBox checkBoxFaceCulling = (CheckBox) steps.faceCulling.findViewById(R.id.checkbox);
+        checkBoxFaceCulling.setChecked(mCullingEnabled);
+        checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mCullingEnabled = isChecked;
+                updateViews();
+            }
+        });
 
         steps.faceCulling.setOnClickListener(new OnClickListener() {
             @Override
@@ -192,31 +202,21 @@ public class SetupActivity extends Activity {
             }
         });
 
-        CheckBox checkBoxFaceCulling = (CheckBox) steps.faceCulling.findViewById(R.id.checkbox);
-        checkBoxFaceCulling.setChecked(mCullingEnabled);
-        checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mCullingEnabled = isChecked;
-                updateViews();
-            }
-        });
-        
         ((LinearLayout) steps.fragmentShading).removeView(steps.fragmentShading.findViewById(R.id.checkbox));
         steps.fragmentShading.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                
+
                 View view = SetupActivity.this.getLayoutInflater().inflate(R.layout.component_shader_dialogue, null);
                 builder.setView(view);
-                
+
                 TextView messageView = (TextView) view.findViewById(android.R.id.message);
                 messageView.setText(mLightingModel.getFragmentShader(GLES20.GL_TRIANGLES));
                 messageView.setTextIsSelectable(true);
                 messageView.setHorizontallyScrolling(true);
-                
+
                 builder.setTitle(R.string.dialogue_title_fragment_shading);
                 builder.setPositiveButton(R.string.dialogue_button_close, null);
                 builder.show();
@@ -280,7 +280,7 @@ public class SetupActivity extends Activity {
         String sceneCompositionSummary = mSceneElements.size() + " element";
         if (mSceneElements.size() != 1)
             sceneCompositionSummary += "s";
-        
+
         // Generate camera parameters summary
         String cameraParametersSummary = "Eye point " + mCamera.getEye() + ", focus point " + mCamera.getFocus() + ".";
 
@@ -304,7 +304,7 @@ public class SetupActivity extends Activity {
             vertexProcessingSummary += " vertex)";
         else
             vertexProcessingSummary += " vertices)";
-        
+
         // Generate vertex shading summary
         String vertexShadingSummary = "Undefined vertex shader";
         switch (mLightingModel.getModel()) {
@@ -331,7 +331,7 @@ public class SetupActivity extends Activity {
             cullingSummary += "clockwise winding)";
         } else
             cullingSummary += "disabled";
-        
+
         // Generate fragment shading summary
         String fragmentShadingSummary = "Undefined fragment shader";
         switch (mLightingModel.getModel()) {
