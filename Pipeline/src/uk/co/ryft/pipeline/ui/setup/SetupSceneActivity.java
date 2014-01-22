@@ -51,7 +51,7 @@ public class SetupSceneActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scene);
+        setContentView(R.layout.activity_setup_scene);
 
         // Get elements from returning activity intent or saved state, if possible.
         Bundle extras = getIntent().getExtras();

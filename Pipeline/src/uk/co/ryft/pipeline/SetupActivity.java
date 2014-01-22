@@ -47,6 +47,8 @@ public class SetupActivity extends Activity {
     protected boolean mDepthBufferEnabled = true;
     // TODO Allow choice of depth buffer test using glDepthFunc
     // See http://www.opengl.org/sdk/docs/man/xhtml/glDepthFunc.xml
+    // Blending
+    protected boolean mBlendingEnabled = true;
 
     ViewHolder steps = new ViewHolder();
 
@@ -62,6 +64,7 @@ public class SetupActivity extends Activity {
         View faceCulling;
         View fragmentShading;
         View depthBufferTest;
+        View blending;
     }
 
     @Override
@@ -83,6 +86,7 @@ public class SetupActivity extends Activity {
         steps.faceCulling = findViewById(R.id.step_face_culling);
         steps.fragmentShading = findViewById(R.id.step_fragment_shading);
         steps.depthBufferTest = findViewById(R.id.step_depth_buffer_test);
+        steps.blending = findViewById(R.id.step_blending);
 
         initialiseViews();
     }
@@ -101,6 +105,7 @@ public class SetupActivity extends Activity {
         setText(steps.faceCulling, android.R.id.title, R.string.button_face_culling);
         setText(steps.fragmentShading, android.R.id.title, R.string.button_fragment_shading);
         setText(steps.depthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
+        setText(steps.blending, android.R.id.title, R.string.button_blending);
 
         ((LinearLayout) steps.sceneComposition).removeView(steps.sceneComposition.findViewById(R.id.checkbox));
         steps.sceneComposition.setOnClickListener(new OnClickListener() {
@@ -251,6 +256,16 @@ public class SetupActivity extends Activity {
             }
         });
 
+        CheckBox checkBoxBlending = (CheckBox) steps.blending.findViewById(R.id.checkbox);
+        checkBoxBlending.setChecked(mBlendingEnabled);
+        checkBoxBlending.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mBlendingEnabled = isChecked;
+                updateViews();
+            }
+        });
+
         Button buttonSimulate = (Button) findViewById(R.id.button_simulate);
         buttonSimulate.setOnClickListener(new OnClickListener() {
 
@@ -380,6 +395,13 @@ public class SetupActivity extends Activity {
         else
             depthBufferSummary = "Depth buffer test disabled";
 
+        // Generate blending summary
+        String blendingSummary;
+        if (mBlendingEnabled)
+            blendingSummary = "Blending enabled";
+        else
+            blendingSummary = "Blending disabled";
+
         // TODO Update these properly
 
         setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
@@ -393,6 +415,7 @@ public class SetupActivity extends Activity {
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);
         setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
         setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
+        setText(steps.blending, android.R.id.summary, blendingSummary);
 
     }
 

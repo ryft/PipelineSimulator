@@ -119,6 +119,10 @@
             <TextView
                 style="?android:listSeparatorTextViewStyle"
                 android:text="@string/heading_group_pixel_processing" />
+
+            <include
+                android:id="@+id/step_blending"
+                layout="@layout/component_setup_step" />
         </LinearLayout>
 
         <View
