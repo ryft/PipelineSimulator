@@ -105,7 +105,7 @@ public class PipelineSurface extends GLSurfaceView {
                 PipelineRenderer.mLighting = LightingModel.UNIFORM;
                 break;
             case 1:
-                PipelineRenderer.mLighting = LightingModel.GOURAUD;
+                PipelineRenderer.mLighting = LightingModel.LAMBERTIAN;
                 break;
             case 2:
                 PipelineRenderer.mLighting = LightingModel.PHONG;

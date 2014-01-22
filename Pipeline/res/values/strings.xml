@@ -86,10 +86,14 @@
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_title_composite_new">Select Type</string>
+    <string name="dialogue_title_lighting_model">Select Lighting Model</string>
+    <string name="dialogue_title_vertex_shading">Vertex Shader Code</string>
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
+    <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
+    <string name="dialogue_button_close">Close</string>
     
     <string name="button_scene_composition">Scene composition</string>
     <string name="button_lighting_model">Lighting model</string>

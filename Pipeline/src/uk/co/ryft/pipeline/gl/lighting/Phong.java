@@ -1,6 +1,6 @@
 package uk.co.ryft.pipeline.gl.lighting;
 
-public class Phong extends Lambertian {
+public class Phong extends InterpolatedLighting {
     
     protected Phong() {
         super(Model.PHONG);
@@ -36,7 +36,7 @@ public class Phong extends Lambertian {
     // XXX Same as Lambertian vertex shader; ignore normal direction and use uniform shading for 2D primitives
     public String getFragmentShader(int primitiveType) {
         
-        if (types3D.contains(primitiveType))
+        if (types2D.contains(primitiveType))
             return   "precision mediump float;       \n"
                     + "                               \n"
                     + "uniform vec3 u_LightPos;       \n"     // The position of the light in eye space

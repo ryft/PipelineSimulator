@@ -2,6 +2,7 @@ package uk.co.ryft.pipeline;
 
 import java.util.ArrayList;
 
+import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.ui.setup.SetupSceneActivity;
 import uk.co.ryft.pipeline.ui.simulator.SimulatorActivity;
@@ -9,6 +10,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.opengl.GLES20;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -21,7 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class SetupActivity extends Activity {
-    
+
     // Activity request codes
     protected static final int REQUEST_STEP_SCENE = 2;
     protected static final int REQUEST_STEP_CULLING = 3;
@@ -30,13 +32,13 @@ public class SetupActivity extends Activity {
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
     // Lighting model
-    protected LightingModel mLightingModel = LightingModel.UNIFORM;
+    protected LightingModel mLightingModel = LightingModel.LAMBERTIAN;
     // Face culling
     protected boolean mCullingEnabled = true;
     protected boolean mCullingClockwise = false;
     // Depth buffer test
     protected boolean mDepthBufferEnabled = true;
-    
+
     ViewHolder steps = new ViewHolder();
 
     static class ViewHolder {
@@ -97,23 +99,57 @@ public class SetupActivity extends Activity {
                 startActivityForResult(intent, REQUEST_STEP_SCENE);
             }
         });
-        
+
+        ((LinearLayout) steps.lightingModel).removeView(steps.lightingModel.findViewById(R.id.checkbox));
         steps.lightingModel.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Instantiate and display a configuration dialogue
                 AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                builder.setTitle(R.string.dialogue_title_face_culling);
-                builder.setItems(new CharSequence[] {"Wind faces clockwise", "Wind faces counter-clockwise"}, new DialogInterface.OnClickListener() {
+                builder.setTitle(R.string.dialogue_title_lighting_model);
+                final LightingModel.Model[] models = LightingModel.Model.values();
+                CharSequence[] modelNames = new CharSequence[models.length];
+                for (int i = 0; i < models.length; i++)
+                    modelNames[i] = models[i].getTitle();
+                builder.setItems(modelNames, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mCullingClockwise = (which == 0);
+                        mLightingModel = LightingModel.getLightingModel(models[which]);
                         updateViews();
-                    }});
+                    }
+                });
                 AlertDialog dialogue = builder.create();
                 dialogue.show();
             }
         });
+
+        ((LinearLayout) steps.vertexProcessing).removeView(steps.vertexProcessing.findViewById(R.id.checkbox));
+        TextView title = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
+        title.setEnabled(false);
+        
+        ((LinearLayout) steps.vertexShading).removeView(steps.vertexShading.findViewById(R.id.checkbox));
+        steps.vertexShading.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                
+                View view = SetupActivity.this.getLayoutInflater().inflate(R.layout.component_shader_dialogue, null);
+                builder.setView(view);
+                
+                TextView messageView = (TextView) view.findViewById(android.R.id.message);
+                messageView.setText(mLightingModel.getVertexShader(GLES20.GL_TRIANGLES));
+                messageView.setTextIsSelectable(true);
+                messageView.setHorizontallyScrolling(true);
+                
+                builder.setTitle(R.string.dialogue_title_vertex_shading);
+                builder.setPositiveButton(R.string.dialogue_button_close, null);
+                builder.show();
+            }
+
+        });
+
+        ((LinearLayout) steps.geometryShading).removeView(steps.geometryShading.findViewById(R.id.checkbox));
 
         steps.faceCulling.setOnClickListener(new OnClickListener() {
             @Override
@@ -121,17 +157,19 @@ public class SetupActivity extends Activity {
                 // Instantiate and display a configuration dialogue
                 AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
                 builder.setTitle(R.string.dialogue_title_face_culling);
-                builder.setItems(new CharSequence[] {"Wind faces clockwise", "Wind faces counter-clockwise"}, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mCullingClockwise = (which == 0);
-                        updateViews();
-                    }});
+                builder.setItems(new CharSequence[] { "Wind faces clockwise", "Wind faces counter-clockwise" },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mCullingClockwise = (which == 0);
+                                updateViews();
+                            }
+                        });
                 AlertDialog dialogue = builder.create();
                 dialogue.show();
             }
         });
-        
+
         CheckBox checkBoxFaceCulling = (CheckBox) steps.faceCulling.findViewById(R.id.checkbox);
         checkBoxFaceCulling.setChecked(mCullingEnabled);
         checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -142,6 +180,28 @@ public class SetupActivity extends Activity {
             }
         });
         
+        ((LinearLayout) steps.fragmentShading).removeView(steps.fragmentShading.findViewById(R.id.checkbox));
+        steps.fragmentShading.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                
+                View view = SetupActivity.this.getLayoutInflater().inflate(R.layout.component_shader_dialogue, null);
+                builder.setView(view);
+                
+                TextView messageView = (TextView) view.findViewById(android.R.id.message);
+                messageView.setText(mLightingModel.getFragmentShader(GLES20.GL_TRIANGLES));
+                messageView.setTextIsSelectable(true);
+                messageView.setHorizontallyScrolling(true);
+                
+                builder.setTitle(R.string.dialogue_title_fragment_shading);
+                builder.setPositiveButton(R.string.dialogue_button_close, null);
+                builder.show();
+            }
+
+        });
+
         CheckBox checkBoxDepthBuffer = (CheckBox) steps.depthBufferTest.findViewById(R.id.checkbox);
         checkBoxDepthBuffer.setChecked(mDepthBufferEnabled);
         checkBoxDepthBuffer.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -151,10 +211,10 @@ public class SetupActivity extends Activity {
                 updateViews();
             }
         });
-        
+
         Button buttonSimulate = (Button) findViewById(R.id.button_simulate);
         buttonSimulate.setOnClickListener(new OnClickListener() {
-            
+
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SetupActivity.this, SimulatorActivity.class);
@@ -165,33 +225,33 @@ public class SetupActivity extends Activity {
 
         updateViews();
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        
+
         switch (requestCode) {
             case REQUEST_STEP_SCENE:
-                
+
                 if (resultCode == RESULT_OK)
                     mSceneElements = ((ArrayList<Element>) data.getSerializableExtra("elements"));
                 break;
-                
+
             case REQUEST_STEP_CULLING:
-                
+
                 if (resultCode == RESULT_OK) {
                     mCullingEnabled = data.getBooleanExtra("enabled", true);
                     mCullingClockwise = data.getBooleanExtra("clockwise", false);
                 }
                 break;
-                
+
             default:
                 // Add any new result codes here.
                 throw new UnsupportedOperationException();
         }
-        
+
         updateViews();
-        
+
     }
 
     private void updateViews() {
@@ -200,10 +260,10 @@ public class SetupActivity extends Activity {
         String sceneCompositionSummary = mSceneElements.size() + " element";
         if (mSceneElements.size() != 1)
             sceneCompositionSummary += "s";
-        
+
         // Generate lighting model summary
-        String lightingModelSummary;
-        
+        String lightingModelSummary = mLightingModel.toString();
+
         // Generate vertex processing summary
         String vertexProcessingSummary;
         int primitiveCount = 0;
@@ -212,7 +272,7 @@ public class SetupActivity extends Activity {
         int vertexCount = 0;
         for (Element e : mSceneElements)
             vertexCount += e.getVertexCount();
-        
+
         vertexProcessingSummary = primitiveCount + " primitive";
         if (primitiveCount != 1)
             vertexProcessingSummary += "s";
@@ -222,6 +282,23 @@ public class SetupActivity extends Activity {
         else
             vertexProcessingSummary += " vertices)";
         
+        // Generate vertex shading summary
+        String vertexShadingSummary = "Undefined vertex shader";
+        switch (mLightingModel.getModel()) {
+            case UNIFORM:
+                vertexShadingSummary = "Project vertices into eye space";
+                break;
+            case LAMBERTIAN:
+                vertexShadingSummary = "Calculate diffuse light intensity using normal direction";
+                break;
+            case PHONG:
+                vertexShadingSummary = "Project normal direction for use in fragment shader";
+                break;
+            case POINT_SOURCE:
+                vertexShadingSummary = "Project vertices into eye space and fix a preset size";
+                break;
+        }
+
         // Generate face culling summary
         String cullingSummary = "Culling ";
         if (mCullingEnabled) {
@@ -232,23 +309,40 @@ public class SetupActivity extends Activity {
         } else
             cullingSummary += "disabled";
         
+        // Generate fragment shading summary
+        String fragmentShadingSummary = "Undefined fragment shader";
+        switch (mLightingModel.getModel()) {
+            case UNIFORM:
+                fragmentShadingSummary = "Apply a per-primitive uniform light level";
+                break;
+            case LAMBERTIAN:
+                fragmentShadingSummary = "Apply the Gouraud interpolated vertex colour";
+                break;
+            case PHONG:
+                fragmentShadingSummary = "Use interpolated normal to calculate per-pixel intensity";
+                break;
+            case POINT_SOURCE:
+                fragmentShadingSummary = "Apply white colour regardless of light source position";
+                break;
+        }
+
         // Generate depth buffer summary
         String depthBufferSummary;
         if (mDepthBufferEnabled)
             depthBufferSummary = "Depth buffer test enabled";
         else
             depthBufferSummary = "Depth buffer test disabled";
-        
+
         // TODO Update these properly
 
         setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
         setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
-        setText(steps.vertexShading, android.R.id.summary, "Empty vertex shader");
-        setText(steps.geometryShading, android.R.id.summary, "Empty geometry shader");
+        setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
+        setText(steps.geometryShading, android.R.id.summary, "No geometry shader");
         setText(steps.clipping, android.R.id.summary, "Default clipping");
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);
-        setText(steps.fragmentShading, android.R.id.summary, "Empty fragment shader");
+        setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
         setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
 
     }
