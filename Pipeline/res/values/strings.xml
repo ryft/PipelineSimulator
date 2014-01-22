@@ -105,15 +105,16 @@
     <string name="button_scene_composition">Scene composition</string>
     <string name="button_camera_parameters">Camera parameters</string>
     <string name="button_lighting_model">Lighting model</string>
-    <string name="button_vertex_processing">Vertex processing</string>
+    <string name="button_vertex_processing">Vertex assembly</string>
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_geometry_shading">Geometry shading</string>
-    <string name="button_clipping">Clipping</string>
-    <string name="button_culling">Face culling</string>
+    <string name="button_clipping">Viewport mapping and clipping</string>
+    <string name="button_multisampling">Multisampling</string>
+    <string name="button_face_culling">Face culling</string>
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
     
-    <string name="label_clipping">Clip planes defined by camera frustum</string>
+    <string name="label_clipping">Viewport and clip planes defined by camera parameters</string>
     
     <string name="button_simulate">Simulate</string>
 

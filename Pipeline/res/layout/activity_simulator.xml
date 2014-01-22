@@ -1,5 +1,0 @@
-<uk.co.ryft.pipeline.ui.simulator.PipelineSurface xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="2dip"
-    android:id="@+id/pipeline_surface"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />

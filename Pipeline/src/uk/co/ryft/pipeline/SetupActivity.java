@@ -38,11 +38,15 @@ public class SetupActivity extends Activity {
     protected Camera mCamera = new Camera(new Float3(-2, 0, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 7);
     // Lighting model
     protected LightingModel mLightingModel = LightingModel.LAMBERTIAN;
+    // Multisampling
+    protected boolean mMultisamplingEnabled = true;
     // Face culling
     protected boolean mCullingEnabled = true;
     protected boolean mCullingClockwise = false;
     // Depth buffer test
     protected boolean mDepthBufferEnabled = true;
+    // TODO Allow choice of depth buffer test using glDepthFunc
+    // See http://www.opengl.org/sdk/docs/man/xhtml/glDepthFunc.xml
 
     ViewHolder steps = new ViewHolder();
 
@@ -54,6 +58,7 @@ public class SetupActivity extends Activity {
         View vertexShading;
         View geometryShading;
         View clipping;
+        View multisampling;
         View faceCulling;
         View fragmentShading;
         View depthBufferTest;
@@ -74,7 +79,8 @@ public class SetupActivity extends Activity {
         steps.vertexShading = findViewById(R.id.step_vertex_shading);
         steps.geometryShading = findViewById(R.id.step_geometry_shading);
         steps.clipping = findViewById(R.id.step_clipping);
-        steps.faceCulling = findViewById(R.id.step_culling);
+        steps.multisampling = findViewById(R.id.step_multisampling);
+        steps.faceCulling = findViewById(R.id.step_face_culling);
         steps.fragmentShading = findViewById(R.id.step_fragment_shading);
         steps.depthBufferTest = findViewById(R.id.step_depth_buffer_test);
 
@@ -91,7 +97,8 @@ public class SetupActivity extends Activity {
         setText(steps.vertexShading, android.R.id.title, R.string.button_vertex_shading);
         setText(steps.geometryShading, android.R.id.title, R.string.button_geometry_shading);
         setText(steps.clipping, android.R.id.title, R.string.button_clipping);
-        setText(steps.faceCulling, android.R.id.title, R.string.button_culling);
+        setText(steps.multisampling, android.R.id.title, R.string.button_multisampling);
+        setText(steps.faceCulling, android.R.id.title, R.string.button_face_culling);
         setText(steps.fragmentShading, android.R.id.title, R.string.button_fragment_shading);
         setText(steps.depthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
 
@@ -168,17 +175,27 @@ public class SetupActivity extends Activity {
 
         });
 
-        ((LinearLayout) steps.geometryShading).removeView(steps.geometryShading.findViewById(R.id.checkbox));
-        ((LinearLayout) steps.clipping).removeView(steps.clipping.findViewById(R.id.checkbox));
-        TextView titleClipping = (TextView) steps.clipping.findViewById(android.R.id.title);
-        titleClipping.setEnabled(false);
-
         CheckBox checkBoxFaceCulling = (CheckBox) steps.faceCulling.findViewById(R.id.checkbox);
         checkBoxFaceCulling.setChecked(mCullingEnabled);
         checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCullingEnabled = isChecked;
+                updateViews();
+            }
+        });
+
+        ((LinearLayout) steps.geometryShading).removeView(steps.geometryShading.findViewById(R.id.checkbox));
+        ((LinearLayout) steps.clipping).removeView(steps.clipping.findViewById(R.id.checkbox));
+        TextView titleClipping = (TextView) steps.clipping.findViewById(android.R.id.title);
+        titleClipping.setEnabled(false);
+
+        CheckBox checkBoxMultisampling = (CheckBox) steps.multisampling.findViewById(R.id.checkbox);
+        checkBoxMultisampling.setChecked(mMultisamplingEnabled);
+        checkBoxMultisampling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mMultisamplingEnabled = isChecked;
                 updateViews();
             }
         });
@@ -321,6 +338,13 @@ public class SetupActivity extends Activity {
                 vertexShadingSummary = "Project vertices into eye space and fix a preset size";
                 break;
         }
+        
+        // Generate multisampling summary
+        String multisamplingSummary;
+        if (mMultisamplingEnabled)
+            multisamplingSummary = "Multisampling enabled";
+        else
+            multisamplingSummary = "Multisampling disabled";
 
         // Generate face culling summary
         String cullingSummary = "Culling ";
@@ -365,6 +389,7 @@ public class SetupActivity extends Activity {
         setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
         setText(steps.geometryShading, android.R.id.summary, "No geometry shader");
         setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
+        setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);
         setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
         setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);

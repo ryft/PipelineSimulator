@@ -1,5 +1,6 @@
 package uk.co.ryft.pipeline.gl.lighting;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,9 @@ import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import android.opengl.GLES20;
 import android.util.Log;
 
-public abstract class LightingModel {
+public abstract class LightingModel implements Serializable {
+
+    private static final long serialVersionUID = -8281004338010378525L;
 
     private final String TAG = "LightingModel";
 
@@ -197,6 +200,24 @@ public abstract class LightingModel {
         }
 
         return programHandle;
+    }
+
+    /**
+     * Utility method for debugging OpenGL calls:
+     * 
+     * <pre>
+     * mColorHandle = GLES20.glGetUniformLocation(mProgram, &quot;vColor&quot;);
+     * MyGLRenderer.checkGlError();
+     * </pre>
+     * 
+     * If the operation is not successful, the check throws an error.
+     */
+    public void checkGlError() {
+        int error;
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            Log.e(TAG, "glError " + error);
+            throw new RuntimeException("glError " + error);
+        }
     }
 
 }

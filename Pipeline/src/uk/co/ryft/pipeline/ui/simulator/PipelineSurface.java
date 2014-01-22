@@ -8,7 +8,7 @@ import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.util.AttributeSet;
+import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -23,19 +23,14 @@ public class PipelineSurface extends GLSurfaceView {
     public PipelineRenderer getRenderer() { return mRenderer; }
     
     Context mContext;
-
-    public PipelineSurface(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        construct(context);
-    }
-
+    
     public PipelineSurface(Context context) {
         super(context);
-        construct(context);
+        throw new RuntimeException("Pipeline surface called with no parameters");
     }
-
-    private void construct(Context context) {
         
+    public PipelineSurface(Context context, Bundle params) {
+        super(context);
         mContext = context;
         
         final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {

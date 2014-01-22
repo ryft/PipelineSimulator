@@ -9,6 +9,8 @@ import android.opengl.GLES20;
 
 public abstract class InterpolatedLighting extends LightingModel {
     
+    private static final long serialVersionUID = -3397825035311793185L;
+    
     List<Integer> types2D = Arrays.asList(new Integer[] {GLES20.GL_TRIANGLES, GLES20.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_STRIP});
     
     // XXX Allows Lambertian, Phong models to use distinct shaders for 1D and 2D primitives
@@ -110,7 +112,7 @@ public abstract class InterpolatedLighting extends LightingModel {
         GLES20.glDisableVertexAttribArray(mColourHandle);
         GLES20.glDisableVertexAttribArray(mNormalHandle);
         
-        PipelineRenderer.checkGlError();
+        checkGlError();
     }
     
     @Override

@@ -83,7 +83,11 @@
                 android:text="@string/heading_group_rasterisation" />
 
             <include
-                android:id="@+id/step_culling"
+                android:id="@+id/step_multisampling"
+                layout="@layout/component_setup_step" />
+
+            <include
+                android:id="@+id/step_face_culling"
                 layout="@layout/component_setup_step" />
         </LinearLayout>
 
