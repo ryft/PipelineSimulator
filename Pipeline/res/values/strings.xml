@@ -13,12 +13,14 @@
     
     <string name="action_points_new">New vertex</string>
     <string name="action_points_discard">Discard vertices</string>
-    <string name="action_element_save">Save</string>
-    <string name="action_element_delete">Delete</string>
-    <string name="action_element_discard">Discard</string>
+    <string name="action_button_save">Save</string>
+    <string name="action_button_delete">Delete</string>
+    <string name="action_button_discard">Discard</string>
+    <string name="action_button_cancel">Cancel</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
-    <string name="title_activity_scene">Edit Scene</string>
+    <string name="title_activity_setup_scene">Scene Composition</string>
+    <string name="title_activity_setup_camera">Camera Parameters</string>
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
     <string name="title_activity_cylinder_add">New Cylinder</string>
@@ -55,6 +57,19 @@
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
     
+    <string name="label_camera_view_eye">Eye point</string>
+    <string name="label_camera_view_focus">Focus point</string>
+    <string name="label_camera_view_up">Up direction</string>
+    <string name="label_camera_projection_left">Left clip plane</string>
+    <string name="label_camera_projection_right">Right clip plane</string>
+    <string name="label_camera_projection_bottom">Bottom clip plane</string>
+    <string name="label_camera_projection_top">Top clip plane</string>
+    <string name="label_camera_projection_near">Near clip plane</string>
+    <string name="label_camera_projection_far">Far clip plane</string>
+    
+    <string name="heading_camera_view">View parameters</string>
+    <string name="heading_camera_projection">Projection (Frustum definition)</string>
+    
     <string name="heading_primitive_type">Primitive type</string>
     <string name="heading_primitive_colour">Primitive colour</string>
     <string name="heading_points">Vertices</string>
@@ -64,6 +79,7 @@
     <string name="heading_element_proportions">Size and proportions</string>
     <string name="heading_element_parameters">Other parameters</string>
     
+    <string name="heading_group_scene_definition">Scene Definition</string>
     <string name="heading_group_vertex_processing">Vertex Processing</string>
     <string name="heading_group_primitive_processing">Primitive Processing</string>
     <string name="heading_group_rasterisation">Rasterisation</string>
@@ -72,23 +88,34 @@
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
-    
     <string name="desc_colour_edit">Edit colour</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_title_composite_new">Select Type</string>
+    <string name="dialogue_title_lighting_model">Select Lighting Model</string>
+    <string name="dialogue_title_vertex_shading">Vertex Shader Code</string>
+    <string name="dialogue_title_face_culling">Select Winding Direction</string>
+    <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
+    <string name="dialogue_button_close">Close</string>
     
     <string name="button_scene_composition">Scene composition</string>
+    <string name="button_camera_parameters">Camera parameters</string>
+    <string name="button_lighting_model">Lighting model</string>
+    <string name="button_vertex_processing">Vertex assembly</string>
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_geometry_shading">Geometry shading</string>
-    <string name="button_clipping">Clipping</string>
-    <string name="button_culling">Culling</string>
+    <string name="button_clipping">Viewport mapping and clipping</string>
+    <string name="button_multisampling">Multisampling</string>
+    <string name="button_face_culling">Face culling</string>
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
+    <string name="button_blending">Blending</string>
+    
+    <string name="label_clipping">Viewport and clip planes defined by camera parameters</string>
     
     <string name="button_simulate">Simulate</string>
 

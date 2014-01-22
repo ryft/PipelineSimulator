@@ -32,9 +32,7 @@
                     android:text="@string/label_element_eye" />
 
                 <include
-                    android:layout_gravity="right"
-                    layout="@layout/listitem_point"
-                    android:textAlignment="center" />
+                    layout="@layout/listitem_point" />
             </LinearLayout>
 
             <TextView

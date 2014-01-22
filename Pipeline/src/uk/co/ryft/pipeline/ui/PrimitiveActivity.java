@@ -65,9 +65,9 @@ public class PrimitiveActivity extends ListActivity {
         Button deleteButton = (Button) findViewById(R.id.button_element_discard);
 
         if (mEditMode)
-            deleteButton.setText(R.string.action_element_delete);
+            deleteButton.setText(R.string.action_button_delete);
         else
-            deleteButton.setText(R.string.action_element_discard);
+            deleteButton.setText(R.string.action_button_discard);
 
         saveButton.setOnClickListener(new OnClickListener() {
             @Override

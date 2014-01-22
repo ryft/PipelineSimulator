@@ -12,6 +12,29 @@
         tools:context=".SetupActivity" >
 
         <LinearLayout
+            android:id="@+id/group_scene_definition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:text="@string/heading_group_scene_definition" />
+
+            <include
+                android:id="@+id/step_scene_composition"
+                layout="@layout/component_setup_step" />
+
+            <include
+                android:id="@+id/step_camera_parameters"
+                layout="@layout/component_setup_step" />
+
+            <include
+                android:id="@+id/step_lighting_model"
+                layout="@layout/component_setup_step" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/group_vertex_processing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,7 +45,7 @@
                 android:text="@string/heading_group_vertex_processing" />
 
             <include
-                android:id="@+id/step_scene_composition"
+                android:id="@+id/step_vertex_processing"
                 layout="@layout/component_setup_step" />
 
             <include
@@ -60,7 +83,11 @@
                 android:text="@string/heading_group_rasterisation" />
 
             <include
-                android:id="@+id/step_culling"
+                android:id="@+id/step_multisampling"
+                layout="@layout/component_setup_step" />
+
+            <include
+                android:id="@+id/step_face_culling"
                 layout="@layout/component_setup_step" />
         </LinearLayout>
 
@@ -92,6 +119,10 @@
             <TextView
                 style="?android:listSeparatorTextViewStyle"
                 android:text="@string/heading_group_pixel_processing" />
+
+            <include
+                android:id="@+id/step_blending"
+                layout="@layout/component_setup_step" />
         </LinearLayout>
 
         <View

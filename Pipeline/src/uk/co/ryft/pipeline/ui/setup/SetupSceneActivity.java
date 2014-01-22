@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui;
+package uk.co.ryft.pipeline.ui.setup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +8,7 @@ import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.ui.PrimitiveActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -32,7 +33,7 @@ import android.widget.Toast;
 
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
-public class SceneActivity extends ListActivity {
+public class SetupSceneActivity extends ListActivity {
 
     // Request values
     protected static final int REQUEST_PRIMITIVE_ADD = 2;
@@ -50,10 +51,9 @@ public class SceneActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scene);
+        setContentView(R.layout.activity_setup_scene);
 
-        // Get elements from returning activity intent or saved state, if
-        // possible.
+        // Get elements from returning activity intent or saved state, if possible.
         Bundle extras = getIntent().getExtras();
 
         ArrayList<Element> elements;
@@ -94,6 +94,7 @@ public class SceneActivity extends ListActivity {
         // Set up save / delete button listeners
         Button saveButton = (Button) findViewById(R.id.button_element_save);
         Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+        deleteButton.setText(R.string.action_button_cancel);
 
         saveButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -112,7 +113,7 @@ public class SceneActivity extends ListActivity {
 
     @Override
     public void onBackPressed() {
-        discardAndQuit();
+        saveAndQuit();
     }
 
     protected void saveAndQuit() {
@@ -123,8 +124,7 @@ public class SceneActivity extends ListActivity {
     }
 
     protected void discardAndQuit() {
-        Intent result = new Intent();
-        setResult(RESULT_CANCELED, result);
+        setResult(Activity.RESULT_CANCELED);
         finish();
     }
 
@@ -187,7 +187,7 @@ public class SceneActivity extends ListActivity {
             public void onClick(DialogInterface dialog, int which) {
                 ElementType type = types[which];
                 if (type != Composite.Type.CUSTOM)
-                    startActivityForResult(new Intent(SceneActivity.this, type.getEditorActivity()), REQUEST_COMPOSITE_ADD);
+                    startActivityForResult(new Intent(SetupSceneActivity.this, type.getEditorActivity()), REQUEST_COMPOSITE_ADD);
             }
         });
 
@@ -420,7 +420,7 @@ public class SceneActivity extends ListActivity {
                             String message = "Expanded " + components.size() + " component";
                             if (components.size() != 1)
                                 message += "s";
-                            Toast.makeText(SceneActivity.this, message, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SetupSceneActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

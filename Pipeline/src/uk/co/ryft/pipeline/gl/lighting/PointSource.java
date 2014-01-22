@@ -1,11 +1,12 @@
 package uk.co.ryft.pipeline.gl.lighting;
 
-import android.opengl.GLES20;
-import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
+import android.opengl.GLES20;
 
 public class PointSource extends LightingModel {
     
+    private static final long serialVersionUID = 588690466528371489L;
+
     protected PointSource() {
         super(Model.POINT_SOURCE);
     }
@@ -71,6 +72,6 @@ public class PointSource extends LightingModel {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         
-        PipelineRenderer.checkGlError();
+        checkGlError();
     }
 }

@@ -22,7 +22,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/action_element_discard" />
+            android:text="@string/action_button_discard" />
 
         <Button
             android:id="@+id/button_element_save"
@@ -30,7 +30,7 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/action_element_save" />
+            android:text="@string/action_button_save" />
     </LinearLayout>
 
 </LinearLayout>

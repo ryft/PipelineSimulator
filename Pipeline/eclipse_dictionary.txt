@@ -12,3 +12,5 @@ lambertian
 reflectance
 luminosity
 polygonal
+phong
+multisampling

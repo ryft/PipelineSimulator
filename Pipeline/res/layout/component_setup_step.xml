@@ -36,10 +36,8 @@
             android:textColor="?android:attr/textColorSecondary" />
     </RelativeLayout>
 
-    <!-- Preference should place its actual preference widget here. -->
-
     <CheckBox
-        android:id="@+android:id/widget_frame"
+        android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"

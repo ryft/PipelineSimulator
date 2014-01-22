@@ -25,15 +25,23 @@
         </activity>
         
         <activity
-            android:name="uk.co.ryft.pipeline.ui.SimulatorActivity"
+            android:name="uk.co.ryft.pipeline.ui.simulator.SimulatorActivity"
             android:label="@string/app_name" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.MainActivity" />
         </activity>
         <activity
-            android:name="uk.co.ryft.pipeline.ui.SceneActivity"
-            android:label="@string/title_activity_scene" >
+            android:name="uk.co.ryft.pipeline.ui.setup.SetupSceneActivity"
+            android:label="@string/title_activity_setup_scene" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.co.ryft.pipeline.ui.MainActivity" />
+        </activity>
+        <activity
+            android:name="uk.co.ryft.pipeline.ui.setup.SetupCameraActivity"
+            android:label="@string/title_activity_setup_camera"
+            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard incorrectly opening at startup -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.MainActivity" />
@@ -47,15 +55,15 @@
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />
         </activity>
         <activity
-            android:name="uk.co.ryft.pipeline.ui.builders.CylinderActivity"
+            android:name="uk.co.ryft.pipeline.ui.setup.builders.BuildCylinderActivity"
             android:label="@string/title_activity_cylinder_add"
-            android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard spuriously opening at startup -->
+            android:windowSoftInputMode="stateUnchanged" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />
         </activity>
         <activity
-            android:name="uk.co.ryft.pipeline.ui.builders.CuboidActivity"
+            android:name="uk.co.ryft.pipeline.ui.setup.builders.BuildCuboidActivity"
             android:label="@string/title_activity_cuboid_add"
             android:windowSoftInputMode="stateUnchanged" >
             <meta-data
@@ -63,7 +71,7 @@
                 android:value="uk.co.ryft.pipeline.ui.SceneActivity" />
         </activity>
         <activity
-            android:name="uk.co.ryft.pipeline.ui.builders.CameraActivity"
+            android:name="uk.co.ryft.pipeline.ui.setup.builders.BuildCameraActivity"
             android:label="@string/title_activity_camera_add"
             android:windowSoftInputMode="stateUnchanged" >
             <meta-data

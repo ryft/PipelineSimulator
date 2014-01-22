@@ -172,8 +172,13 @@ public class Primitive implements Element {
     }
 
     @Override
-    public int getSize() {
+    public int getPrimitiveCount() {
         return 1;
+    }
+
+    @Override
+    public int getVertexCount() {
+        return mVertices.size();
     }
 
     @Override

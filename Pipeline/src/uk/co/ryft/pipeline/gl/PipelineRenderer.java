@@ -21,13 +21,10 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
     private static final long serialVersionUID = -5651858198215667027L;
-
-    private static final String TAG = "PipelineRenderer";
     
     public static LightingModel mLighting = LightingModel.UNIFORM;
 
@@ -85,7 +82,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     // Axes should never change between instances so they can be declared statically
     private static Composite sAxes;
     private static Drawable sAxesDrawable;
-    static {
+    
+    public PipelineRenderer() {
+        
         LinkedList<Element> axes = new LinkedList<Element>();
 
         LinkedList<Float3> lineCoords = new LinkedList<Float3>();
@@ -262,24 +261,6 @@ public class PipelineRenderer implements Renderer, Serializable {
                 System.out.println("]");
             else
                 System.out.println();
-        }
-    }
-
-    /**
-     * Utility method for debugging OpenGL calls:
-     * 
-     * <pre>
-     * mColorHandle = GLES20.glGetUniformLocation(mProgram, &quot;vColor&quot;);
-     * MyGLRenderer.checkGlError();
-     * </pre>
-     * 
-     * If the operation is not successful, the check throws an error.
-     */
-    public static void checkGlError() {
-        int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e(TAG, "glError " + error);
-            throw new RuntimeException("glError " + error);
         }
     }
 
