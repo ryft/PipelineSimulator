@@ -19,8 +19,8 @@
     <string name="action_button_cancel">Cancel</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
-    <string name="title_activity_scene">Configure Scene</string>
-    <string name="title_activity_culling">Configure Face Culling</string>
+    <string name="title_activity_setup_scene">Scene Composition</string>
+    <string name="title_activity_setup_camera">Camera Parameters</string>
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
     <string name="title_activity_cylinder_add">New Cylinder</string>
@@ -57,6 +57,19 @@
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
     
+    <string name="label_camera_view_eye">Eye point</string>
+    <string name="label_camera_view_focus">Focus point</string>
+    <string name="label_camera_view_up">Up direction</string>
+    <string name="label_camera_projection_left">Left clip plane</string>
+    <string name="label_camera_projection_right">Right clip plane</string>
+    <string name="label_camera_projection_bottom">Bottom clip plane</string>
+    <string name="label_camera_projection_top">Top clip plane</string>
+    <string name="label_camera_projection_near">Near clip plane</string>
+    <string name="label_camera_projection_far">Far clip plane</string>
+    
+    <string name="heading_camera_view">View parameters</string>
+    <string name="heading_camera_projection">Projection parameters (Frustum)</string>
+    
     <string name="heading_primitive_type">Primitive type</string>
     <string name="heading_primitive_colour">Primitive colour</string>
     <string name="heading_points">Vertices</string>
@@ -73,6 +86,7 @@
     <string name="heading_group_fragment_processing">Fragment Processing</string>
     <string name="heading_group_pixel_processing">Pixel Processing</string>
     
+    <string name="label_clipping">Clip planes defined by camera frustum</string>
     <string name="heading_culling_face_winding">Surface direction</string>
     <string name="label_culling_enable">Enable face culling</string>
     <string name="label_culling_cw">Wind faces clockwise</string>
@@ -80,7 +94,6 @@
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>
-    
     <string name="desc_colour_edit">Edit colour</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
@@ -96,6 +109,7 @@
     <string name="dialogue_button_close">Close</string>
     
     <string name="button_scene_composition">Scene composition</string>
+    <string name="button_camera_parameters">Camera parameters</string>
     <string name="button_lighting_model">Lighting model</string>
     <string name="button_vertex_processing">Vertex processing</string>
     <string name="button_vertex_shading">Vertex shading</string>

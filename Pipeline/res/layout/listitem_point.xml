@@ -2,8 +2,8 @@
     android:id="@+id/text_point"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:gravity="right"
     android:padding="8dp"
-    android:textAlignment="center"
+    android:textAlignment="viewEnd"
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:typeface="monospace" />

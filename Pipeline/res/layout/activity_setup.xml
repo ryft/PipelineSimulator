@@ -26,6 +26,10 @@
                 layout="@layout/component_setup_step" />
 
             <include
+                android:id="@+id/step_camera_parameters"
+                layout="@layout/component_setup_step" />
+
+            <include
                 android:id="@+id/step_lighting_model"
                 layout="@layout/component_setup_step" />
         </LinearLayout>

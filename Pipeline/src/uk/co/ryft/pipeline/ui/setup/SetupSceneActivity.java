@@ -53,8 +53,7 @@ public class SetupSceneActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scene);
 
-        // Get elements from returning activity intent or saved state, if
-        // possible.
+        // Get elements from returning activity intent or saved state, if possible.
         Bundle extras = getIntent().getExtras();
 
         ArrayList<Element> elements;

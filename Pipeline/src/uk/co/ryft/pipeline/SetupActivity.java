@@ -2,8 +2,11 @@ package uk.co.ryft.pipeline;
 
 import java.util.ArrayList;
 
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
+import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.ui.setup.SetupCameraActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupSceneActivity;
 import uk.co.ryft.pipeline.ui.simulator.SimulatorActivity;
 import android.app.Activity;
@@ -26,11 +29,13 @@ public class SetupActivity extends Activity {
 
     // Activity request codes
     protected static final int REQUEST_STEP_SCENE = 2;
-    protected static final int REQUEST_STEP_CULLING = 3;
+    protected static final int REQUEST_STEP_CAMERA = 3;
 
     // Global state set by step configuration
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
+    // Camera parameters
+    protected Camera mCamera = new Camera(new Float3(-2, 0, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 7);
     // Lighting model
     protected LightingModel mLightingModel = LightingModel.LAMBERTIAN;
     // Face culling
@@ -43,6 +48,7 @@ public class SetupActivity extends Activity {
 
     static class ViewHolder {
         View sceneComposition;
+        View cameraParameters;
         View lightingModel;
         View vertexProcessing;
         View vertexShading;
@@ -62,6 +68,7 @@ public class SetupActivity extends Activity {
 
         // Find all views associated with individual pipeline steps
         steps.sceneComposition = findViewById(R.id.step_scene_composition);
+        steps.cameraParameters = findViewById(R.id.step_camera_parameters);
         steps.lightingModel = findViewById(R.id.step_lighting_model);
         steps.vertexProcessing = findViewById(R.id.step_vertex_processing);
         steps.vertexShading = findViewById(R.id.step_vertex_shading);
@@ -74,10 +81,11 @@ public class SetupActivity extends Activity {
         initialiseViews();
     }
 
-    // XXX To be called one, sets up listeners
+    // XXX To be called once, sets up listeners
     private void initialiseViews() {
 
         setText(steps.sceneComposition, android.R.id.title, R.string.button_scene_composition);
+        setText(steps.cameraParameters, android.R.id.title, R.string.button_camera_parameters);
         setText(steps.lightingModel, android.R.id.title, R.string.button_lighting_model);
         setText(steps.vertexProcessing, android.R.id.title, R.string.button_vertex_processing);
         setText(steps.vertexShading, android.R.id.title, R.string.button_vertex_shading);
@@ -97,6 +105,17 @@ public class SetupActivity extends Activity {
                 Intent intent = new Intent(SetupActivity.this, SetupSceneActivity.class);
                 intent.putExtra("elements", mSceneElements);
                 startActivityForResult(intent, REQUEST_STEP_SCENE);
+            }
+        });
+
+        ((LinearLayout) steps.cameraParameters).removeView(steps.cameraParameters.findViewById(R.id.checkbox));
+        steps.cameraParameters.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SetupActivity.this, SetupCameraActivity.class);
+                intent.putExtra("camera", mCamera);
+                startActivityForResult(intent, REQUEST_STEP_CAMERA);
             }
         });
 
@@ -124,8 +143,8 @@ public class SetupActivity extends Activity {
         });
 
         ((LinearLayout) steps.vertexProcessing).removeView(steps.vertexProcessing.findViewById(R.id.checkbox));
-        TextView title = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
-        title.setEnabled(false);
+        TextView titleVertexProcessing = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
+        titleVertexProcessing.setEnabled(false);
         
         ((LinearLayout) steps.vertexShading).removeView(steps.vertexShading.findViewById(R.id.checkbox));
         steps.vertexShading.setOnClickListener(new OnClickListener() {
@@ -150,6 +169,9 @@ public class SetupActivity extends Activity {
         });
 
         ((LinearLayout) steps.geometryShading).removeView(steps.geometryShading.findViewById(R.id.checkbox));
+        ((LinearLayout) steps.clipping).removeView(steps.clipping.findViewById(R.id.checkbox));
+        TextView titleClipping = (TextView) steps.clipping.findViewById(android.R.id.title);
+        titleClipping.setEnabled(false);
 
         steps.faceCulling.setOnClickListener(new OnClickListener() {
             @Override
@@ -237,12 +259,10 @@ public class SetupActivity extends Activity {
                     mSceneElements = ((ArrayList<Element>) data.getSerializableExtra("elements"));
                 break;
 
-            case REQUEST_STEP_CULLING:
+            case REQUEST_STEP_CAMERA:
 
-                if (resultCode == RESULT_OK) {
-                    mCullingEnabled = data.getBooleanExtra("enabled", true);
-                    mCullingClockwise = data.getBooleanExtra("clockwise", false);
-                }
+                if (resultCode == RESULT_OK)
+                    mCamera = (Camera) data.getSerializableExtra("camera");
                 break;
 
             default:
@@ -260,6 +280,9 @@ public class SetupActivity extends Activity {
         String sceneCompositionSummary = mSceneElements.size() + " element";
         if (mSceneElements.size() != 1)
             sceneCompositionSummary += "s";
+        
+        // Generate camera parameters summary
+        String cameraParametersSummary = "Eye point " + mCamera.getEye() + ", focus point " + mCamera.getFocus() + ".";
 
         // Generate lighting model summary
         String lightingModelSummary = mLightingModel.toString();
@@ -336,11 +359,12 @@ public class SetupActivity extends Activity {
         // TODO Update these properly
 
         setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
+        setText(steps.cameraParameters, android.R.id.summary, cameraParametersSummary);
         setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
         setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
         setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
         setText(steps.geometryShading, android.R.id.summary, "No geometry shader");
-        setText(steps.clipping, android.R.id.summary, "Default clipping");
+        setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);
         setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
         setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
