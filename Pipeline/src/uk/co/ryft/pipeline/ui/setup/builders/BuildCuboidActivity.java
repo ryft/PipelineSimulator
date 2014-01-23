@@ -56,8 +56,8 @@ public class BuildCuboidActivity extends Activity {
         mTextHeight = (EditText) findViewById(R.id.edit_element_height);
         mTextDepth = (EditText) findViewById(R.id.edit_element_depth);
 
-        mButtonSave = (Button) findViewById(R.id.button_element_save);
-        mButtonDiscard = (Button) findViewById(R.id.button_element_discard);
+        mButtonSave = (Button) findViewById(R.id.button_row_positive);
+        mButtonDiscard = (Button) findViewById(R.id.button_row_negative);
 
         // Set up listeners
         mTextCentre.setOnClickListener(new EditPointHandler(this, mPointCentre, new OnPointChangedListener() {

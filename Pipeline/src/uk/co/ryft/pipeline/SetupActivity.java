@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -265,8 +266,19 @@ public class SetupActivity extends Activity {
                 updateViews();
             }
         });
+        
+        Button buttonExit = (Button) findViewById(R.id.button_row_negative);
+        buttonExit.setText(R.string.action_button_exit);
+        buttonExit.setOnClickListener(new OnClickListener() {
 
-        Button buttonSimulate = (Button) findViewById(R.id.button_simulate);
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        Button buttonSimulate = (Button) findViewById(R.id.button_row_positive);
+        buttonSimulate.setText(R.string.action_button_simulate);
         buttonSimulate.setOnClickListener(new OnClickListener() {
 
             @Override

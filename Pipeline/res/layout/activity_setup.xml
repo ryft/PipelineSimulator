@@ -139,11 +139,6 @@
         android:layout_height="1dip"
         android:background="@color/list_item_hairline" />
 
-    <Button
-        android:id="@+id/button_simulate"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/button_simulate" />
+    <include layout="@layout/component_buttonrow" />
 
 </LinearLayout>

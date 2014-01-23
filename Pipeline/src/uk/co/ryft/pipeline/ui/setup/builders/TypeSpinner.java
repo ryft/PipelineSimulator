@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui;
+package uk.co.ryft.pipeline.ui.setup.builders;
 
 import android.content.Context;
 import android.util.AttributeSet;

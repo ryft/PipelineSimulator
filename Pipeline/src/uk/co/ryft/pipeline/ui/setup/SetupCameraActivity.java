@@ -66,8 +66,8 @@ public class SetupCameraActivity extends Activity {
         mTextNear = (EditText) findViewById(R.id.edit_camera_projection_near);
         mTextFar = (EditText) findViewById(R.id.edit_camera_projection_far);
 
-        mButtonSave = (Button) findViewById(R.id.button_element_save);
-        mButtonDiscard = (Button) findViewById(R.id.button_element_discard);
+        mButtonSave = (Button) findViewById(R.id.button_row_positive);
+        mButtonDiscard = (Button) findViewById(R.id.button_row_negative);
         mButtonDiscard.setText(R.string.action_button_cancel);
 
         // Set up listeners

@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui;
+package uk.co.ryft.pipeline.ui.setup.builders;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,11 +31,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
-public class PrimitiveActivity extends ListActivity {
+public class BuildPrimitiveActivity extends ListActivity {
 
     protected ArrayAdapter<Float3> mAdapter;
     protected Primitive mElement;
@@ -61,8 +59,8 @@ public class PrimitiveActivity extends ListActivity {
         }
 
         // Set up save / delete button listeners
-        Button saveButton = (Button) findViewById(R.id.button_element_save);
-        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+        Button saveButton = (Button) findViewById(R.id.button_row_positive);
+        Button deleteButton = (Button) findViewById(R.id.button_row_negative);
 
         if (mEditMode)
             deleteButton.setText(R.string.action_button_delete);
@@ -125,10 +123,10 @@ public class PrimitiveActivity extends ListActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
                 // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(PrimitiveActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(BuildPrimitiveActivity.this);
                 builder.setTitle(R.string.dialogue_title_point);
 
-                LayoutInflater inflater = PrimitiveActivity.this.getLayoutInflater();
+                LayoutInflater inflater = BuildPrimitiveActivity.this.getLayoutInflater();
                 View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
 
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
@@ -176,23 +174,9 @@ public class PrimitiveActivity extends ListActivity {
         }));
     }
 
-    long mBackPressed = 0;
-
     @Override
     public void onBackPressed() {
-        long time = SystemClock.uptimeMillis();
-        long elapsed = time - mBackPressed;
-
-        if (elapsed < 2000)
-            discardAndQuit();
-
-        else {
-            if (mEditMode)
-                Toast.makeText(this, R.string.warning_element_discard_changes, Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this, R.string.warning_element_discard, Toast.LENGTH_SHORT).show();
-            mBackPressed = time;
-        }
+        saveAndQuit(false);
     }
 
     protected void saveAndQuit(boolean delete) {

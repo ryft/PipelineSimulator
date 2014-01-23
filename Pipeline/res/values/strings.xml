@@ -17,6 +17,8 @@
     <string name="action_button_delete">Delete</string>
     <string name="action_button_discard">Discard</string>
     <string name="action_button_cancel">Cancel</string>
+    <string name="action_button_simulate">Simulate</string>
+    <string name="action_button_exit">Exit</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
     <string name="title_activity_setup_scene">Scene Composition</string>
@@ -32,9 +34,6 @@
     <string name="message_element_discarded">Element discarded</string>
     <string name="message_element_updated">Element updated</string>
     <string name="message_element_deleted">Element deleted</string>
-    
-    <string name="warning_element_discard_changes">Press back again to discard changes</string>
-    <string name="warning_element_discard">Press back again to discard</string>
     
     <string name="label_element_centre">Centre point</string>
     <string name="label_element_eye">Eye point</string>

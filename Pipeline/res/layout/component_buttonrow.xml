@@ -17,7 +17,7 @@
         android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/button_element_discard"
+            android:id="@+id/button_row_negative"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             android:text="@string/action_button_discard" />
 
         <Button
-            android:id="@+id/button_element_save"
+            android:id="@+id/button_row_positive"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_width="0dip"
             android:layout_height="wrap_content"

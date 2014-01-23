@@ -8,7 +8,7 @@ import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.ui.PrimitiveActivity;
+import uk.co.ryft.pipeline.ui.setup.builders.BuildPrimitiveActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -92,8 +92,8 @@ public class SetupSceneActivity extends ListActivity {
         listView.setOnScrollListener(touchListener.makeScrollListener());
 
         // Set up save / delete button listeners
-        Button saveButton = (Button) findViewById(R.id.button_element_save);
-        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+        Button saveButton = (Button) findViewById(R.id.button_row_positive);
+        Button deleteButton = (Button) findViewById(R.id.button_row_negative);
         deleteButton.setText(R.string.action_button_cancel);
 
         saveButton.setOnClickListener(new OnClickListener() {
@@ -158,13 +158,13 @@ public class SetupSceneActivity extends ListActivity {
     }
 
     protected void addPrimitive() {
-        Intent intent = new Intent(this, PrimitiveActivity.class);
+        Intent intent = new Intent(this, BuildPrimitiveActivity.class);
         intent.putExtra("edit_mode", false);
         startActivityForResult(intent, REQUEST_PRIMITIVE_ADD);
     }
 
     protected void editPrimitive(Primitive e) {
-        Intent intent = new Intent(this, PrimitiveActivity.class);
+        Intent intent = new Intent(this, BuildPrimitiveActivity.class);
         intent.putExtra("edit_mode", true);
         intent.putExtra("element", e);
         mThisElement = e;
