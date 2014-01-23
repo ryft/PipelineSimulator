@@ -41,7 +41,7 @@ public class SetupCameraActivity extends Activity {
         
         // Get camera state from saved instance or bundle, if possible
         Bundle extras = getIntent().getExtras();
-        Camera camera = new Camera(new Float3(-2, 0, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 7);
+        Camera camera = null;
         
         if (savedInstanceState != null && savedInstanceState.containsKey("camera"))
             camera = (Camera) savedInstanceState.getSerializable("camera");

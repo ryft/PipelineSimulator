@@ -1,11 +1,7 @@
 package uk.co.ryft.pipeline.ui.simulator;
 
-import java.util.List;
-
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.gl.lighting.LightingModel;
-import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
@@ -13,11 +9,10 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public class PipelineSurface extends GLSurfaceView {
 
-    private final PipelineRenderer mRenderer = new PipelineRenderer();
+    private final PipelineRenderer mRenderer;
     // XXX This is very unsafe but required for saving and restoring state.
     // Can we do better by implementing it in onPause() etc here?
     public PipelineRenderer getRenderer() { return mRenderer; }
@@ -32,6 +27,7 @@ public class PipelineSurface extends GLSurfaceView {
     public PipelineSurface(Context context, Bundle params) {
         super(context);
         mContext = context;
+        mRenderer = new PipelineRenderer(params);
         
         final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
@@ -90,31 +86,9 @@ public class PipelineSurface extends GLSurfaceView {
             setBackgroundResource(0);
     }
 
-    static int mCurrentModel = 0;
+    static int mCurrentModel = 2;
 
     public void toggle() {
-        mCurrentModel = (mCurrentModel + 1) % 3;
-
-        switch (mCurrentModel) {
-            case 0:
-                PipelineRenderer.mLighting = LightingModel.UNIFORM;
-                break;
-            case 1:
-                PipelineRenderer.mLighting = LightingModel.LAMBERTIAN;
-                break;
-            case 2:
-                PipelineRenderer.mLighting = LightingModel.PHONG;
-                break;
-        }
-        
-        Toast.makeText(mContext, PipelineRenderer.mLighting.toString(), Toast.LENGTH_SHORT).show();
-            
-        requestRender();
-    }
-
-    public void updateScene(List<Element> elements) {
-        mRenderer.updateScene(elements);
-        requestRender();
     }
 
     private float mPreviousX = 0;

@@ -35,9 +35,9 @@ public class SetupActivity extends Activity {
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
     // Camera parameters
-    protected Camera mCamera = new Camera(new Float3(-2, 0, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 7);
+    protected Camera mCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
     // Lighting model
-    protected LightingModel mLightingModel = LightingModel.LAMBERTIAN;
+    protected LightingModel mLightingModel = LightingModel.PHONG;
     // Multisampling
     protected boolean mMultisamplingEnabled = true;
     // Face culling
@@ -273,6 +273,13 @@ public class SetupActivity extends Activity {
             public void onClick(View v) {
                 Intent intent = new Intent(SetupActivity.this, SimulatorActivity.class);
                 intent.putExtra("elements", mSceneElements);
+                intent.putExtra("camera", mCamera);
+                intent.putExtra("lighting", mLightingModel);
+                intent.putExtra("multisampling", mMultisamplingEnabled);
+                intent.putExtra("culling_enabled", mCullingEnabled);
+                intent.putExtra("culling_clockwise", mCullingClockwise);
+                intent.putExtra("depth_buffer_enabled", mDepthBufferEnabled);
+                intent.putExtra("blending_enabled", mBlendingEnabled);
                 startActivity(intent);
             }
         });

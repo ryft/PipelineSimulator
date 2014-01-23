@@ -7,7 +7,6 @@ import java.util.List;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import android.app.Activity;
 import android.os.Bundle;
@@ -24,37 +23,18 @@ public class SimulatorActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get data from returning activity intent or saved state, if possible
+        // Get data from activity intent
         Bundle data = getIntent().getExtras();
-        
         mPipelineView = new PipelineSurface(this, data);
         setContentView(mPipelineView);
         mPipelineView.setPadding(2, 2, 2, 2);
-
-        if (savedInstanceState != null)
-            data = savedInstanceState;
         
         mElements = (ArrayList<Element>) data.getSerializable("elements");
-
         List<Drawable> scene = new LinkedList<Drawable>();
         for (Element e : mElements) {
             Drawable d = e.getDrawable();
             scene.add(d);
         }
-
-        // XXX Restore scene state
-        if (savedInstanceState != null) {
-            PipelineRenderer renderer = mPipelineView.getRenderer();
-
-            mPipelineView.setEditMode(savedInstanceState.getBoolean("edit_mode"));
-            renderer.setRotation(savedInstanceState.getFloat("angle"));
-            if (savedInstanceState.getSerializable("actual_camera") != null)
-                renderer.setActualCamera((Camera) savedInstanceState.getSerializable("actual_camera"));
-            if (savedInstanceState.getSerializable("virtual_camera") != null)
-                renderer.setVirtualCamera((Camera) savedInstanceState.getSerializable("virtual_camera"));
-        }
-
-        updateScene();
 
     }
 
@@ -64,10 +44,6 @@ public class SimulatorActivity extends Activity {
             mPipelineView.toggleEditMode();
         else
             super.onBackPressed();
-    }
-
-    protected void updateScene() {
-        mPipelineView.updateScene(mElements);
     }
 
     @Override
@@ -92,16 +68,22 @@ public class SimulatorActivity extends Activity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
         PipelineRenderer renderer = mPipelineView.getRenderer();
-
-        savedInstanceState.putSerializable("elements", mElements);
+        
         savedInstanceState.putBoolean("edit_mode", mPipelineView.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());
-        savedInstanceState.putSerializable("actual_camera", renderer.getActualCamera());
-        savedInstanceState.putSerializable("virtual_camera", renderer.getVirtualCamera());
+    }
 
-        super.onSaveInstanceState(savedInstanceState);
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        
+        PipelineRenderer renderer = mPipelineView.getRenderer();
+        
+        mPipelineView.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
+        renderer.setRotation(savedInstanceState.getFloat("angle", 0));
     }
 
     @Override
@@ -114,14 +96,6 @@ public class SimulatorActivity extends Activity {
     public void onResume() {
         super.onResume();
         mPipelineView.onResume();
-    }
-
-    public PipelineSurface getPipelineView() {
-        return mPipelineView;
-    }
-
-    public void setPipelineView(PipelineSurface mPipelineView) {
-        this.mPipelineView = mPipelineView;
     }
 
 }

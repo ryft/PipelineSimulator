@@ -1,6 +1,7 @@
 package uk.co.ryft.pipeline.gl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -20,13 +21,25 @@ import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
+import android.os.Bundle;
 import android.os.SystemClock;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
     private static final long serialVersionUID = -5651858198215667027L;
-    
-    public static LightingModel mLighting = LightingModel.UNIFORM;
+
+    // Renderer helper objects passed from the parent
+    private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
+    private LightingModel mLighting;
+
+    private final Camera mActualCamera;
+    private final Camera mVirtualCamera;
+
+    // Rendering parameters passed from the parent
+    private final boolean mCullingEnabled;
+    private final boolean mCullingClockwise;
+    private final boolean mDepthBufferEnabled;
+    private final boolean mBlendingEnabled;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -36,55 +49,48 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mViewMatrix = new float[16];
     private final float[] mCameraViewMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
-    
+
     private final float[] mMVMatrix = new float[16];
     private final float[] mCVMatrix = new float[16];
     private final float[] mLVMatrix = new float[16];
-    
+
     private final float[] mMVPMatrix = new float[16];
     private final float[] mCVPMatrix = new float[16];
     private final float[] mLVPMatrix = new float[16];
 
-    private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
-
     private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
-    
-    private Camera mActualCamera;
-    private Camera mVirtualCamera;
 
-    // TODO This is unsafe. If that's OK we can just use public variables,
-    // if not implement cloneable and clone each before returning.
-    public Camera getActualCamera() { return mActualCamera; }
-    public Camera getVirtualCamera() { return mVirtualCamera; }
-    public void setActualCamera(Camera actualCamera) { mActualCamera = actualCamera; }
-    public void setVirtualCamera(Camera virtualCamera) { mVirtualCamera = virtualCamera; }
-    
     // Light position, for implementing lighting models
     public static Float3 sLightPosition = new Float3(2, 0, 0);
-    private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE);
+    private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition),
+            Colour.WHITE);
     private Drawable sLightDrawable;
 
     // For touch events
     // TODO: Implement a monitor for this.
     private volatile float mAngle;
-    
-    public float getRotation() { return mAngle; }
-    public void setRotation(float angle) { mAngle = angle; }
-    
     private final float[] mModelRotationMatrix = new float[16];
 
+    public float getRotation() {
+        return mAngle;
+    }
+
+    public void setRotation(float angle) {
+        mAngle = angle;
+    }
+
     // Drawables aren't initialised, and are constructed at render time if necessary
-    private Element mCameraElement;
+    private final Element mCameraElement;
     private Drawable mCameraDrawable;
-    private Element mFrustumElement;
+    private final Element mFrustumElement;
     private Drawable mFrustumDrawable;
 
     // Axes should never change between instances so they can be declared statically
     private static Composite sAxes;
     private static Drawable sAxesDrawable;
-    
-    public PipelineRenderer() {
-        
+
+    public PipelineRenderer(Bundle params) {
+
         LinkedList<Element> axes = new LinkedList<Element>();
 
         LinkedList<Float3> lineCoords = new LinkedList<Float3>();
@@ -96,7 +102,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             lineCoords.add(new Float3(1, 0, i));
         }
         axes.add(new Primitive(Primitive.Type.GL_LINES, lineCoords, Colour.GREY));
-        
+
         LinkedList<Float3> points = new LinkedList<Float3>();
         points.add(new Float3(0, 0, 0));
         points.add(new Float3(1, 0, 0));
@@ -128,34 +134,57 @@ public class PipelineRenderer implements Renderer, Serializable {
         axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
 
         sAxes = new Composite(Composite.Type.CUSTOM, axes);
+
+        // Get list of elements from the parameters bundle
+        @SuppressWarnings("unchecked")
+        ArrayList<Element> elements = (ArrayList<Element>) params.getSerializable("elements");
+        for (Element e : elements)
+            mElements.put(e, e.getDrawable());
+
+        // Initialise cameras
+        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
+        mVirtualCamera = (Camera) params.getSerializable("camera");
+
+        mCameraElement = ShapeFactory.buildCamera(0.25f);
+        mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
+
+        // Initialise lighting model
+        mLighting = (LightingModel) params.getSerializable("lighting");
+
+        mCullingEnabled = params.getBoolean("culling_enabled", true);
+        mCullingClockwise = params.getBoolean("culling_clockwise", false);
+        mDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
+        mBlendingEnabled = params.getBoolean("blending_enabled", true);
     }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        
-        // Initialise cameras
-        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
-        mVirtualCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
-        
-        mCameraElement = ShapeFactory.buildCamera(0.25f);
-        mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClearDepthf(1.0f);
-        
+
         // Enable depth buffer and set parameters
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        if (mDepthBufferEnabled)
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        else
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-        
+
         // Enable face culling and set parameters
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        if (mCullingEnabled)
+            GLES20.glEnable(GLES20.GL_CULL_FACE);
+        else
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
-        GLES20.glFrontFace(GLES20.GL_CCW);
-        
+        if (mCullingClockwise)
+            GLES20.glFrontFace(GLES20.GL_CW);
+        else
+            GLES20.glFrontFace(GLES20.GL_CCW);
+
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
-        
+
         // Force re-initialisation of static scene objects in this new render thread context
         sAxesDrawable = null;
         sLightDrawable = null;
@@ -166,17 +195,17 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-    
+
         // Adjust the viewport based on geometry changes,
         // such as screen rotation
         GLES20.glViewport(0, 0, width, height);
-        
+
         mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
-    
+
     }
-    
+
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
-    
+
     @Override
     public void onDrawFrame(GL10 unused) {
 
@@ -190,16 +219,16 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Set up the model (world transformation) matrix
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.setIdentityM(mLightModelMatrix, 0);
-        
+
         // The camera model matrix transforms the camera to its correct position and orientation in world space
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
 
         long time = SystemClock.uptimeMillis();
-        
+
         // Apply all transformations to the world, in order, in their current state
         for (Transformation t : mModelTransformations)
             Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
-        
+
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
         Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
         Matrix.multiplyMM(mModelMatrix, 0, mModelRotationMatrix, 0, mModelMatrix, 0);
@@ -223,11 +252,11 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (mFrustumDrawable == null)
             mFrustumDrawable = mFrustumElement.getDrawable();
 
-        // Draw axes and virtual camera        
+        // Draw axes and virtual camera
         sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
-        
+
         // Draw world objects in the scene
         for (Element e : mElements.keySet()) {
             if (mElements.get(e) == null)
@@ -246,7 +275,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         sLightDrawable.draw(LightingModel.POINT_SOURCE, mLVMatrix, mLVPMatrix);
 
     }
-    
+
     // XXX Prints matrices in OpenGL-style column-major order.
     public static void printMatrix(float[] m, int cols, int rows) {
         for (int i = 0; i < rows; i++) {
@@ -263,15 +292,4 @@ public class PipelineRenderer implements Renderer, Serializable {
                 System.out.println();
         }
     }
-
-    public void addToScene(Element e) {
-        mElements.put(e, null);
-    }
-
-    public void updateScene(List<Element> elements) {
-        mElements.clear();
-        for (Element e : elements)
-            mElements.put(e, null);
-    }
-
 }
