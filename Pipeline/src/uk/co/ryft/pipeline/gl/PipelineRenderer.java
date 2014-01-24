@@ -79,6 +79,11 @@ public class PipelineRenderer implements Renderer, Serializable {
         mAngle = angle;
     }
 
+    public void setScaleFactor(float scaleFactor) {
+        mActualCamera.setScaleFactor(scaleFactor);
+        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+    }
+
     // Drawables aren't initialised, and are constructed at render time if necessary
     private final Element mCameraElement;
     private Drawable mCameraDrawable;
@@ -142,7 +147,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             mElements.put(e, e.getDrawable());
 
         // Initialise cameras
-        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 7);
+        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 7);
         mVirtualCamera = (Camera) params.getSerializable("camera");
 
         mCameraElement = ShapeFactory.buildCamera(0.25f);
@@ -193,8 +198,14 @@ public class PipelineRenderer implements Renderer, Serializable {
         LightingModel.resetAll();
     }
 
+    int mSurfaceWidth;
+    int mSurfaceHeight;
+    
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
+        
+        mSurfaceWidth = width;
+        mSurfaceHeight = height;
 
         // Adjust the viewport based on geometry changes,
         // such as screen rotation

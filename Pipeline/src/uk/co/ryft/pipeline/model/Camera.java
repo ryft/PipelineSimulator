@@ -70,6 +70,12 @@ public class Camera implements Serializable {
     public Float3 getFocus() { return (Float3) mFocus.clone(); }
     public Float3 getUp() { return (Float3) mUp.clone(); }
     
+    private float mScaleFactor = 1;
+
+    public void setScaleFactor(float scaleFactor) {
+        mScaleFactor /= scaleFactor;
+    }
+    
     public void setViewMatrix(float[] viewMatrix, int offset) {
         
 //        if (mStep < mSteps) {
@@ -79,8 +85,10 @@ public class Camera implements Serializable {
 //
 //            if (mPrevView == null)
 //                mPrevView = new float[16];
+        
+        Float3 eye = getEye().scale(mScaleFactor);
             
-            Matrix.setLookAtM(viewMatrix, offset, mEye.getX(), mEye.getY(), mEye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
+        Matrix.setLookAtM(viewMatrix, offset, eye.getX(), eye.getY(), eye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
 //            mStep++;
 //            
 //        } else if (mPrevView == null) {
@@ -114,7 +122,7 @@ public class Camera implements Serializable {
         frustumNear = near;
         frustumFar = far;
     }
-    
+
     public void setProjectionMatrix(float[] projectionMatrix, int offset, int width, int height) {
 
         // XXX display a unit square with correct aspect ratio, regardless of screen orientation

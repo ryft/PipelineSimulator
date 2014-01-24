@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 
 public class PipelineSurface extends GLSurfaceView {
@@ -17,7 +19,7 @@ public class PipelineSurface extends GLSurfaceView {
     // Can we do better by implementing it in onPause() etc here?
     public PipelineRenderer getRenderer() { return mRenderer; }
     
-    Context mContext;
+    protected Context mContext;
     
     public PipelineSurface(Context context) {
         super(context);
@@ -29,7 +31,7 @@ public class PipelineSurface extends GLSurfaceView {
         mContext = context;
         mRenderer = new PipelineRenderer(params);
         
-        final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
+        final GestureDetector doubleTapDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 toggleEditMode();
@@ -42,12 +44,28 @@ public class PipelineSurface extends GLSurfaceView {
             }
         });
         
+        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(context, new SimpleOnScaleGestureListener() {
+            
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                mRenderer.setScaleFactor(detector.getScaleFactor());
+                return true;
+            }
+        });
+        
         setOnTouchListener(new OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (!gestureDetector.onTouchEvent(event))
+
+                // Consume all double-tap events as highest priority
+                if (!doubleTapDetector.onTouchEvent(event) && mEditMode) {
+
+                    // XXX There is a bug in ScaleGeestureDetector where it always returns true
+                    // See https://code.google.com/p/android/issues/detail?id=42591
+                    scaleDetector.onTouchEvent(event);
                     onSceneMove(event);
+                }
                 
                 return true;
             }
@@ -89,19 +107,17 @@ public class PipelineSurface extends GLSurfaceView {
     static int mCurrentModel = 2;
 
     public void toggle() {
+        mRenderer.setScaleFactor(1.5f);
     }
 
     private float mPreviousX = 0;
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;
 
-    public void onSceneMove(MotionEvent e) {
+    public boolean onSceneMove(MotionEvent e) {
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
-        
-        if (!mEditMode)
-            return;
 
         float x = e.getX();
         float y = e.getY();
@@ -126,6 +142,8 @@ public class PipelineSurface extends GLSurfaceView {
 
         mPreviousX = x;
         mPreviousY = y;
+        
+        return true;
     }
 
 }
