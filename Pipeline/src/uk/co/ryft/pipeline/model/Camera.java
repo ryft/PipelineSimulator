@@ -73,6 +73,7 @@ public class Camera implements Serializable {
     private float mScaleFactor = 1;
 
     public void setScaleFactor(float scaleFactor) {
+        // XXX Zooming implemented as described here: http://www.opengl.org/archives/resources/faq/technical/viewing.htm#view0040
         mScaleFactor /= scaleFactor;
     }
     
@@ -85,10 +86,8 @@ public class Camera implements Serializable {
 //
 //            if (mPrevView == null)
 //                mPrevView = new float[16];
-        
-        Float3 eye = getEye().scale(mScaleFactor);
             
-        Matrix.setLookAtM(viewMatrix, offset, eye.getX(), eye.getY(), eye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
+        Matrix.setLookAtM(viewMatrix, offset, mEye.getX(), mEye.getY(), mEye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
 //            mStep++;
 //            
 //        } else if (mPrevView == null) {
@@ -129,12 +128,12 @@ public class Camera implements Serializable {
         if (width >= height) {
             float ratio = (float) width / height;
             
-            Matrix.frustumM(projectionMatrix, offset, -ratio, ratio, frustumBottom, frustumTop, frustumNear, frustumFar);
+            Matrix.frustumM(projectionMatrix, offset, -ratio * mScaleFactor, ratio * mScaleFactor, frustumBottom * mScaleFactor, frustumTop * mScaleFactor, frustumNear, frustumFar);
             // (float[] m, int offset, float left, float right, float bottom, float top, float near, float far)
 
         } else {
             float ratio = (float) height / width;
-            Matrix.frustumM(projectionMatrix, offset, frustumLeft, frustumRight, -ratio, ratio, frustumNear, frustumFar);
+            Matrix.frustumM(projectionMatrix, offset, frustumLeft * mScaleFactor, frustumRight * mScaleFactor, -ratio * mScaleFactor, ratio * mScaleFactor, frustumNear, frustumFar);
 //            float ratio = (float) width / height;
 //            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 
