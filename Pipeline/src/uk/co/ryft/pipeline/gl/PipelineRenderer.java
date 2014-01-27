@@ -3,10 +3,11 @@ package uk.co.ryft.pipeline.gl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -18,18 +19,21 @@ import uk.co.ryft.pipeline.model.Transformation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.widget.Toast;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
     private static final long serialVersionUID = -5651858198215667027L;
+    private static final String TAG = "PipelineRenderer";
 
     // Renderer helper objects passed from the parent
-    private final Map<Element, Drawable> mElements = new LinkedHashMap<Element, Drawable>();
+    private final Map<Element, Drawable> mElements = new ConcurrentHashMap<Element, Drawable>();
     private LightingModel mLighting;
 
     private final Camera mActualCamera;
@@ -147,7 +151,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             mElements.put(e, e.getDrawable());
 
         // Initialise cameras
-        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 7);
+        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1.5f, 7.0f);
         mVirtualCamera = (Camera) params.getSerializable("camera");
 
         mCameraElement = ShapeFactory.buildCamera(0.25f);
@@ -160,27 +164,34 @@ public class PipelineRenderer implements Renderer, Serializable {
         mCullingClockwise = params.getBoolean("culling_clockwise", false);
         mDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
         mBlendingEnabled = params.getBoolean("blending_enabled", true);
+
+        // Put some interesting things in the scene for testing purposes
+        Random r = new Random();
+        for (int i = 0; i < 64; i++) {
+            Element e = ShapeFactory.buildCuboid(
+                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1), r.nextFloat() / 4,
+                    r.nextFloat() / 4, r.nextFloat() / 4, Colour.RANDOM, Colour.RANDOM);
+            mElements.put(e, e.getDrawable());
+        }
     }
+    
+    EGLConfig mConfig;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        
+        mConfig = config;
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClearDepthf(1.0f);
 
         // Enable depth buffer and set parameters
-        if (mDepthBufferEnabled)
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        else
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
         // Enable face culling and set parameters
-        if (mCullingEnabled)
-            GLES20.glEnable(GLES20.GL_CULL_FACE);
-        else
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
         if (mCullingClockwise)
             GLES20.glFrontFace(GLES20.GL_CW);
@@ -195,15 +206,18 @@ public class PipelineRenderer implements Renderer, Serializable {
         sLightDrawable = null;
         mCameraDrawable = null;
         mFrustumDrawable = null;
+
         LightingModel.resetAll();
+        // FIXME For some reason the next call is required. Find out why if there is time (not a priority)
+        mLighting.reset();
     }
 
     int mSurfaceWidth;
     int mSurfaceHeight;
-    
+
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
-        
+
         mSurfaceWidth = width;
         mSurfaceHeight = height;
 
@@ -253,6 +267,13 @@ public class PipelineRenderer implements Renderer, Serializable {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVMatrix, 0);
         Matrix.multiplyMM(mLVPMatrix, 0, mProjectionMatrix, 0, mLVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
+        
+        if (mPipelineStep < STEP_VERTEX_SHADING)
+            mLighting = LightingModel.UNIFORM;
+        else if (mPipelineStep < STEP_FRAGMENT_SHADING)
+            mLighting = LightingModel.LAMBERTIAN;
+        else
+            mLighting = LightingModel.PHONG;
 
         // Initialise axes and camera drawables if necessary
         // Avoid object construction as much as possible at render time
@@ -269,17 +290,18 @@ public class PipelineRenderer implements Renderer, Serializable {
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
         // Draw world objects in the scene
-        for (Element e : mElements.keySet()) {
-            if (mElements.get(e) == null)
-                mElements.put(e, e.getDrawable());
-            Drawable d = mElements.get(e);
-            if (d != null)
-                d.draw(mLighting, mMVMatrix, mMVPMatrix);
-            else
-                // Occasionally happens when app is quitting
-                // TODO: Investigate turning off continuous rendering when quitting
-                System.out.println("Ruh-roh, null drawable!");
-        }
+        if (mPipelineStep >= STEP_VERTEX_ASSEMBLY)
+            for (Element e : mElements.keySet()) {
+                if (mElements.get(e) == null)
+                    mElements.put(e, e.getDrawable());
+                Drawable d = mElements.get(e);
+                if (d != null)
+                    d.draw(mLighting, mMVMatrix, mMVPMatrix);
+                else
+                    // Occasionally happens when app is quitting
+                    // TODO: Investigate turning off continuous rendering when quitting
+                    System.out.println("Ruh-roh, null drawable!");
+            }
 
         if (sLightDrawable == null)
             sLightDrawable = sLightPoint.getDrawable();
@@ -302,5 +324,39 @@ public class PipelineRenderer implements Renderer, Serializable {
             else
                 System.out.println();
         }
+    }
+
+    private int mPipelineStep = STEP_INITIAL;
+    public static final int STEP_INITIAL = 0;
+    public static final int STEP_VERTEX_ASSEMBLY = 1;
+    public static final int STEP_VERTEX_SHADING = 2;
+    public static final int STEP_GEOMETRY_SHADING = 3;
+    public static final int STEP_CLIPPING = 4;
+    public static final int STEP_MULTISAMPLING = 5;
+    public static final int STEP_FACE_CULLING = 6;
+    public static final int STEP_FRAGMENT_SHADING = 7;
+    public static final int STEP_DEPTH_BUFFER = 8;
+    public static final int STEP_BLENDING = 9;
+
+    public void next(Context context) {
+        mPipelineStep++;
+
+        if (mPipelineStep >= STEP_FACE_CULLING)
+            GLES20.glEnable(GLES20.GL_CULL_FACE);
+        if (mPipelineStep >= STEP_DEPTH_BUFFER)
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        
+        Toast.makeText(context, "Completed step "+mPipelineStep, Toast.LENGTH_SHORT).show();
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        onDrawFrame(null);
+    }
+
+    public void previous(Context context) {
+        mPipelineStep--;
+
+        if (mPipelineStep < STEP_FACE_CULLING)
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
+        if (mPipelineStep < STEP_DEPTH_BUFFER)
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
     }
 }

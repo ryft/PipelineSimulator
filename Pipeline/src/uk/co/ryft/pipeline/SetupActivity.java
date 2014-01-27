@@ -3,6 +3,7 @@ package uk.co.ryft.pipeline;
 import java.util.ArrayList;
 
 import uk.co.ryft.pipeline.gl.Float3;
+import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
@@ -18,7 +19,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;

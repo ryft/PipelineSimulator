@@ -13,7 +13,7 @@ public abstract class LightingModel implements Serializable {
 
     private static final long serialVersionUID = -8281004338010378525L;
 
-    private final String TAG = "LightingModel";
+    private static final String TAG = "LightingModel";
 
     // XXX Language- and library-specific constants
     // TODO put these somewhere nice, and only one place

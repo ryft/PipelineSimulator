@@ -21,6 +21,9 @@ public class PipelineSurface extends GLSurfaceView {
     
     protected Context mContext;
     
+    protected boolean mIsScrolling = false;
+    protected float mScrollStartX = 0;
+    
     public PipelineSurface(Context context) {
         super(context);
         throw new RuntimeException("Pipeline surface called with no parameters");
@@ -31,7 +34,7 @@ public class PipelineSurface extends GLSurfaceView {
         mContext = context;
         mRenderer = new PipelineRenderer(params);
         
-        final GestureDetector doubleTapDetector = new GestureDetector(context, new SimpleOnGestureListener() {
+        final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 toggleEditMode();
@@ -41,6 +44,15 @@ public class PipelineSurface extends GLSurfaceView {
             public boolean onDoubleTapEvent(MotionEvent e) {
                 // Consume all events between a double-tap to prevent "jumping"
                 return true;
+            }
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                if (!mEditMode) {
+                    mIsScrolling = true;
+                    mScrollStartX = e1.getX();
+                    return true;
+                } else
+                    return false;
             }
         });
         
@@ -58,8 +70,21 @@ public class PipelineSurface extends GLSurfaceView {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                // Consume all double-tap events as highest priority
-                if (!doubleTapDetector.onTouchEvent(event) && mEditMode) {
+                // Detect if a scroll event has finished for pipeline transitions
+                if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
+                    mIsScrolling = false;
+                    
+                    if (event.getX() - mScrollStartX <= 0)
+                        // Scrolled left
+                        mRenderer.next(mContext);
+                    
+                    else
+                        // Scrolled right
+                        mRenderer.previous(mContext);
+                }
+
+                // Consume all double-tap and swipe events as next highest priority
+                if (!gestureDetector.onTouchEvent(event) && mEditMode) {
 
                     // XXX There is a bug in ScaleGeestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
