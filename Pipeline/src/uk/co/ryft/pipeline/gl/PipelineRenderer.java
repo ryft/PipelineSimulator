@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -24,6 +23,7 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
@@ -98,49 +98,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     public PipelineRenderer(Bundle params) {
 
-        LinkedList<Element> axes = new LinkedList<Element>();
-
-        LinkedList<Float3> lineCoords = new LinkedList<Float3>();
-        // XXX i < 1.1 is required to draw the edge lines
-        for (float i = -1; i < 1.1; i += 0.1) {
-            lineCoords.add(new Float3(i, 0, -1));
-            lineCoords.add(new Float3(i, 0, 1));
-            lineCoords.add(new Float3(-1, 0, i));
-            lineCoords.add(new Float3(1, 0, i));
-        }
-        axes.add(new Primitive(Primitive.Type.GL_LINES, lineCoords, Colour.GREY));
-
-        LinkedList<Float3> points = new LinkedList<Float3>();
-        points.add(new Float3(0, 0, 0));
-        points.add(new Float3(1, 0, 0));
-        points.add(new Float3(0, 0, 0));
-        points.add(new Float3(0, 1, 0));
-        points.add(new Float3(0, 0, 0));
-        points.add(new Float3(0, 0, 1));
-        axes.add(new Primitive(Primitive.Type.GL_LINES, points, Colour.WHITE));
-
-        LinkedList<Float3> arrowX = new LinkedList<Float3>();
-        arrowX.add(new Float3(0.8f, 0.1f, -0.1f));
-        arrowX.add(new Float3(1, 0, 0));
-        arrowX.add(new Float3(0.8f, -0.1f, 0.1f));
-        arrowX.add(new Float3(0.9f, 0, 0));
-        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowX, Colour.RED));
-
-        LinkedList<Float3> arrowY = new LinkedList<Float3>();
-        arrowY.add(new Float3(-0.1f, 0.8f, 0.1f));
-        arrowY.add(new Float3(0, 1, 0));
-        arrowY.add(new Float3(0.1f, 0.8f, -0.1f));
-        arrowY.add(new Float3(0, 0.9f, 0));
-        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowY, Colour.GREEN));
-
-        LinkedList<Float3> arrowZ = new LinkedList<Float3>();
-        arrowZ.add(new Float3(0.1f, -0.1f, 0.8f));
-        arrowZ.add(new Float3(0, 0, 1));
-        arrowZ.add(new Float3(-0.1f, 0.1f, 0.8f));
-        arrowZ.add(new Float3(0, 0, 0.9f));
-        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
-
-        sAxes = new Composite(Composite.Type.CUSTOM, axes);
+        sAxes = ShapeFactory.buildAxes();
 
         // Get list of elements from the parameters bundle
         @SuppressWarnings("unchecked")
@@ -162,15 +120,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         mCullingClockwise = params.getBoolean("culling_clockwise", false);
         mDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
         mBlendingEnabled = params.getBoolean("blending_enabled", true);
-
-        // Put some interesting things in the scene for testing purposes
-        Random r = new Random();
-        for (int i = 0; i < 64; i++) {
-            Element e = ShapeFactory.buildCuboid(
-                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1), r.nextFloat() / 4,
-                    r.nextFloat() / 4, r.nextFloat() / 4, Colour.RANDOM, Colour.RANDOM);
-            mElements.put(e, e.getDrawable());
-        }
     }
 
     @Override
@@ -180,18 +129,15 @@ public class PipelineRenderer implements Renderer, Serializable {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClearDepthf(1.0f);
 
-        // Enable depth buffer and set parameters
-        if (mDepthBufferEnabled)
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        else
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        // XXX Turn everything off initially
+        // TODO Reset state as per mPipelineStep on screen rotation etc
+        
+        // Set depth buffer parameters
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
-        // Enable face culling and set parameters
-        if (mCullingEnabled)
-            GLES20.glEnable(GLES20.GL_CULL_FACE);
-        else
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
+        // Set face culling parameters
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
         if (mCullingClockwise)
             GLES20.glFrontFace(GLES20.GL_CW);
@@ -316,5 +262,40 @@ public class PipelineRenderer implements Renderer, Serializable {
             else
                 System.out.println();
         }
+    }
+
+    private int mPipelineStep = STEP_INITIAL;
+    public static final int STEP_INITIAL = 0;
+    public static final int STEP_VERTEX_ASSEMBLY = 1;
+    public static final int STEP_VERTEX_SHADING = 2;
+    public static final int STEP_GEOMETRY_SHADING = 3;
+    public static final int STEP_CLIPPING = 4;
+    public static final int STEP_MULTISAMPLING = 5;
+    public static final int STEP_FACE_CULLING = 6;
+    public static final int STEP_FRAGMENT_SHADING = 7;
+    public static final int STEP_DEPTH_BUFFER = 8;
+    public static final int STEP_BLENDING = 9;
+
+    public void next() {
+        mPipelineStep++;
+        Log.d(TAG, "Step " + mPipelineStep);
+
+        if (mPipelineStep >= STEP_FACE_CULLING)
+            GLES20.glEnable(GLES20.GL_CULL_FACE);
+        if (mPipelineStep >= STEP_DEPTH_BUFFER)
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        onDrawFrame(null);
+    }
+
+    public void previous() {
+        mPipelineStep--;
+        Log.d(TAG, "Step " + mPipelineStep);
+
+        if (mPipelineStep < STEP_FACE_CULLING)
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
+        if (mPipelineStep < STEP_DEPTH_BUFFER)
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
     }
 }

@@ -5,7 +5,6 @@ import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -79,11 +78,21 @@ public class PipelineSurface extends GLSurfaceView {
                     
                     if (event.getX() - mScrollStartX <= 0)
                         // Scrolled left
-                        Log.d(TAG, "Swiped left");
+                        queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+                                mRenderer.next();
+                            }
+                        });
                     
                     else
                         // Scrolled right
-                        Log.d(TAG, "Swiped right");
+                        queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+                                mRenderer.previous();
+                            }
+                        });
                 }
 
                 // Consume all double-tap and swipe events as next highest priority

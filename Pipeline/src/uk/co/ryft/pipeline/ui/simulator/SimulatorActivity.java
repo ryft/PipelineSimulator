@@ -16,20 +16,23 @@ import android.view.MenuItem;
 
 public class SimulatorActivity extends Activity {
 
+    private static final String TAG = "SimulatorActivity";
+
     protected PipelineSurface mPipelineView;
     protected ArrayList<Element> mElements;
+    protected Bundle mPipelineParams;
 
     @SuppressWarnings("unchecked")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Get data from activity intent
-        Bundle data = getIntent().getExtras();
-        mPipelineView = new PipelineSurface(this, data);
+        mPipelineParams = getIntent().getExtras();
+        mPipelineView = new PipelineSurface(this, mPipelineParams);
         setContentView(mPipelineView);
         mPipelineView.setPadding(2, 2, 2, 2);
-        
-        mElements = (ArrayList<Element>) data.getSerializable("elements");
+
+        mElements = (ArrayList<Element>) mPipelineParams.getSerializable("elements");
         List<Drawable> scene = new LinkedList<Drawable>();
         for (Element e : mElements) {
             Drawable d = e.getDrawable();
@@ -71,7 +74,7 @@ public class SimulatorActivity extends Activity {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         PipelineRenderer renderer = mPipelineView.getRenderer();
-        
+
         savedInstanceState.putBoolean("edit_mode", mPipelineView.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());
     }
@@ -79,9 +82,9 @@ public class SimulatorActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        
+
         PipelineRenderer renderer = mPipelineView.getRenderer();
-        
+
         mPipelineView.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
         renderer.setRotation(savedInstanceState.getFloat("angle", 0));
     }

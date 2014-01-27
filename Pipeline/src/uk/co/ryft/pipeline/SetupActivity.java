@@ -1,12 +1,14 @@
 package uk.co.ryft.pipeline;
 
 import java.util.ArrayList;
+import java.util.Random;
 
+import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
-import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import uk.co.ryft.pipeline.ui.setup.SetupCameraActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupSceneActivity;
 import uk.co.ryft.pipeline.ui.simulator.SimulatorActivity;
@@ -88,6 +90,15 @@ public class SetupActivity extends Activity {
         steps.fragmentShading = findViewById(R.id.step_fragment_shading);
         steps.depthBufferTest = findViewById(R.id.step_depth_buffer_test);
         steps.blending = findViewById(R.id.step_blending);
+
+        // Put some interesting things in the scene for testing purposes
+        Random r = new Random();
+        for (int i = 0; i < 64; i++) {
+            Element e = ShapeFactory.buildCuboid(
+                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1), r.nextFloat() / 4,
+                    r.nextFloat() / 4, r.nextFloat() / 4, Colour.RANDOM, Colour.RANDOM);
+            mSceneElements.add(e);
+        }
 
         initialiseViews();
     }

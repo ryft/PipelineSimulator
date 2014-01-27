@@ -223,5 +223,53 @@ public class ShapeFactory {
 
         return new Primitive(Primitive.Type.GL_TRIANGLE_FAN, points, colour);
     }
+    
+    // XXX Builds a right-handed set of 3D axes centred at the origin in object space
+    public static Composite buildAxes() {
+        
+        LinkedList<Element> axes = new LinkedList<Element>();
+
+        LinkedList<Float3> lineCoords = new LinkedList<Float3>();
+        // XXX i < 1.1 is required to draw the edge lines
+        for (float i = -1; i < 1.1; i += 0.1) {
+            lineCoords.add(new Float3(i, 0, -1));
+            lineCoords.add(new Float3(i, 0, 1));
+            lineCoords.add(new Float3(-1, 0, i));
+            lineCoords.add(new Float3(1, 0, i));
+        }
+        axes.add(new Primitive(Primitive.Type.GL_LINES, lineCoords, Colour.GREY));
+
+        LinkedList<Float3> points = new LinkedList<Float3>();
+        points.add(new Float3(0, 0, 0));
+        points.add(new Float3(1, 0, 0));
+        points.add(new Float3(0, 0, 0));
+        points.add(new Float3(0, 1, 0));
+        points.add(new Float3(0, 0, 0));
+        points.add(new Float3(0, 0, 1));
+        axes.add(new Primitive(Primitive.Type.GL_LINES, points, Colour.WHITE));
+
+        LinkedList<Float3> arrowX = new LinkedList<Float3>();
+        arrowX.add(new Float3(0.8f, 0.1f, -0.1f));
+        arrowX.add(new Float3(1, 0, 0));
+        arrowX.add(new Float3(0.8f, -0.1f, 0.1f));
+        arrowX.add(new Float3(0.9f, 0, 0));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowX, Colour.RED));
+
+        LinkedList<Float3> arrowY = new LinkedList<Float3>();
+        arrowY.add(new Float3(-0.1f, 0.8f, 0.1f));
+        arrowY.add(new Float3(0, 1, 0));
+        arrowY.add(new Float3(0.1f, 0.8f, -0.1f));
+        arrowY.add(new Float3(0, 0.9f, 0));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowY, Colour.GREEN));
+
+        LinkedList<Float3> arrowZ = new LinkedList<Float3>();
+        arrowZ.add(new Float3(0.1f, -0.1f, 0.8f));
+        arrowZ.add(new Float3(0, 0, 1));
+        arrowZ.add(new Float3(-0.1f, 0.1f, 0.8f));
+        arrowZ.add(new Float3(0, 0, 0.9f));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
+
+        return new Composite(Composite.Type.CUSTOM, axes);
+    }
 
 }
