@@ -74,6 +74,7 @@ public class SimulatorActivity extends Activity {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         PipelineRenderer renderer = mPipelineView.getRenderer();
+        // TODO check out GLSurfaceView.setPreserveEGLContextOnPause()
 
         savedInstanceState.putBoolean("edit_mode", mPipelineView.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());

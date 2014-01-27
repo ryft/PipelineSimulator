@@ -98,7 +98,7 @@ public class PipelineSurface extends GLSurfaceView {
                 // Consume all double-tap and swipe events as next highest priority
                 if (!gestureDetector.onTouchEvent(event) && mEditMode) {
 
-                    // XXX There is a bug in ScaleGeestureDetector where it always returns true
+                    // XXX There is a bug in ScaleGestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
                     scaleDetector.onTouchEvent(event);
                     onSceneMove(event);

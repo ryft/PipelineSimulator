@@ -31,7 +31,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static final String TAG = "PipelineRenderer";
 
     // Renderer helper objects passed from the parent
-    private final Map<Element, Drawable> mElements = new ConcurrentHashMap<Element, Drawable>();
+    private final ArrayList<Element> mElements = new ArrayList<Element>();
+    private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
     private LightingModel mLighting;
 
     private final Camera mActualCamera;
@@ -103,8 +104,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Get list of elements from the parameters bundle
         @SuppressWarnings("unchecked")
         ArrayList<Element> elements = (ArrayList<Element>) params.getSerializable("elements");
-        for (Element e : elements)
-            mElements.put(e, e.getDrawable());
+        mElements.addAll(elements);
 
         // Initialise cameras
         mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1.5f, 7.0f);
@@ -229,10 +229,10 @@ public class PipelineRenderer implements Renderer, Serializable {
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
         // Draw world objects in the scene
-        for (Element e : mElements.keySet()) {
-            if (mElements.get(e) == null)
-                mElements.put(e, e.getDrawable());
-            Drawable d = mElements.get(e);
+        for (Element e : mSceneElements.keySet()) {
+            if (mSceneElements.get(e) == null)
+                mSceneElements.put(e, e.getDrawable());
+            Drawable d = mSceneElements.get(e);
             if (d != null)
                 d.draw(mLighting, mMVMatrix, mMVPMatrix);
             else
@@ -279,7 +279,10 @@ public class PipelineRenderer implements Renderer, Serializable {
     public void next() {
         mPipelineStep++;
         Log.d(TAG, "Step " + mPipelineStep);
-
+        
+        if (mPipelineStep == STEP_VERTEX_ASSEMBLY)
+            for (Element e : mElements)
+                mSceneElements.put(e, e.getDrawable());
         if (mPipelineStep >= STEP_FACE_CULLING)
             GLES20.glEnable(GLES20.GL_CULL_FACE);
         if (mPipelineStep >= STEP_DEPTH_BUFFER)
@@ -292,7 +295,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     public void previous() {
         mPipelineStep--;
         Log.d(TAG, "Step " + mPipelineStep);
-
+        
+        if (mPipelineStep < STEP_VERTEX_ASSEMBLY)
+            mSceneElements.clear();
         if (mPipelineStep < STEP_FACE_CULLING)
             GLES20.glDisable(GLES20.GL_CULL_FACE);
         if (mPipelineStep < STEP_DEPTH_BUFFER)
