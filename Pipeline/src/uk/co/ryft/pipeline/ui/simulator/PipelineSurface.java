@@ -5,6 +5,7 @@ import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -13,6 +14,8 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 
 public class PipelineSurface extends GLSurfaceView {
+    
+    private static final String TAG = "PipelineSurface";
 
     private final PipelineRenderer mRenderer;
     // XXX This is very unsafe but required for saving and restoring state.
@@ -76,11 +79,11 @@ public class PipelineSurface extends GLSurfaceView {
                     
                     if (event.getX() - mScrollStartX <= 0)
                         // Scrolled left
-                        mRenderer.next(mContext);
+                        Log.d(TAG, "Swiped left");
                     
                     else
                         // Scrolled right
-                        mRenderer.previous(mContext);
+                        Log.d(TAG, "Swiped right");
                 }
 
                 // Consume all double-tap and swipe events as next highest priority

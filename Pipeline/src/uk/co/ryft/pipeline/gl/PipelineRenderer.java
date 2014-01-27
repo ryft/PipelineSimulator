@@ -19,13 +19,11 @@ import uk.co.ryft.pipeline.model.Transformation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.widget.Toast;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
@@ -174,24 +172,26 @@ public class PipelineRenderer implements Renderer, Serializable {
             mElements.put(e, e.getDrawable());
         }
     }
-    
-    EGLConfig mConfig;
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        
-        mConfig = config;
 
         // Set the background frame colour
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClearDepthf(1.0f);
 
         // Enable depth buffer and set parameters
-        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        if (mDepthBufferEnabled)
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        else
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
         // Enable face culling and set parameters
-        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        if (mCullingEnabled)
+            GLES20.glEnable(GLES20.GL_CULL_FACE);
+        else
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
         if (mCullingClockwise)
             GLES20.glFrontFace(GLES20.GL_CW);
@@ -267,13 +267,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVMatrix, 0);
         Matrix.multiplyMM(mLVPMatrix, 0, mProjectionMatrix, 0, mLVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
-        
-        if (mPipelineStep < STEP_VERTEX_SHADING)
-            mLighting = LightingModel.UNIFORM;
-        else if (mPipelineStep < STEP_FRAGMENT_SHADING)
-            mLighting = LightingModel.LAMBERTIAN;
-        else
-            mLighting = LightingModel.PHONG;
 
         // Initialise axes and camera drawables if necessary
         // Avoid object construction as much as possible at render time
@@ -290,18 +283,17 @@ public class PipelineRenderer implements Renderer, Serializable {
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
         // Draw world objects in the scene
-        if (mPipelineStep >= STEP_VERTEX_ASSEMBLY)
-            for (Element e : mElements.keySet()) {
-                if (mElements.get(e) == null)
-                    mElements.put(e, e.getDrawable());
-                Drawable d = mElements.get(e);
-                if (d != null)
-                    d.draw(mLighting, mMVMatrix, mMVPMatrix);
-                else
-                    // Occasionally happens when app is quitting
-                    // TODO: Investigate turning off continuous rendering when quitting
-                    System.out.println("Ruh-roh, null drawable!");
-            }
+        for (Element e : mElements.keySet()) {
+            if (mElements.get(e) == null)
+                mElements.put(e, e.getDrawable());
+            Drawable d = mElements.get(e);
+            if (d != null)
+                d.draw(mLighting, mMVMatrix, mMVPMatrix);
+            else
+                // Occasionally happens when app is quitting
+                // TODO: Investigate turning off continuous rendering when quitting
+                System.out.println("Ruh-roh, null drawable!");
+        }
 
         if (sLightDrawable == null)
             sLightDrawable = sLightPoint.getDrawable();
@@ -324,39 +316,5 @@ public class PipelineRenderer implements Renderer, Serializable {
             else
                 System.out.println();
         }
-    }
-
-    private int mPipelineStep = STEP_INITIAL;
-    public static final int STEP_INITIAL = 0;
-    public static final int STEP_VERTEX_ASSEMBLY = 1;
-    public static final int STEP_VERTEX_SHADING = 2;
-    public static final int STEP_GEOMETRY_SHADING = 3;
-    public static final int STEP_CLIPPING = 4;
-    public static final int STEP_MULTISAMPLING = 5;
-    public static final int STEP_FACE_CULLING = 6;
-    public static final int STEP_FRAGMENT_SHADING = 7;
-    public static final int STEP_DEPTH_BUFFER = 8;
-    public static final int STEP_BLENDING = 9;
-
-    public void next(Context context) {
-        mPipelineStep++;
-
-        if (mPipelineStep >= STEP_FACE_CULLING)
-            GLES20.glEnable(GLES20.GL_CULL_FACE);
-        if (mPipelineStep >= STEP_DEPTH_BUFFER)
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        
-        Toast.makeText(context, "Completed step "+mPipelineStep, Toast.LENGTH_SHORT).show();
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        onDrawFrame(null);
-    }
-
-    public void previous(Context context) {
-        mPipelineStep--;
-
-        if (mPipelineStep < STEP_FACE_CULLING)
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
-        if (mPipelineStep < STEP_DEPTH_BUFFER)
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
     }
 }
