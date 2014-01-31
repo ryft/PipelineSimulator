@@ -131,7 +131,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // XXX Turn everything off initially
         // TODO Reset state as per mPipelineStep on screen rotation etc
-        
+
         // Set depth buffer parameters
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
@@ -264,43 +264,82 @@ public class PipelineRenderer implements Renderer, Serializable {
         }
     }
 
-    private int mPipelineStep = STEP_INITIAL;
+    // State is set to the previously-completed pipeline step transition.
+    private int mPipelineState = STEP_INITIAL;
     public static final int STEP_INITIAL = 0;
-    public static final int STEP_VERTEX_ASSEMBLY = 1;
-    public static final int STEP_VERTEX_SHADING = 2;
-    public static final int STEP_GEOMETRY_SHADING = 3;
-    public static final int STEP_CLIPPING = 4;
-    public static final int STEP_MULTISAMPLING = 5;
-    public static final int STEP_FACE_CULLING = 6;
-    public static final int STEP_FRAGMENT_SHADING = 7;
-    public static final int STEP_DEPTH_BUFFER = 8;
-    public static final int STEP_BLENDING = 9;
+    public static final int STEP_VERTEX_ASSEMBLY = 1; // Add one element at a time
+    public static final int STEP_VERTEX_SHADING = 2; // Apply shader gradually?
+    public static final int STEP_GEOMETRY_SHADING = 3; // XX
+    public static final int STEP_CLIPPING = 4; // Zoom to virtual camera
+    public static final int STEP_MULTISAMPLING = 5; // XX
+    public static final int STEP_FACE_CULLING = 6; // ?
+    public static final int STEP_FRAGMENT_SHADING = 7; // ?
+    public static final int STEP_DEPTH_BUFFER = 8; // ?
+    public static final int STEP_BLENDING = 9; // XX
+    public static final int STEP_FINAL = STEP_BLENDING;
+
+    class TransitionAnimator extends Thread {
+
+        @Override
+        public void run() {
+            animationLock = true;
+            try {
+                switch (mStep) {
+
+                    case STEP_VERTEX_ASSEMBLY:
+                        animateVertexAssembly(mForward);
+                        break;
+
+                }
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+            animationLock = false;
+        }
+
+        private int mStep;
+        private boolean mForward;
+
+        // XXX (current step, true)
+        public TransitionAnimator(int step, boolean forward) {
+            mStep = (forward) ? step + 1 : step;
+            mForward = forward;
+        }
+
+    }
+
+    // TODO Decide if implementing a monitor for this is worthwhile
+    volatile boolean animationLock = false;
+
+    private void animateVertexAssembly(boolean forward) throws InterruptedException {
+        long interval = 2000 / mElements.size();
+        Iterable<Element> elements = (forward) ? mElements : mSceneElements.keySet();
+        for (Element e : elements) {
+            if (forward)
+                mSceneElements.put(e, e.getDrawable());
+            else
+                mSceneElements.remove(e);
+            Thread.sleep(interval);
+        }
+    }
 
     public void next() {
-        mPipelineStep++;
-        Log.d(TAG, "Step " + mPipelineStep);
-        
-        if (mPipelineStep == STEP_VERTEX_ASSEMBLY)
-            for (Element e : mElements)
-                mSceneElements.put(e, e.getDrawable());
-        if (mPipelineStep >= STEP_FACE_CULLING)
-            GLES20.glEnable(GLES20.GL_CULL_FACE);
-        if (mPipelineStep >= STEP_DEPTH_BUFFER)
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        onDrawFrame(null);
+        if (mPipelineState < STEP_FINAL && !animationLock) {
+
+            new TransitionAnimator(mPipelineState, true).start();
+            mPipelineState++;
+            Log.d(TAG, "Step " + mPipelineState);
+
+        }
     }
 
     public void previous() {
-        mPipelineStep--;
-        Log.d(TAG, "Step " + mPipelineStep);
-        
-        if (mPipelineStep < STEP_VERTEX_ASSEMBLY)
-            mSceneElements.clear();
-        if (mPipelineStep < STEP_FACE_CULLING)
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
-        if (mPipelineStep < STEP_DEPTH_BUFFER)
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        if (mPipelineState > STEP_INITIAL && !animationLock) {
+
+            new TransitionAnimator(mPipelineState, false).start();
+            mPipelineState--;
+            Log.d(TAG, "Step " + mPipelineState);
+
+        }
     }
 }

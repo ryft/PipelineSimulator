@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui.simulator;
+package uk.co.ryft.pipeline.ui.pipeline;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
@@ -78,21 +78,11 @@ public class PipelineSurface extends GLSurfaceView {
                     
                     if (event.getX() - mScrollStartX <= 0)
                         // Scrolled left
-                        queueEvent(new Runnable() {
-                            @Override
-                            public void run() {
-                                mRenderer.next();
-                            }
-                        });
+                        mRenderer.next();
                     
                     else
                         // Scrolled right
-                        queueEvent(new Runnable() {
-                            @Override
-                            public void run() {
-                                mRenderer.previous();
-                            }
-                        });
+                        mRenderer.previous();
                 }
 
                 // Consume all double-tap and swipe events as next highest priority

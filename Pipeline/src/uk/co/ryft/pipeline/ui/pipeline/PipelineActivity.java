@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.ui.simulator;
+package uk.co.ryft.pipeline.ui.pipeline;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -14,7 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class SimulatorActivity extends Activity {
+public class PipelineActivity extends Activity {
 
     private static final String TAG = "SimulatorActivity";
 

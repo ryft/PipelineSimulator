@@ -9,9 +9,9 @@ import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
+import uk.co.ryft.pipeline.ui.pipeline.PipelineActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupCameraActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupSceneActivity;
-import uk.co.ryft.pipeline.ui.simulator.SimulatorActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -294,7 +294,7 @@ public class SetupActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SetupActivity.this, SimulatorActivity.class);
+                Intent intent = new Intent(SetupActivity.this, PipelineActivity.class);
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
                 intent.putExtra("lighting", mLightingModel);
