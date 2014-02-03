@@ -22,10 +22,6 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class SetupActivity extends Activity {
@@ -38,20 +34,14 @@ public class SetupActivity extends Activity {
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
     // Camera parameters
-    protected Camera mCamera = new Camera(new Float3(-1.5f, 1, 0), new Float3(1, -0.5f, 0), new Float3(0, 1, 0), -0.5f, 0.5f, -0.5f, 0.5f, 1, 3);
+    protected Camera mCamera = new Camera(new Float3(-1.5f, 1, 0), new Float3(1, -0.5f, 0), new Float3(0, 1, 0), -0.5f, 0.5f,
+            -0.5f, 0.5f, 1, 3);
     // Lighting model
-    protected LightingModel mLightingModel = LightingModel.PHONG;
-    // Multisampling
-    protected boolean mMultisamplingEnabled = true;
+    protected LightingModel mPreviewLightingModel = LightingModel.PHONG;
     // Face culling
-    protected boolean mCullingEnabled = true;
     protected boolean mCullingClockwise = false;
-    // Depth buffer test
-    protected boolean mDepthBufferEnabled = true;
     // TODO Allow choice of depth buffer test using glDepthFunc
     // See http://www.opengl.org/sdk/docs/man/xhtml/glDepthFunc.xml
-    // Blending
-    protected boolean mBlendingEnabled = true;
 
     ViewHolder steps = new ViewHolder();
 
@@ -95,8 +85,8 @@ public class SetupActivity extends Activity {
         Random r = new Random();
         for (int i = 0; i < 64; i++) {
             Element e = ShapeFactory.buildCuboid(
-                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1), r.nextFloat() / 4,
-                    r.nextFloat() / 4, r.nextFloat() / 4, Colour.RANDOM, Colour.RANDOM);
+                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1), r.nextFloat() / 5,
+                    r.nextFloat() / 5, r.nextFloat() / 5, Colour.RANDOM, Colour.RANDOM);
             mSceneElements.add(e);
         }
 
@@ -119,7 +109,6 @@ public class SetupActivity extends Activity {
         setText(steps.depthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
         setText(steps.blending, android.R.id.title, R.string.button_blending);
 
-        ((LinearLayout) steps.sceneComposition).removeView(steps.sceneComposition.findViewById(R.id.checkbox));
         steps.sceneComposition.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,7 +121,6 @@ public class SetupActivity extends Activity {
             }
         });
 
-        ((LinearLayout) steps.cameraParameters).removeView(steps.cameraParameters.findViewById(R.id.checkbox));
         steps.cameraParameters.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -143,7 +131,6 @@ public class SetupActivity extends Activity {
             }
         });
 
-        ((LinearLayout) steps.lightingModel).removeView(steps.lightingModel.findViewById(R.id.checkbox));
         steps.lightingModel.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,7 +144,7 @@ public class SetupActivity extends Activity {
                 builder.setItems(modelNames, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mLightingModel = LightingModel.getLightingModel(models[which]);
+                        mPreviewLightingModel = LightingModel.getLightingModel(models[which]);
                         updateViews();
                     }
                 });
@@ -166,11 +153,9 @@ public class SetupActivity extends Activity {
             }
         });
 
-        ((LinearLayout) steps.vertexProcessing).removeView(steps.vertexProcessing.findViewById(R.id.checkbox));
         TextView titleVertexProcessing = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
         titleVertexProcessing.setEnabled(false);
 
-        ((LinearLayout) steps.vertexShading).removeView(steps.vertexShading.findViewById(R.id.checkbox));
         steps.vertexShading.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -181,7 +166,7 @@ public class SetupActivity extends Activity {
                 builder.setView(view);
 
                 TextView messageView = (TextView) view.findViewById(android.R.id.message);
-                messageView.setText(mLightingModel.getVertexShader(GLES20.GL_TRIANGLES));
+                messageView.setText(mPreviewLightingModel.getVertexShader(GLES20.GL_TRIANGLES));
                 messageView.setTextIsSelectable(true);
                 messageView.setHorizontallyScrolling(true);
 
@@ -192,30 +177,8 @@ public class SetupActivity extends Activity {
 
         });
 
-        CheckBox checkBoxFaceCulling = (CheckBox) steps.faceCulling.findViewById(R.id.checkbox);
-        checkBoxFaceCulling.setChecked(mCullingEnabled);
-        checkBoxFaceCulling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mCullingEnabled = isChecked;
-                updateViews();
-            }
-        });
-
-        ((LinearLayout) steps.geometryShading).removeView(steps.geometryShading.findViewById(R.id.checkbox));
-        ((LinearLayout) steps.clipping).removeView(steps.clipping.findViewById(R.id.checkbox));
         TextView titleClipping = (TextView) steps.clipping.findViewById(android.R.id.title);
         titleClipping.setEnabled(false);
-
-        CheckBox checkBoxMultisampling = (CheckBox) steps.multisampling.findViewById(R.id.checkbox);
-        checkBoxMultisampling.setChecked(mMultisamplingEnabled);
-        checkBoxMultisampling.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mMultisamplingEnabled = isChecked;
-                updateViews();
-            }
-        });
 
         steps.faceCulling.setOnClickListener(new OnClickListener() {
             @Override
@@ -236,7 +199,6 @@ public class SetupActivity extends Activity {
             }
         });
 
-        ((LinearLayout) steps.fragmentShading).removeView(steps.fragmentShading.findViewById(R.id.checkbox));
         steps.fragmentShading.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -247,7 +209,7 @@ public class SetupActivity extends Activity {
                 builder.setView(view);
 
                 TextView messageView = (TextView) view.findViewById(android.R.id.message);
-                messageView.setText(mLightingModel.getFragmentShader(GLES20.GL_TRIANGLES));
+                messageView.setText(mPreviewLightingModel.getFragmentShader(GLES20.GL_TRIANGLES));
                 messageView.setTextIsSelectable(true);
                 messageView.setHorizontallyScrolling(true);
 
@@ -258,26 +220,12 @@ public class SetupActivity extends Activity {
 
         });
 
-        CheckBox checkBoxDepthBuffer = (CheckBox) steps.depthBufferTest.findViewById(R.id.checkbox);
-        checkBoxDepthBuffer.setChecked(mDepthBufferEnabled);
-        checkBoxDepthBuffer.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mDepthBufferEnabled = isChecked;
-                updateViews();
-            }
-        });
+        TextView titleDepthBuffer = (TextView) steps.depthBufferTest.findViewById(android.R.id.title);
+        titleDepthBuffer.setEnabled(false);
 
-        CheckBox checkBoxBlending = (CheckBox) steps.blending.findViewById(R.id.checkbox);
-        checkBoxBlending.setChecked(mBlendingEnabled);
-        checkBoxBlending.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mBlendingEnabled = isChecked;
-                updateViews();
-            }
-        });
-        
+        TextView titleBlending = (TextView) steps.blending.findViewById(android.R.id.title);
+        titleBlending.setEnabled(false);
+
         Button buttonExit = (Button) findViewById(R.id.button_row_negative);
         buttonExit.setText(R.string.action_button_exit);
         buttonExit.setOnClickListener(new OnClickListener() {
@@ -297,12 +245,7 @@ public class SetupActivity extends Activity {
                 Intent intent = new Intent(SetupActivity.this, PipelineActivity.class);
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
-                intent.putExtra("lighting", mLightingModel);
-                intent.putExtra("multisampling", mMultisamplingEnabled);
-                intent.putExtra("culling_enabled", mCullingEnabled);
                 intent.putExtra("culling_clockwise", mCullingClockwise);
-                intent.putExtra("depth_buffer_enabled", mDepthBufferEnabled);
-                intent.putExtra("blending_enabled", mBlendingEnabled);
                 startActivity(intent);
             }
         });
@@ -347,7 +290,7 @@ public class SetupActivity extends Activity {
         String cameraParametersSummary = "Eye point " + mCamera.getEye() + ", focus point " + mCamera.getFocus() + ".";
 
         // Generate lighting model summary
-        String lightingModelSummary = mLightingModel.toString();
+        String lightingModelSummary = mPreviewLightingModel.toString();
 
         // Generate vertex processing summary
         String vertexProcessingSummary;
@@ -369,7 +312,7 @@ public class SetupActivity extends Activity {
 
         // Generate vertex shading summary
         String vertexShadingSummary = "Undefined vertex shader";
-        switch (mLightingModel.getModel()) {
+        switch (mPreviewLightingModel.getModel()) {
             case UNIFORM:
                 vertexShadingSummary = "Project vertices into eye space";
                 break;
@@ -383,27 +326,23 @@ public class SetupActivity extends Activity {
                 vertexShadingSummary = "Project vertices into eye space and fix a preset size";
                 break;
         }
-        
+
+        // Generate geometry shading summary
+        String geometryShadingSummary = "TODO";
+
         // Generate multisampling summary
-        String multisamplingSummary;
-        if (mMultisamplingEnabled)
-            multisamplingSummary = "Multisampling enabled";
-        else
-            multisamplingSummary = "Multisampling disabled";
+        String multisamplingSummary = "TODO";
 
         // Generate face culling summary
-        String cullingSummary = "Culling ";
-        if (mCullingEnabled) {
-            cullingSummary += "enabled (";
-            if (!mCullingClockwise)
-                cullingSummary += "counter-";
-            cullingSummary += "clockwise winding)";
-        } else
-            cullingSummary += "disabled";
+        String cullingSummary;
+        if (!mCullingClockwise)
+            cullingSummary = "Counter-clockwise face winding";
+        else
+            cullingSummary = "Clockwise face winding";
 
         // Generate fragment shading summary
         String fragmentShadingSummary = "Undefined fragment shader";
-        switch (mLightingModel.getModel()) {
+        switch (mPreviewLightingModel.getModel()) {
             case UNIFORM:
                 fragmentShadingSummary = "Apply a per-primitive uniform light level";
                 break;
@@ -419,18 +358,10 @@ public class SetupActivity extends Activity {
         }
 
         // Generate depth buffer summary
-        String depthBufferSummary;
-        if (mDepthBufferEnabled)
-            depthBufferSummary = "Depth buffer test enabled";
-        else
-            depthBufferSummary = "Depth buffer test disabled";
+        String depthBufferSummary = "TODO";
 
         // Generate blending summary
-        String blendingSummary;
-        if (mBlendingEnabled)
-            blendingSummary = "Blending enabled";
-        else
-            blendingSummary = "Blending disabled";
+        String blendingSummary = "TODO";
 
         // TODO Update these properly
 
@@ -439,7 +370,7 @@ public class SetupActivity extends Activity {
         setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
         setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
         setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
-        setText(steps.geometryShading, android.R.id.summary, "No geometry shader");
+        setText(steps.geometryShading, android.R.id.summary, geometryShadingSummary);
         setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
         setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);

@@ -14,9 +14,7 @@ import javax.microedition.khronos.opengles.GL10;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.Rotation;
 import uk.co.ryft.pipeline.model.Transformation;
-import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
@@ -26,7 +24,6 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
@@ -42,10 +39,10 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final Camera mActualCamera;
     private final Camera mVirtualCamera;
 
-    private boolean mCullingEnabled = false;
-    private boolean mCullingClockwise;
-    private boolean mDepthBufferEnabled = false;
-    private boolean mBlendingEnabled = false;
+    private boolean mGLCullingEnabled = false;
+    private boolean mGLCullingClockwise;
+    private boolean mGLDepthBufferEnabled = false;
+    private boolean mGLBlendingEnabled = false;
     private boolean mDrawAxes = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
@@ -66,11 +63,11 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mLVPMatrix = new float[16];
 
     // List of model transformations
-    // FIXME This needs to be a concurrent datatype because it's modified from the UI thread
+    // FIXME remove all accesses from outside the render thread
     private final List<Transformation<float[]>> mModelTransformations = new LinkedList<Transformation<float[]>>();
 
     // Light position, for implementing lighting models
-    public static Float3 sLightPosition = new Float3(-1.5f, 1, 0);
+    public static Float3 sLightPosition = new Float3(-1, 1, -2);
     private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition),
             Colour.WHITE);
     private Drawable sLightDrawable;
@@ -99,8 +96,6 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     public void interact() {
-        // mModelTransformations.add(new Translation(new Float3(1, 0, 0)));
-        // mModelTransformations.add(new Rotation((int) (mAngle * (180.0 / Math.PI)), new Float3(0, 1, 0)));
         resetScaleFactor();
         setRotation(0);
         mActualCamera.transformTo(mVirtualCamera);
@@ -136,10 +131,10 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Initialise lighting model
         mLighting = LightingModel.UNIFORM;
 
-//        mCullingEnabled = params.getBoolean("culling_enabled", true);
-        mCullingClockwise = params.getBoolean("culling_clockwise", false);
-//        mDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
-//        mBlendingEnabled = params.getBoolean("blending_enabled", true);
+        mGLCullingEnabled = params.getBoolean("culling_enabled", true);
+        mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
+        mGLDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
+        mGLBlendingEnabled = params.getBoolean("blending_enabled", true);
     }
 
     @Override
@@ -184,33 +179,42 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
-
-    @Override
-    public void onDrawFrame(GL10 unused) {
+    private boolean mGLParametersModified = true;
+    
+    protected void setGLParameters() {
 
         // Set depth buffer parameters
-        if (mDepthBufferEnabled)
+        if (mGLDepthBufferEnabled)
             GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         else
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
         // Set face culling parameters
-        if (mCullingEnabled)
+        if (mGLCullingEnabled)
             GLES20.glEnable(GLES20.GL_CULL_FACE);
         else
         GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
-        if (mCullingClockwise)
+        if (mGLCullingClockwise)
             GLES20.glFrontFace(GLES20.GL_CW);
         else
             GLES20.glFrontFace(GLES20.GL_CCW);
         
         // Set blending parameters
-        if (mBlendingEnabled)
+        if (mGLBlendingEnabled)
             GLES20.glEnable(GLES20.GL_BLEND);
         else
             GLES20.glDisable(GLES20.GL_BLEND);
+        
+        mGLParametersModified = false;
+    }
+
+    @Override
+    public void onDrawFrame(GL10 unused) {
+        
+        if (mGLParametersModified )
+            setGLParameters();
 
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -435,7 +439,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateFaceCulling(boolean forward) throws InterruptedException {
-        mCullingEnabled = forward;
+        mGLCullingEnabled = forward;
+        mGLParametersModified = true;
     }
 
     private void animateFragmentShading(boolean forward) throws InterruptedException {
@@ -451,11 +456,13 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateDepthBuffer(boolean forward) throws InterruptedException {
-        mDepthBufferEnabled = forward;
+        mGLDepthBufferEnabled = forward;
+        mGLParametersModified = true;
     }
 
     private void animateBlending(boolean forward) throws InterruptedException {
-        mBlendingEnabled = forward;
+        mGLBlendingEnabled = forward;
+        mGLParametersModified = true;
     }
 
     public void next() {
