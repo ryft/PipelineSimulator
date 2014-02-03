@@ -2,26 +2,33 @@ package uk.co.ryft.pipeline.model;
 
 import android.os.SystemClock;
 
-public abstract class Transformation {
+public abstract class Transformation<E> {
     
     protected long mStartTime = SystemClock.uptimeMillis();
     protected long mLength = 2000;
     
-    protected abstract float[] getTransformationState(float progress);
+    protected abstract E getTransformationState(float progress);
     
-    public float[] getTransformation(long time) {
+    public E getTransformation(long time) {
         
-        if (time < mStartTime)
-            return getTransformationState(0);
-        
-        else if (time > mStartTime + mLength)
+        if (isComplete(time))
             return getTransformationState(1);
+        
+        else if (time < mStartTime)
+            return getTransformationState(0);
         
         else {
             float elapsed = time - mStartTime;
             float progress = elapsed / mLength;
             return getTransformationState(progress);
         }
+    }
+    
+    public boolean isComplete(long time) {
+        if (time > mStartTime + mLength)
+            return true;
+        else
+            return false;
     }
 
 }

@@ -14,7 +14,9 @@ import javax.microedition.khronos.opengles.GL10;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Rotation;
 import uk.co.ryft.pipeline.model.Transformation;
+import uk.co.ryft.pipeline.model.Translation;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
@@ -24,6 +26,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.Toast;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
@@ -35,14 +38,15 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
     private LightingModel mLighting;
 
+    private final Camera mSceneCamera;
     private final Camera mActualCamera;
     private final Camera mVirtualCamera;
 
-    // Rendering parameters passed from the parent
-    private final boolean mCullingEnabled;
-    private final boolean mCullingClockwise;
-    private final boolean mDepthBufferEnabled;
-    private final boolean mBlendingEnabled;
+    private boolean mCullingEnabled = false;
+    private boolean mCullingClockwise;
+    private boolean mDepthBufferEnabled = false;
+    private boolean mBlendingEnabled = false;
+    private boolean mDrawAxes = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -61,10 +65,12 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mCVPMatrix = new float[16];
     private final float[] mLVPMatrix = new float[16];
 
-    private final List<Transformation> mModelTransformations = new LinkedList<Transformation>();
+    // List of model transformations
+    // FIXME This needs to be a concurrent datatype because it's modified from the UI thread
+    private final List<Transformation<float[]>> mModelTransformations = new LinkedList<Transformation<float[]>>();
 
     // Light position, for implementing lighting models
-    public static Float3 sLightPosition = new Float3(2, 0, 0);
+    public static Float3 sLightPosition = new Float3(-1.5f, 1, 0);
     private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition),
             Colour.WHITE);
     private Drawable sLightDrawable;
@@ -82,9 +88,22 @@ public class PipelineRenderer implements Renderer, Serializable {
         mAngle = angle;
     }
 
-    public void setScaleFactor(float scaleFactor) {
-        mActualCamera.setScaleFactor(scaleFactor);
+    public void resetScaleFactor() {
+        mActualCamera.resetScaleFactor();
         mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+    }
+
+    public void setScaleFactor(float scaleFactor) {
+        mActualCamera.updateScaleFactor(scaleFactor);
+        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+    }
+
+    public void interact() {
+        // mModelTransformations.add(new Translation(new Float3(1, 0, 0)));
+        // mModelTransformations.add(new Rotation((int) (mAngle * (180.0 / Math.PI)), new Float3(0, 1, 0)));
+        resetScaleFactor();
+        setRotation(0);
+        mActualCamera.transformTo(mVirtualCamera);
     }
 
     // Drawables aren't initialised, and are constructed at render time if necessary
@@ -107,19 +126,20 @@ public class PipelineRenderer implements Renderer, Serializable {
         mElements.addAll(elements);
 
         // Initialise cameras
-        mActualCamera = new Camera(new Float3(2, 2, 2), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1.5f, 7.0f);
+        mSceneCamera = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
+        mActualCamera = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
         mVirtualCamera = (Camera) params.getSerializable("camera");
 
         mCameraElement = ShapeFactory.buildCamera(0.25f);
         mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
 
         // Initialise lighting model
-        mLighting = (LightingModel) params.getSerializable("lighting");
+        mLighting = LightingModel.UNIFORM;
 
-        mCullingEnabled = params.getBoolean("culling_enabled", true);
+//        mCullingEnabled = params.getBoolean("culling_enabled", true);
         mCullingClockwise = params.getBoolean("culling_clockwise", false);
-        mDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
-        mBlendingEnabled = params.getBoolean("blending_enabled", true);
+//        mDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
+//        mBlendingEnabled = params.getBoolean("blending_enabled", true);
     }
 
     @Override
@@ -131,18 +151,6 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // XXX Turn everything off initially
         // TODO Reset state as per mPipelineStep on screen rotation etc
-
-        // Set depth buffer parameters
-        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-
-        // Set face culling parameters
-        GLES20.glDisable(GLES20.GL_CULL_FACE);
-        GLES20.glCullFace(GLES20.GL_BACK);
-        if (mCullingClockwise)
-            GLES20.glFrontFace(GLES20.GL_CW);
-        else
-            GLES20.glFrontFace(GLES20.GL_CCW);
 
         // For touch events
         Matrix.setIdentityM(mModelRotationMatrix, 0);
@@ -180,6 +188,30 @@ public class PipelineRenderer implements Renderer, Serializable {
     @Override
     public void onDrawFrame(GL10 unused) {
 
+        // Set depth buffer parameters
+        if (mDepthBufferEnabled)
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        else
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+
+        // Set face culling parameters
+        if (mCullingEnabled)
+            GLES20.glEnable(GLES20.GL_CULL_FACE);
+        else
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
+        if (mCullingClockwise)
+            GLES20.glFrontFace(GLES20.GL_CW);
+        else
+            GLES20.glFrontFace(GLES20.GL_CCW);
+        
+        // Set blending parameters
+        if (mBlendingEnabled)
+            GLES20.glEnable(GLES20.GL_BLEND);
+        else
+            GLES20.glDisable(GLES20.GL_BLEND);
+
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -196,8 +228,9 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         long time = SystemClock.uptimeMillis();
 
-        // Apply all transformations to the world, in order, in their current state
-        for (Transformation t : mModelTransformations)
+        // Apply all ongoing transformations to the world, in order, in their current state
+        for (Transformation<float[]> t : mModelTransformations)
+            // TODO Find a way to remove completed transformations if necessary
             Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
 
         // Combine the current rotation matrix with the projection and camera view for touch-rotation
@@ -224,7 +257,8 @@ public class PipelineRenderer implements Renderer, Serializable {
             mFrustumDrawable = mFrustumElement.getDrawable();
 
         // Draw axes and virtual camera
-        sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
+        if (mDrawAxes)
+            sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
@@ -290,6 +324,38 @@ public class PipelineRenderer implements Renderer, Serializable {
                         animateVertexAssembly(mForward);
                         break;
 
+                    case STEP_VERTEX_SHADING:
+                        animateVertexShading(mForward);
+                        break;
+
+                    case STEP_GEOMETRY_SHADING:
+                        animateGeometryShading(mForward);
+                        break;
+
+                    case STEP_CLIPPING:
+                        animateClipping(mForward);
+                        break;
+
+                    case STEP_MULTISAMPLING:
+                        animateMultisampling(mForward);
+                        break;
+
+                    case STEP_FACE_CULLING:
+                        animateFaceCulling(mForward);
+                        break;
+
+                    case STEP_FRAGMENT_SHADING:
+                        animateFragmentShading(mForward);
+                        break;
+
+                    case STEP_DEPTH_BUFFER:
+                        animateDepthBuffer(mForward);
+                        break;
+
+                    case STEP_BLENDING:
+                        animateBlending(mForward);
+                        break;
+
                 }
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
@@ -312,7 +378,22 @@ public class PipelineRenderer implements Renderer, Serializable {
     volatile boolean animationLock = false;
 
     private void animateVertexAssembly(boolean forward) throws InterruptedException {
-        long interval = 2000 / mElements.size();
+
+        String message;
+        if (forward) {
+            int vertexCount = 0;
+            for (Element e : mElements)
+                vertexCount += e.getVertexCount();
+            message = String.valueOf(vertexCount);
+            if (vertexCount == 1)
+                message += " vertex assebled";
+            else
+                message += " vertices assembled";
+        } else
+            message = "Scene cleared";
+        Log.d(TAG, message);
+
+        int interval = (int) (1000.0 / mElements.size()); // Allow 1 second for the whole scene
         Iterable<Element> elements = (forward) ? mElements : mSceneElements.keySet();
         for (Element e : elements) {
             if (forward)
@@ -321,6 +402,60 @@ public class PipelineRenderer implements Renderer, Serializable {
                 mSceneElements.remove(e);
             Thread.sleep(interval);
         }
+    }
+
+    private void animateVertexShading(boolean forward) throws InterruptedException {
+        for (float i = 1; i >= 0; i -= 0.01) {
+            mLighting.setGlobalLightLevel(i);
+            Thread.sleep(5);
+        }
+        mLighting = (forward) ? LightingModel.LAMBERTIAN : LightingModel.UNIFORM;
+        for (float i = 0; i <= 1; i += 0.01) {
+            mLighting.setGlobalLightLevel(i);
+            Thread.sleep(5);
+        }
+    }
+
+    private void animateGeometryShading(boolean forward) throws InterruptedException {
+
+    }
+
+    private void animateClipping(boolean forward) throws InterruptedException {
+        mDrawAxes = !forward;
+        if (forward) {
+            resetScaleFactor();
+            setRotation(0);
+            mActualCamera.transformTo(mVirtualCamera);
+        } else
+            mActualCamera.transformTo(mSceneCamera);
+    }
+
+    private void animateMultisampling(boolean forward) throws InterruptedException {
+
+    }
+
+    private void animateFaceCulling(boolean forward) throws InterruptedException {
+        mCullingEnabled = forward;
+    }
+
+    private void animateFragmentShading(boolean forward) throws InterruptedException {
+        for (float i = 1; i >= 0; i -= 0.01) {
+            mLighting.setGlobalLightLevel(i);
+            Thread.sleep(5);
+        }
+        mLighting = (forward) ? LightingModel.PHONG : LightingModel.LAMBERTIAN;
+        for (float i = 0; i <= 1; i += 0.01) {
+            mLighting.setGlobalLightLevel(i);
+            Thread.sleep(5);
+        }
+    }
+
+    private void animateDepthBuffer(boolean forward) throws InterruptedException {
+        mDepthBufferEnabled = forward;
+    }
+
+    private void animateBlending(boolean forward) throws InterruptedException {
+        mBlendingEnabled = forward;
     }
 
     public void next() {

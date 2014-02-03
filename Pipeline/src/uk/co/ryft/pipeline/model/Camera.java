@@ -4,10 +4,11 @@ import java.io.Serializable;
 
 import uk.co.ryft.pipeline.gl.Float3;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 
 //XXX Virtual camera parameters including camera location and projection
 // Necessary because android.graphics.camera doesn't hold projection parameters
-public class Camera implements Serializable {
+public class Camera implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2169762992472303103L;
     
@@ -15,24 +16,8 @@ public class Camera implements Serializable {
     private Float3 mEye;
     private Float3 mFocus;
     private Float3 mUp;
-
-    // Projection parameters
-//    private float 
     
-    
-//    // Transition view parameters
-//    private FloatPoint mEyeTarget;
-//    private FloatPoint mFocusTarget;
-//    private FloatPoint mUpTarget;
-//    
-//    private FloatPoint mEyeStep;
-//    private FloatPoint mFocusStep;
-//    private FloatPoint mUpStep;
-//    
-//    private int mSteps = 0;
-//    private int mStep = 0;
-//    
-//    private float[] mPrevView;
+    private Transformation<Camera> transformation;
     
     public Camera(Float3 eye, Float3 focus, Float3 up, float left, float right, float bottom, float top, float near, float far) {
         mEye = (Float3) eye.clone();
@@ -41,30 +26,9 @@ public class Camera implements Serializable {
         setProjection(left, right, bottom, top, near, far);
     }
 
-//    public void transformTo(Camera camera, int steps) {
-//        transformTo(camera.mEye, camera.mFocus, camera.mUp, steps);
-//    }
-//
-//    public void transformTo(FloatPoint eye, FloatPoint focus, FloatPoint up, int steps) {
-//        
-//        mSteps = steps;
-//        
-//        mEyeTarget = (FloatPoint) eye.clone();
-//        mFocusTarget = (FloatPoint) focus.clone();
-//        mUpTarget = (FloatPoint) up.clone();
-//
-//        FloatPoint eyeDiff = mEyeTarget.minus(mEye);
-//        FloatPoint focusDiff = mFocusTarget.minus(mFocus);
-//        FloatPoint upDiff = mUpTarget.minus(mUp);
-//        
-//        mEyeStep = eyeDiff.scale(1.0f / mSteps);
-//        mFocusStep = focusDiff.scale(1.0f / mSteps);
-//        mUpStep = upDiff.scale(1.0f / mSteps);
-//        
-//        // Invalidate previous completed view matrix
-//        mPrevView = null;
-//        mStep = 0;
-//    }
+    public void transformTo(Camera destination) {
+        transformation = new CameraTransformation(this, destination);
+    }
 
     public Float3 getEye() { return (Float3) mEye.clone(); }
     public Float3 getFocus() { return (Float3) mFocus.clone(); }
@@ -72,33 +36,26 @@ public class Camera implements Serializable {
     
     private float mScaleFactor = 1;
 
-    public void setScaleFactor(float scaleFactor) {
+    public void resetScaleFactor() {
+        mScaleFactor = 1;
+    }
+
+    public void updateScaleFactor(float scaleFactor) {
         // XXX Zooming implemented as described here: http://www.opengl.org/archives/resources/faq/technical/viewing.htm#view0040
         mScaleFactor /= scaleFactor;
     }
     
     public void setViewMatrix(float[] viewMatrix, int offset) {
         
-//        if (mStep < mSteps) {
-//            mEye = mEye.plus(mEyeStep);
-//            mFocus = mFocus.plus(mFocusStep);
-//            mUp = mUp.plus(mUpStep);
-//
-//            if (mPrevView == null)
-//                mPrevView = new float[16];
-            
-        Matrix.setLookAtM(viewMatrix, offset, mEye.getX(), mEye.getY(), mEye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
-//            mStep++;
-//            
-//        } else if (mPrevView == null) {
-//            mPrevView = new float[16];
-//            Matrix.setLookAtM(mPrevView, 0, mEye.getX(), mEye.getY(), mEye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
-//            
-//        } // Otherwise the animation has completed and we can reuse the last view matrix
-//        
-//        return mPrevView;
+        Camera cam = (transformation == null) ? this : transformation.getTransformation(SystemClock.uptimeMillis());
+        
+        Matrix.setLookAtM(viewMatrix, offset,
+                cam.getEye().getX(), cam.getEye().getY(), cam.getEye().getZ(),
+                cam.getFocus().getX(), cam.getFocus().getY(), cam.getFocus().getZ(),
+                cam.getUp().getX(), cam.getUp().getY(), cam.getUp().getZ());
     }
 
+    // Projection parameters
     float frustumLeft;
     float frustumRight;
     float frustumBottom;
@@ -138,6 +95,11 @@ public class Camera implements Serializable {
 //            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
 
         }
+    }
+    
+    @Override
+    public Object clone() {
+        return new Camera(getEye(), getFocus(), getUp(), getLeft(), getRight(), getBottom(), getTop(), getNear(), getFar());
     }
     
 }

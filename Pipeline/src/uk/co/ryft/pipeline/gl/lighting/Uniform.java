@@ -30,12 +30,13 @@ public class Uniform extends LightingModel {
 
     @Override
     public String getFragmentShader(int primitiveType) {
-        return   "precision mediump float;       \n"
-                + "uniform vec4 u_Color;          \n"
-                + "                               \n"
-                + "void main() {                  \n"
-                + "    gl_FragColor = u_Color;    \n"
-                + "}                              \n";
+        return   "precision mediump float;                     \n"
+                + "uniform float u_LightLevel;                  \n" // Light level parameter for use in transition animations
+                + "uniform vec4 u_Color;                        \n"
+                + "                                             \n"
+                + "void main() {                                \n"
+                + "   gl_FragColor = u_Color * u_LightLevel;    \n"
+                + "}                                            \n";
     }
 
     @Override
@@ -47,11 +48,13 @@ public class Uniform extends LightingModel {
 
         // Set program handles for drawing
         int mMVPMatrixHandle;
+        int mLightLevelHandle;
         int mPositionHandle;
         int mColourHandle;
 
         // Get handle to vertex shader's position member
         mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
+        mLightLevelHandle = GLES20.glGetUniformLocation(glProgram, "u_LightLevel");
 
         // Enable a handle to the vertices
         GLES20.glEnableVertexAttribArray(mPositionHandle);
@@ -71,6 +74,9 @@ public class Uniform extends LightingModel {
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+        // Pass in the overall light level for transitions (fading in/out)
+        GLES20.glUniform1f(mLightLevelHandle, mLightLevel);
 
         // Draw the primitive
         GLES20.glDrawArrays(primitive.mPrimitiveType, 0, primitive.mVertexCount);

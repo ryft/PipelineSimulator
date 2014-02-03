@@ -131,10 +131,8 @@ public class PipelineSurface extends GLSurfaceView {
             setBackgroundResource(0);
     }
 
-    static int mCurrentModel = 2;
-
     public void toggle() {
-        mRenderer.setScaleFactor(1.5f);
+        mRenderer.interact();
     }
 
     private float mPreviousX = 0;

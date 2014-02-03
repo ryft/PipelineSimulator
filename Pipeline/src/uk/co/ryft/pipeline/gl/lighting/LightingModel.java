@@ -38,9 +38,9 @@ public abstract class LightingModel implements Serializable {
         static {
             Map<Model, String> titleMap = new HashMap<Model, String>();
             titleMap.put(Model.UNIFORM, "Uniform lighting");
-            titleMap.put(Model.LAMBERTIAN, "Lambertian lighting");
-            titleMap.put(Model.PHONG, "Phong lighting");
-            titleMap.put(Model.POINT_SOURCE, "Point source lighting");
+            titleMap.put(Model.LAMBERTIAN, "Lambertian reflectance");
+            titleMap.put(Model.PHONG, "Phong shading");
+            titleMap.put(Model.POINT_SOURCE, "Point light source");
             mTitleMap = Collections.unmodifiableMap(titleMap);
         }
 
@@ -88,12 +88,18 @@ public abstract class LightingModel implements Serializable {
         return mProgram;
     }
 
+    protected float mLightLevel = 1;
+    
+    public void setGlobalLightLevel(float lightLevel) {
+        mLightLevel = lightLevel;
+    }
+
     protected abstract String[] getVertexShaderAttributes();
 
     public abstract String getVertexShader(int primitiveType);
 
     public abstract String getFragmentShader(int primitiveType);
-
+    
     public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
 
     public static void resetAll() {

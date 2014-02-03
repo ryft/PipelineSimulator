@@ -38,7 +38,7 @@ public class SetupActivity extends Activity {
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
     // Camera parameters
-    protected Camera mCamera = new Camera(new Float3(-1f, 0.5f, 0.5f), new Float3(0, 0, 1), new Float3(0, 1, 0), -0.25f, 0.25f, -0.25f, 0.25f, 0.5f, 1.5f);
+    protected Camera mCamera = new Camera(new Float3(-1.5f, 1, 0), new Float3(1, -0.5f, 0), new Float3(0, 1, 0), -0.5f, 0.5f, -0.5f, 0.5f, 1, 3);
     // Lighting model
     protected LightingModel mLightingModel = LightingModel.PHONG;
     // Multisampling
