@@ -1,12 +1,12 @@
 package uk.co.ryft.pipeline.ui.setup.builders;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
+import uk.co.ryft.pipeline.gl.Float3Wrapper;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.ui.components.EditColourHandler;
@@ -36,7 +36,8 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class BuildPrimitiveActivity extends ListActivity {
 
-    protected ArrayAdapter<Float3> mAdapter;
+    // XXX Build an adapter of Float3Wrappers because they are mutable
+    protected ArrayAdapter<Float3Wrapper> mAdapter;
     protected Primitive mElement;
     protected TypeSpinner mTypeSpinner;
 
@@ -88,7 +89,10 @@ public class BuildPrimitiveActivity extends ListActivity {
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElement.getType());
 
-        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point, R.id.text_point, mElement.getVertices());
+        LinkedList<Float3Wrapper> wrapped = new LinkedList<Float3Wrapper>();
+        for (Float3 e : mElement.getVertices())
+            wrapped.add(e.wrap());
+        mAdapter = new ArrayAdapter<Float3Wrapper>(this, R.layout.listitem_point, R.id.text_point, wrapped);
         setListAdapter(mAdapter);
 
         // XXX reference https://github.com/romannurik/Android-SwipeToDismiss
@@ -106,7 +110,7 @@ public class BuildPrimitiveActivity extends ListActivity {
                     @Override
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         for (int position : reverseSortedPositions) {
-                            mAdapter.remove((Float3) mAdapter.getItem(position));
+                            mAdapter.remove(mAdapter.getItem(position));
                         }
                         mAdapter.notifyDataSetChanged();
                     }
@@ -132,7 +136,7 @@ public class BuildPrimitiveActivity extends ListActivity {
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
                 final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
                 final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
-                final Float3 thisPoint = mAdapter.getItem(position);
+                final Float3Wrapper thisPoint = mAdapter.getItem(position);
 
                 builder.setView(dialogueView);
                 builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
@@ -140,7 +144,7 @@ public class BuildPrimitiveActivity extends ListActivity {
                         float x = Float.valueOf(editX.getText().toString());
                         float y = Float.valueOf(editY.getText().toString());
                         float z = Float.valueOf(editZ.getText().toString());
-                        thisPoint.setCoordinates(x, y, z);
+                        thisPoint.wrap(new Float3(x, y, z));
                         mAdapter.notifyDataSetChanged();
                     }
                 });
@@ -153,9 +157,9 @@ public class BuildPrimitiveActivity extends ListActivity {
                 // Get the AlertDialog, initialise values and show it.
                 AlertDialog dialogue = builder.create();
 
-                editX.setText(String.valueOf(thisPoint.getX()));
-                editY.setText(String.valueOf(thisPoint.getY()));
-                editZ.setText(String.valueOf(thisPoint.getZ()));
+                editX.setText(String.valueOf(thisPoint.unwrap().getX()));
+                editY.setText(String.valueOf(thisPoint.unwrap().getY()));
+                editZ.setText(String.valueOf(thisPoint.unwrap().getZ()));
                 dialogue.show();
             }
         });
@@ -187,7 +191,7 @@ public class BuildPrimitiveActivity extends ListActivity {
             mElement.setType((Type) mTypeSpinner.getSelectedItem());
             LinkedList<Float3> points = new LinkedList<Float3>();
             for (int i = 0; i < mAdapter.getCount(); i++) {
-                points.add((Float3) mAdapter.getItem(i));
+                points.add(mAdapter.getItem(i).unwrap());
             }
             mElement.setVertices(points);
             result.putExtra("element", mElement);
@@ -217,7 +221,7 @@ public class BuildPrimitiveActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_points_new:
-                mAdapter.add(new Float3(0f, 0f, 0f));
+                mAdapter.add(new Float3(0f, 0f, 0f).wrap());
                 mAdapter.notifyDataSetChanged();
                 break;
 
@@ -233,10 +237,9 @@ public class BuildPrimitiveActivity extends ListActivity {
     // http://www.piwai.info/android-adapter-good-practices/
     // TODO: Consider using a ViewHolder -- see
     // http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
-    class PointAdapter extends ArrayAdapter<Float3> {
+    class PointAdapter extends ArrayAdapter<Float3Wrapper> {
 
         final Context mContext;
-        final ArrayList<Float3> mPoints;
         final LayoutInflater mInflater;
 
         public PointAdapter(Context context, Collection<Float3> points) {
@@ -244,7 +247,6 @@ public class BuildPrimitiveActivity extends ListActivity {
 
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mPoints = new ArrayList<Float3>(points);
 
         }
 
@@ -259,10 +261,8 @@ public class BuildPrimitiveActivity extends ListActivity {
         }
 
         protected void updatePoint(int position, float x, float y, float z) {
-            Float3 point = (Float3) getItem(position);
-            point.setX(x);
-            point.setY(y);
-            point.setZ(z);
+            Float3Wrapper pointWrapper = getItem(position);
+            pointWrapper.wrap(new Float3(x, y, z));
         }
 
     }

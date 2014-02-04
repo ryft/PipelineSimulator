@@ -22,38 +22,19 @@ public class Float3 implements Serializable, Cloneable {
         return x;
     }
 
-    public void setX(float x) {
-        this.x = x;
-    }
-
     public float getY() {
         return y;
-    }
-
-    public void setY(float y) {
-        this.y = y;
     }
 
     public float getZ() {
         return z;
     }
 
-    public void setZ(float z) {
-        this.z = z;
-    }
-
-    // XXX shortcut
-    public void setCoordinates(float x, float y, float z) {
-        setX(x);
-        setY(y);
-        setZ(z);
-    }
-
-    public void transform(float[] transformation) {
+    public Float3 transform(float[] transformation) {
 
         float[] v = new float[] { this.x, this.y, this.z, 1 };
         Matrix.multiplyMV(v, 0, transformation, 0, v, 0);
-        setCoordinates(v[0], v[1], v[2]);
+        return new Float3(v[0], v[1], v[2]);
     }
 
     // XXX Find out whether or not using Matrix operations is better than a home-grown solution.
@@ -73,10 +54,8 @@ public class Float3 implements Serializable, Cloneable {
         return new Float3(v[0], v[1], v[2]);
     }
 
-    public void translate(float x, float y, float z) {
-        setX(getX() + x);
-        setY(getY() + y);
-        setZ(getZ() + z);
+    public Float3 translate(float x, float y, float z) {
+        return new Float3(getX() + x, getY() + y, getZ() + z);
     }
 
     /* Modifications which return new objects */
@@ -105,8 +84,13 @@ public class Float3 implements Serializable, Cloneable {
     }
 
     public Float3 normalised() {
-        float norm = (float) Math.sqrt(getX() * getX() + getY() * getY() + getZ() * getZ());
+        Double d = Math.sqrt(getX() * getX() + getY() * getY() + getZ() * getZ());
+        float norm = d.floatValue();
         return new Float3(getX() / norm, getY() / norm, getZ() / norm);
+    }
+    
+    public Float3Wrapper wrap() {
+        return new Float3Wrapper(this);
     }
 
     public float[] toArray() {
