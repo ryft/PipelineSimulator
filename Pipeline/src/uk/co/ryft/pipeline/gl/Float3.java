@@ -61,7 +61,7 @@ public class Float3 implements Serializable, Cloneable {
     // TODO: Try to multiply multiple points in one M x V operation in Primitive.
     // This function belongs in Element, not Point.
     // XXX This rotates about the origin.
-    public void rotate(float a, float x, float y, float z) {
+    public Float3 rotate(float a, float x, float y, float z) {
 
         float[] v = new float[] { this.x, this.y, this.z, 1 };
 
@@ -70,7 +70,7 @@ public class Float3 implements Serializable, Cloneable {
         Matrix.rotateM(m, 0, a, x, y, z);
         Matrix.multiplyMV(v, 0, m, 0, v, 0);
 
-        setCoordinates(v[0], v[1], v[2]);
+        return new Float3(v[0], v[1], v[2]);
     }
 
     public void translate(float x, float y, float z) {

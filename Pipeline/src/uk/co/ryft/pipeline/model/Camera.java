@@ -16,6 +16,10 @@ public class Camera implements Serializable, Cloneable {
     private Float3 mEye;
     private Float3 mFocus;
     private Float3 mUp;
+
+    // For touch events
+    // TODO: Implement a monitor for this.
+    public volatile Float mRotation = 0f;
     
     private Transformation<Camera> transformation;
     
@@ -47,12 +51,21 @@ public class Camera implements Serializable, Cloneable {
     
     public void setViewMatrix(float[] viewMatrix, int offset) {
         
-        Camera cam = (transformation == null) ? this : transformation.getTransformation(SystemClock.uptimeMillis());
+        if (transformation != null) {
+            Camera newCamera = transformation.getTransformation(SystemClock.uptimeMillis());
+            mEye = newCamera.getEye();
+            mFocus = newCamera.getFocus();
+            mUp = newCamera.getUp();
+            setProjection(newCamera.getLeft(), newCamera.getRight(), newCamera.getBottom(), newCamera.getTop(), newCamera.getNear(), newCamera.getFar());
+        }
+
+        // Use negative angle to rotate in the correct direction about the y-axis
+        Float3 eye = mEye.rotate(-mRotation, 0, 1, 0);
         
         Matrix.setLookAtM(viewMatrix, offset,
-                cam.getEye().getX(), cam.getEye().getY(), cam.getEye().getZ(),
-                cam.getFocus().getX(), cam.getFocus().getY(), cam.getFocus().getZ(),
-                cam.getUp().getX(), cam.getUp().getY(), cam.getUp().getZ());
+                eye.getX(), eye.getY(), eye.getZ(),
+                getFocus().getX(), getFocus().getY(), getFocus().getZ(),
+                getUp().getX(), getUp().getY(), getUp().getZ());
     }
 
     // Projection parameters

@@ -72,17 +72,12 @@ public class PipelineRenderer implements Renderer, Serializable {
             Colour.WHITE);
     private Drawable sLightDrawable;
 
-    // For touch events
-    // TODO: Implement a monitor for this.
-    private volatile float mAngle;
-    private final float[] mModelRotationMatrix = new float[16];
-
     public float getRotation() {
-        return mAngle;
+        return mActualCamera.mRotation;
     }
 
     public void setRotation(float angle) {
-        mAngle = angle;
+        mActualCamera.mRotation = angle;
     }
 
     public void resetScaleFactor() {
@@ -131,10 +126,11 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Initialise lighting model
         mLighting = LightingModel.UNIFORM;
 
-        mGLCullingEnabled = params.getBoolean("culling_enabled", true);
+        mGLCullingEnabled = false;
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
-        mGLDepthBufferEnabled = params.getBoolean("depth_buffer_enabled", true);
-        mGLBlendingEnabled = params.getBoolean("blending_enabled", true);
+        mGLDepthBufferEnabled = false;
+        mGLBlendingEnabled = false;
+        mGLParametersModified = true;
     }
 
     @Override
@@ -146,9 +142,6 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // XXX Turn everything off initially
         // TODO Reset state as per mPipelineStep on screen rotation etc
-
-        // For touch events
-        Matrix.setIdentityM(mModelRotationMatrix, 0);
 
         // Force re-initialisation of static scene objects in this new render thread context
         sAxesDrawable = null;
@@ -180,40 +173,40 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
     private boolean mGLParametersModified = true;
-    
+
     protected void setGLParameters() {
 
         // Set depth buffer parameters
         if (mGLDepthBufferEnabled)
             GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         else
-        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 
         // Set face culling parameters
         if (mGLCullingEnabled)
             GLES20.glEnable(GLES20.GL_CULL_FACE);
         else
-        GLES20.glDisable(GLES20.GL_CULL_FACE);
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
         GLES20.glCullFace(GLES20.GL_BACK);
         if (mGLCullingClockwise)
             GLES20.glFrontFace(GLES20.GL_CW);
         else
             GLES20.glFrontFace(GLES20.GL_CCW);
-        
+
         // Set blending parameters
         if (mGLBlendingEnabled)
             GLES20.glEnable(GLES20.GL_BLEND);
         else
             GLES20.glDisable(GLES20.GL_BLEND);
-        
+
         mGLParametersModified = false;
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        
-        if (mGLParametersModified )
+
+        if (mGLParametersModified)
             setGLParameters();
 
         // Clear background colour and depth buffer
@@ -237,11 +230,6 @@ public class PipelineRenderer implements Renderer, Serializable {
             // TODO Find a way to remove completed transformations if necessary
             Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
 
-        // Combine the current rotation matrix with the projection and camera view for touch-rotation
-        Matrix.setRotateM(mModelRotationMatrix, 0, mAngle, 0, 1, 0);
-        Matrix.multiplyMM(mModelMatrix, 0, mModelRotationMatrix, 0, mModelMatrix, 0);
-        Matrix.multiplyMM(mCameraModelMatrix, 0, mModelRotationMatrix, 0, mCameraModelMatrix, 0);
-
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
         Matrix.multiplyMM(mLVMatrix, 0, mViewMatrix, 0, mLightModelMatrix, 0);
@@ -260,11 +248,15 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (mFrustumDrawable == null)
             mFrustumDrawable = mFrustumElement.getDrawable();
 
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+
         // Draw axes and virtual camera
         if (mDrawAxes)
             sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
 
         // Draw world objects in the scene
         for (Element e : mSceneElements.keySet()) {
