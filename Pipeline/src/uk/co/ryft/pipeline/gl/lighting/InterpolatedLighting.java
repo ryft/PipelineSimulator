@@ -122,6 +122,7 @@ public abstract class InterpolatedLighting extends LightingModel {
     
     @Override
     public void reset() {
+        super.reset();
         mProgram1D = 0;
         mProgram2D = 0;
     }

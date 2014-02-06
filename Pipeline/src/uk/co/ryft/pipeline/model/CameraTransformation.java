@@ -5,8 +5,16 @@ import uk.co.ryft.pipeline.gl.Float3;
 // XXX: Explain the rationale behind this being immutable
 public class CameraTransformation extends Transformation<Camera> {
 
+    @SuppressWarnings("unused")
+    private static final String TAG = "CameraTransformation";
+
     private final Camera mOrigin;
     private final Camera mDestination;
+
+    private final float mRotationBase;
+    private final float mRotationDiff;
+    private final float mScaleFactorBase;
+    private final float mScaleFactorDiff;
 
     private final Float3 mEyeBase;
     private final Float3 mEyeDiff;
@@ -32,6 +40,11 @@ public class CameraTransformation extends Transformation<Camera> {
         mOrigin = (Camera) origin.clone();
         mDestination = (Camera) destination.clone();
         
+        mRotationBase = mOrigin.getRotation();
+        mRotationDiff = mDestination.getRotation() - mRotationBase;
+        mScaleFactorBase = mOrigin.getScaleFactor();
+        mScaleFactorDiff = mDestination.getScaleFactor() - mScaleFactorBase;
+        
         mEyeBase = mOrigin.getEye();
         mEyeDiff = mDestination.getEye().minus(mEyeBase);
         mFocusBase = mOrigin.getFocus();
@@ -55,6 +68,12 @@ public class CameraTransformation extends Transformation<Camera> {
 
     @Override
     protected Camera getTransformationState(float progress) {
+        
+        // FIXME is this unsafe?
+        if (progress <= 0)
+            return mOrigin;
+        else if (progress >= 1)
+            return mDestination;
 
         Float3 eye = mEyeBase.plus(mEyeDiff.scale(progress));
         Float3 focus = mFocusBase.plus(mFocusDiff.scale(progress));
@@ -67,7 +86,10 @@ public class CameraTransformation extends Transformation<Camera> {
         float near = mNearBase + (mNearDiff * progress);
         float far = mFarBase + (mFarDiff * progress);
         
-        return new Camera(eye, focus, up, left, right, bottom, top, near, far);
+        Camera diff = new Camera(eye, focus, up, left, right, bottom, top, near, far);
+        diff.setRotation(mRotationBase + mRotationDiff * progress);
+        diff.setScaleFactor(mScaleFactorBase + mScaleFactorDiff * progress);
+        return diff;
     }
 
 }

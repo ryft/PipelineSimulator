@@ -103,15 +103,14 @@ public abstract class LightingModel implements Serializable {
     public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
 
     public static void resetAll() {
-        UNIFORM.reset();
-        LAMBERTIAN.reset();
-        PHONG.reset();
-        POINT_SOURCE.reset();
+        for (Model m : Model.values())
+            getLightingModel(m).reset();
     }
 
     // XXX Clears the GL program for use in a new render thread
     public void reset() {
         mProgram = 0;
+        setGlobalLightLevel(1);
     }
 
     @Override

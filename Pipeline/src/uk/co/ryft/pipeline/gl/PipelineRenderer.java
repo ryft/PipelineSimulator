@@ -73,27 +73,25 @@ public class PipelineRenderer implements Renderer, Serializable {
     private Drawable sLightDrawable;
 
     public float getRotation() {
-        return mActualCamera.mRotation;
+        return mActualCamera.getRotation();
     }
 
     public void setRotation(float angle) {
-        mActualCamera.mRotation = angle;
-    }
-
-    public void resetScaleFactor() {
-        mActualCamera.resetScaleFactor();
-        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+        if (mPipelineState < STEP_CLIPPING)
+            mActualCamera.setRotation(angle);
     }
 
     public void setScaleFactor(float scaleFactor) {
-        mActualCamera.updateScaleFactor(scaleFactor);
-        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+        if (mPipelineState < STEP_CLIPPING) {
+            mActualCamera.updateScaleFactor(scaleFactor);
+            // Force update to projection matrix
+            mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+        }
     }
 
     public void interact() {
-        resetScaleFactor();
-        setRotation(0);
-        mActualCamera.transformTo(mVirtualCamera);
+//        mActualCamera.transformTo(mVirtualCamera);
+        Log.d(TAG, mActualCamera.toString());
     }
 
     // Drawables aren't initialised, and are constructed at render time if necessary
@@ -130,7 +128,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
         mGLDepthBufferEnabled = false;
         mGLBlendingEnabled = false;
-        mGLParametersModified = true;
     }
 
     @Override
@@ -172,7 +169,6 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
-    private boolean mGLParametersModified = true;
 
     protected void setGLParameters() {
 
@@ -199,21 +195,18 @@ public class PipelineRenderer implements Renderer, Serializable {
             GLES20.glEnable(GLES20.GL_BLEND);
         else
             GLES20.glDisable(GLES20.GL_BLEND);
-
-        mGLParametersModified = false;
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
-
-        if (mGLParametersModified)
-            setGLParameters();
 
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Get the current camera view matrices
         mActualCamera.setViewMatrix(mViewMatrix, 0);
+        if (mActualCamera.isTransforming())
+            mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
         mVirtualCamera.setViewMatrix(mCameraViewMatrix, 0);
 
         // Set up the model (world transformation) matrix
@@ -249,6 +242,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             mFrustumDrawable = mFrustumElement.getDrawable();
 
         GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
         // Draw axes and virtual camera
         if (mDrawAxes)
@@ -256,7 +250,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
-        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        setGLParameters();
 
         // Draw world objects in the scene
         for (Element e : mSceneElements.keySet()) {
@@ -418,11 +412,9 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private void animateClipping(boolean forward) throws InterruptedException {
         mDrawAxes = !forward;
-        if (forward) {
-            resetScaleFactor();
-            setRotation(0);
+        if (forward)
             mActualCamera.transformTo(mVirtualCamera);
-        } else
+        else
             mActualCamera.transformTo(mSceneCamera);
     }
 
@@ -432,7 +424,6 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private void animateFaceCulling(boolean forward) throws InterruptedException {
         mGLCullingEnabled = forward;
-        mGLParametersModified = true;
     }
 
     private void animateFragmentShading(boolean forward) throws InterruptedException {
@@ -449,16 +440,14 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private void animateDepthBuffer(boolean forward) throws InterruptedException {
         mGLDepthBufferEnabled = forward;
-        mGLParametersModified = true;
     }
 
     private void animateBlending(boolean forward) throws InterruptedException {
         mGLBlendingEnabled = forward;
-        mGLParametersModified = true;
     }
 
     public void next() {
-        if (mPipelineState < STEP_FINAL && !animationLock) {
+        if (mPipelineState < STEP_FINAL && !animationLock && !mActualCamera.isTransforming()) {
 
             new TransitionAnimator(mPipelineState, true).start();
             mPipelineState++;
@@ -468,7 +457,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     public void previous() {
-        if (mPipelineState > STEP_INITIAL && !animationLock) {
+        if (mPipelineState > STEP_INITIAL && !animationLock && !mActualCamera.isTransforming()) {
 
             new TransitionAnimator(mPipelineState, false).start();
             mPipelineState--;
