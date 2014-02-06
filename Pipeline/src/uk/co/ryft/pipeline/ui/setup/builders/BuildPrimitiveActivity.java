@@ -2,6 +2,7 @@ package uk.co.ryft.pipeline.ui.setup.builders;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
@@ -38,7 +39,10 @@ public class BuildPrimitiveActivity extends ListActivity {
 
     // XXX Build an adapter of Float3Wrappers because they are mutable
     protected ArrayAdapter<Float3Wrapper> mAdapter;
-    protected Primitive mElement;
+//    protected Primitive mElement;
+    protected Type mElementType;
+    protected List<Float3> mElementVertices;
+    protected Colour mElementColour;
     protected TypeSpinner mTypeSpinner;
 
     protected boolean mEditMode;
@@ -51,13 +55,17 @@ public class BuildPrimitiveActivity extends ListActivity {
         Bundle fromScene = this.getIntent().getExtras();
         mEditMode = fromScene.getBoolean("edit_mode", false);
 
+        Primitive primitive;
         if (mEditMode) {
-            mElement = (Primitive) fromScene.getSerializable("element");
+            primitive = (Primitive) fromScene.getSerializable("element");
             setTitle(R.string.title_activity_primitive_edit);
         } else {
-            mElement = new Primitive(Type.GL_POINTS);
+            primitive = new Primitive(Type.GL_POINTS);
             setTitle(R.string.title_activity_primitive_add);
         }
+        mElementType = primitive.getType();
+        mElementVertices = primitive.getVertices();
+        mElementColour = primitive.getColour();
 
         // Set up save / delete button listeners
         Button saveButton = (Button) findViewById(R.id.button_row_positive);
@@ -87,10 +95,10 @@ public class BuildPrimitiveActivity extends ListActivity {
         TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this, android.R.layout.simple_list_item_1,
                 Primitive.Type.values());
         mTypeSpinner.setAdapter(typeAdapter);
-        mTypeSpinner.setSelection(mElement.getType());
+        mTypeSpinner.setSelection(mElementType);
 
         LinkedList<Float3Wrapper> wrapped = new LinkedList<Float3Wrapper>();
-        for (Float3 e : mElement.getVertices())
+        for (Float3 e : mElementVertices)
             wrapped.add(e.wrap());
         mAdapter = new ArrayAdapter<Float3Wrapper>(this, R.layout.listitem_point, R.id.text_point, wrapped);
         setListAdapter(mAdapter);
@@ -166,12 +174,12 @@ public class BuildPrimitiveActivity extends ListActivity {
 
         final ImageButton buttonColour = (ImageButton) findViewById(R.id.button_element_colour);
         final View swatch = (View) findViewById(R.id.element_colour_swatch);
-        swatch.setBackgroundColor(mElement.getColourArgb());
-        buttonColour.setOnClickListener(new EditColourHandler(this, mElement.getColour(), new OnColourChangedListener() {
+        swatch.setBackgroundColor(mElementColour.toArgb());
+        buttonColour.setOnClickListener(new EditColourHandler(this, mElementColour, new OnColourChangedListener() {
 
             @Override
             public void notifyColourChanged(Colour colour) {
-                mElement.setColour(colour);
+                mElementColour = colour;
                 swatch.setBackgroundColor(colour.toArgb());
             }
 
@@ -188,13 +196,12 @@ public class BuildPrimitiveActivity extends ListActivity {
         result.putExtra("delete", delete);
 
         if (!delete) {
-            mElement.setType((Type) mTypeSpinner.getSelectedItem());
-            LinkedList<Float3> points = new LinkedList<Float3>();
+            Type type = (Type) mTypeSpinner.getSelectedItem();
+            LinkedList<Float3> vertices = new LinkedList<Float3>();
             for (int i = 0; i < mAdapter.getCount(); i++) {
-                points.add(mAdapter.getItem(i).unwrap());
+                vertices.add(mAdapter.getItem(i).unwrap());
             }
-            mElement.setVertices(points);
-            result.putExtra("element", mElement);
+            result.putExtra("element", new Primitive(type, vertices, mElementColour));
         }
 
         setResult(RESULT_OK, result);

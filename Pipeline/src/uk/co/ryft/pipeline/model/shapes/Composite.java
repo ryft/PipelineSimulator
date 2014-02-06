@@ -60,7 +60,7 @@ public class Composite implements Element {
         }
     };
     
-    protected Type mType;
+    protected final Type mType;
     protected final LinkedList<Element> mComponents;
     
     public Composite(Type type, Collection<? extends Element> elements) {
@@ -72,14 +72,10 @@ public class Composite implements Element {
     public Type getType() {
         return mType;
     }
-
-    public void setType(Type t) {
-        mType = t;
-    }
     
     public Collection<Element> getComponents() {
-        // TODO decide whether or not this should be made safe
-        return mComponents;
+        // XXX The immutability of elements makes this safe.
+        return new LinkedList<Element>(mComponents);
     }
 
     @Override
@@ -145,38 +141,33 @@ public class Composite implements Element {
 
     @Override
     public Composite translate(float x, float y, float z) {
+        LinkedList<Element> components = new LinkedList<Element>();
         for (Element e : mComponents)
-            e.translate(x, y, z);
-        return this;
+            components.add(e.translate(x, y, z));
+        return new Composite(getType(), components);
     }
 
     @Override
     public Composite translate(Float3 v) {
-        for (Element e : mComponents)
-            e.translate(v);
-        return this;
+        return translate(v.getX(), v.getY(), v.getZ());
     }
 
     @Override
     public Composite rotate(float a, float x, float y, float z) {
+        LinkedList<Element> components = new LinkedList<Element>();
         for (Element e : mComponents)
-            e.rotate(a, x, y, z);
-        return this;
+            components.add(e.rotate(a, x, y, z));
+        return new Composite(getType(), components);
     }
 
     @Override
     public Composite rotate(float a, Float3 v) {
-        for (Element e : mComponents)
-            e.rotate(a, v);
-        return this;
+        return rotate(a, v.getX(), v.getY(), v.getZ());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Object clone() {
-        
-        LinkedList<Element> components = (LinkedList<Element>) mComponents.clone();
-        return new Composite(mType, components);
+        return new Composite(getType(), getComponents());
     }
 
 }

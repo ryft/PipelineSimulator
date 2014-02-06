@@ -9,10 +9,10 @@ public class Colour implements Serializable, Cloneable {
     
     private static final long serialVersionUID = -6574165998266076014L;
     
-    int red;
-    int green;
-    int blue;
-    int alpha;
+    protected int red;
+    protected int green;
+    protected int blue;
+    protected int alpha;
 
     // Primaries
     public static final Colour RED = new Colour(255, 0, 0);
@@ -44,7 +44,7 @@ public class Colour implements Serializable, Cloneable {
         setColour(red, green, blue, 255);
     }
     
-    public void setColour(int red, int green, int blue, int alpha) {
+    private void setColour(int red, int green, int blue, int alpha) {
         this.red = red;
         this.green = green;
         this.blue = blue;
@@ -111,8 +111,8 @@ public class Colour implements Serializable, Cloneable {
         
         private void randomise() {
             red = r.nextInt(256);
-            blue = r.nextInt(256);
             green = r.nextInt(256);
+            blue = r.nextInt(256);
         }
         
     }

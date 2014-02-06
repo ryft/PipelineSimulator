@@ -14,6 +14,7 @@ import android.view.View;
 
 public class PipelineSurface extends GLSurfaceView {
     
+    @SuppressWarnings("unused")
     private static final String TAG = "PipelineSurface";
 
     private final PipelineRenderer mRenderer;

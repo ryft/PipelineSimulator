@@ -16,6 +16,7 @@ import android.view.MenuItem;
 
 public class PipelineActivity extends Activity {
 
+    @SuppressWarnings("unused")
     private static final String TAG = "SimulatorActivity";
 
     protected PipelineSurface mPipelineView;
