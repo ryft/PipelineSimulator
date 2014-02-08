@@ -70,10 +70,6 @@
                     android:text="@string/heading_group_primitive_processing" />
 
                 <include
-                    android:id="@+id/step_geometry_shading"
-                    layout="@layout/component_setup_step" />
-
-                <include
                     android:id="@+id/step_clipping"
                     layout="@layout/component_setup_step" />
             </LinearLayout>

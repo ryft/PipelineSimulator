@@ -51,7 +51,6 @@ public class SetupActivity extends Activity {
         View lightingModel;
         View vertexProcessing;
         View vertexShading;
-        View geometryShading;
         View clipping;
         View multisampling;
         View faceCulling;
@@ -73,7 +72,6 @@ public class SetupActivity extends Activity {
         steps.lightingModel = findViewById(R.id.step_lighting_model);
         steps.vertexProcessing = findViewById(R.id.step_vertex_processing);
         steps.vertexShading = findViewById(R.id.step_vertex_shading);
-        steps.geometryShading = findViewById(R.id.step_geometry_shading);
         steps.clipping = findViewById(R.id.step_clipping);
         steps.multisampling = findViewById(R.id.step_multisampling);
         steps.faceCulling = findViewById(R.id.step_face_culling);
@@ -101,7 +99,6 @@ public class SetupActivity extends Activity {
         setText(steps.lightingModel, android.R.id.title, R.string.button_lighting_model);
         setText(steps.vertexProcessing, android.R.id.title, R.string.button_vertex_processing);
         setText(steps.vertexShading, android.R.id.title, R.string.button_vertex_shading);
-        setText(steps.geometryShading, android.R.id.title, R.string.button_geometry_shading);
         setText(steps.clipping, android.R.id.title, R.string.button_clipping);
         setText(steps.multisampling, android.R.id.title, R.string.button_multisampling);
         setText(steps.faceCulling, android.R.id.title, R.string.button_face_culling);
@@ -327,9 +324,6 @@ public class SetupActivity extends Activity {
                 break;
         }
 
-        // Generate geometry shading summary
-        String geometryShadingSummary = "TODO";
-
         // Generate multisampling summary
         String multisamplingSummary = "TODO";
 
@@ -370,7 +364,6 @@ public class SetupActivity extends Activity {
         setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
         setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
         setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
-        setText(steps.geometryShading, android.R.id.summary, geometryShadingSummary);
         setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
         setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);

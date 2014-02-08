@@ -293,7 +293,6 @@ public class PipelineRenderer implements Renderer, Serializable {
     public static final int STEP_INITIAL = 0;
     public static final int STEP_VERTEX_ASSEMBLY = 1; // Add one element at a time
     public static final int STEP_VERTEX_SHADING = 2; // Apply shader gradually?
-    public static final int STEP_GEOMETRY_SHADING = 3; // XX
     public static final int STEP_CLIPPING = 4; // Zoom to virtual camera
     public static final int STEP_MULTISAMPLING = 5; // XX
     public static final int STEP_FACE_CULLING = 6; // ?
@@ -316,10 +315,6 @@ public class PipelineRenderer implements Renderer, Serializable {
 
                     case STEP_VERTEX_SHADING:
                         animateVertexShading(mForward);
-                        break;
-
-                    case STEP_GEOMETRY_SHADING:
-                        animateGeometryShading(mForward);
                         break;
 
                     case STEP_CLIPPING:
@@ -404,10 +399,6 @@ public class PipelineRenderer implements Renderer, Serializable {
             mLighting.setGlobalLightLevel(i);
             Thread.sleep(5);
         }
-    }
-
-    private void animateGeometryShading(boolean forward) throws InterruptedException {
-
     }
 
     private void animateClipping(boolean forward) throws InterruptedException {
