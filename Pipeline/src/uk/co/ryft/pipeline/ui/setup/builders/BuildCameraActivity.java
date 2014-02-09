@@ -57,8 +57,8 @@ public class BuildCameraActivity extends Activity {
 
         mTextScale = (EditText) findViewById(R.id.edit_element_scale);
 
-        mButtonSave = (Button) findViewById(R.id.button_element_save);
-        mButtonDiscard = (Button) findViewById(R.id.button_element_discard);
+        mButtonSave = (Button) findViewById(R.id.button_row_positive);
+        mButtonDiscard = (Button) findViewById(R.id.button_row_negative);
 
         // Set up listeners
         mTextEye.setOnClickListener(new EditPointHandler(this, mPointEye, new OnPointChangedListener() {

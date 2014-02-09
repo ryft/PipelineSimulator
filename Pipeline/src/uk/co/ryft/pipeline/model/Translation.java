@@ -4,7 +4,7 @@ import uk.co.ryft.pipeline.gl.Float3;
 import android.opengl.Matrix;
 
 // XXX: Explain the rationale behind this being immutable
-public class Translation extends Transformation {
+public class Translation extends Transformation<float[]> {
 
     private final Float3 mTranslation;
 

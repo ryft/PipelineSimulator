@@ -12,7 +12,7 @@ import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.shapes.GL_Primitive;
 import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.ui.PrimitiveActivity;
+import uk.co.ryft.pipeline.ui.setup.builders.BuildPrimitiveActivity;
 import android.app.Activity;
 import android.opengl.GLES20;
 
@@ -56,10 +56,10 @@ public class Primitive implements Element {
 
         @Override
         public Class<? extends Activity> getEditorActivity() {
-            return PrimitiveActivity.class;
+            return BuildPrimitiveActivity.class;
         }
 
-        public Integer getGLPrimitive() {
+        public int getGLPrimitive() {
             return mPrimitiveMap.get(this);
         }
 
@@ -69,61 +69,43 @@ public class Primitive implements Element {
         }
     };
 
-    protected Type mType;
-    protected final ArrayList<Float3> mVertices = new ArrayList<Float3>();
-    protected Colour mColour = Colour.WHITE;
+    protected final Type mType;
+    protected final ArrayList<Float3> mVertices;
+    protected final Colour mColour;
 
     public Primitive(Type type) {
+        mType = type;
+        mVertices = new ArrayList<Float3>();
+        mColour = Colour.WHITE;
     }
 
     public Primitive(Type type, List<Float3> vertices) {
         mType = type;
-        mVertices.addAll(vertices);
+        // XXX This is safe because Float3s are immutable.
+        mVertices = new ArrayList<Float3>(vertices);
+        mColour = Colour.WHITE;
     }
 
     public Primitive(Type type, List<Float3> vertices, Colour colour) {
         mType = type;
-        mVertices.addAll(vertices);
+        mVertices = new ArrayList<Float3>(vertices);
         mColour = colour;
-    }
-
-    public int getColourArgb() {
-        return mColour.toArgb();
-    }
-
-    public void setColour(int red, int green, int blue, int alpha) {
-        mColour.setColour(red, green, blue, alpha);
-    }
-
-    public void setColour(int red, int green, int blue) {
-        mColour.setColour(red, green, blue);
     }
 
     public Type getType() {
         return mType;
     }
 
-    public void setType(Type t) {
-        mType = t;
-    }
-
     public List<Float3> getVertices() {
-        // TODO this is unsafe -- passing a reference to a list.
-        return mVertices;
-    }
-
-    public void setVertices(List<Float3> vertices) {
-        // Probably not unsafe but investigate and discuss the mutability of Float3s.
-        mVertices.clear();
-        mVertices.addAll(vertices);
+        return new ArrayList<Float3>(mVertices);
     }
 
     public Colour getColour() {
         return mColour;
     }
 
-    public void setColour(Colour colour) {
-        mColour = colour;
+    public int getColourArgb() {
+        return mColour.toArgb();
     }
 
     /**
@@ -196,46 +178,37 @@ public class Primitive implements Element {
 
     @Override
     public Primitive translate(float x, float y, float z) {
+        ArrayList<Float3> vertices = new ArrayList<Float3>();
         for (Float3 v : mVertices)
-            v.translate(x, y, z);
-        return this;
+            vertices.add(v.translate(x, y, z));
+        return new Primitive(getType(), vertices, getColour());
     }
 
     @Override
     public Primitive translate(Float3 v) {
-        for (Float3 x : mVertices)
-            x.translate(v.getX(), v.getY(), v.getZ());
-        return this;
+        return translate(v.getX(), v.getY(), v.getZ());
     }
 
     @Override
     public Primitive rotate(float a, float x, float y, float z) {
-
+        ArrayList<Float3> vertices = new ArrayList<Float3>();
         for (Float3 v : mVertices)
-            v.rotate(a, x, y, z);
+            vertices.add(v.rotate(a, x, y, z));
 
         // TODO: Decide whether this (and other set operations) should instantiate a new Primitive
         // (immutable) or perform operations on itself (mutable) and document this.
 
-        return this;
+        return new Primitive(getType(), vertices, getColour());
     }
 
     @Override
     public Primitive rotate(float a, Float3 v) {
-
-        for (Float3 x : mVertices)
-            x.rotate(a, v.getX(), v.getY(), v.getZ());
-
-        return this;
+        return rotate(a, v.getX(), v.getY(), v.getZ());
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Object clone() {
-
-        Colour colour = (Colour) mColour.clone();
-        ArrayList<Float3> vertices = (ArrayList<Float3>) mVertices.clone();
-        return new Primitive(mType, vertices, colour);
+        return new Primitive(getType(), getVertices(), getColour());
     }
 
 }

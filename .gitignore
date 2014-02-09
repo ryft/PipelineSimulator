@@ -20,7 +20,7 @@ local.properties
 .project
 
 # image resources
-drawable/
+drawable-*/
 
 # misc.
 *.log

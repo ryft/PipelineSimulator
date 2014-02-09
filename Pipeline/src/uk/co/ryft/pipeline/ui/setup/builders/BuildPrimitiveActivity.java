@@ -1,12 +1,13 @@
-package uk.co.ryft.pipeline.ui;
+package uk.co.ryft.pipeline.ui.setup.builders;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
+import uk.co.ryft.pipeline.gl.Float3Wrapper;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.ui.components.EditColourHandler;
@@ -17,7 +18,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,14 +32,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
-public class PrimitiveActivity extends ListActivity {
+public class BuildPrimitiveActivity extends ListActivity {
 
-    protected ArrayAdapter<Float3> mAdapter;
-    protected Primitive mElement;
+    // XXX Build an adapter of Float3Wrappers because they are mutable
+    protected ArrayAdapter<Float3Wrapper> mAdapter;
+//    protected Primitive mElement;
+    protected Type mElementType;
+    protected List<Float3> mElementVertices;
+    protected Colour mElementColour;
     protected TypeSpinner mTypeSpinner;
 
     protected boolean mEditMode;
@@ -52,17 +55,21 @@ public class PrimitiveActivity extends ListActivity {
         Bundle fromScene = this.getIntent().getExtras();
         mEditMode = fromScene.getBoolean("edit_mode", false);
 
+        Primitive primitive;
         if (mEditMode) {
-            mElement = (Primitive) fromScene.getSerializable("element");
+            primitive = (Primitive) fromScene.getSerializable("element");
             setTitle(R.string.title_activity_primitive_edit);
         } else {
-            mElement = new Primitive(Type.GL_POINTS);
+            primitive = new Primitive(Type.GL_POINTS);
             setTitle(R.string.title_activity_primitive_add);
         }
+        mElementType = primitive.getType();
+        mElementVertices = primitive.getVertices();
+        mElementColour = primitive.getColour();
 
         // Set up save / delete button listeners
-        Button saveButton = (Button) findViewById(R.id.button_element_save);
-        Button deleteButton = (Button) findViewById(R.id.button_element_discard);
+        Button saveButton = (Button) findViewById(R.id.button_row_positive);
+        Button deleteButton = (Button) findViewById(R.id.button_row_negative);
 
         if (mEditMode)
             deleteButton.setText(R.string.action_button_delete);
@@ -88,9 +95,12 @@ public class PrimitiveActivity extends ListActivity {
         TypeSpinnerAdapter typeAdapter = new TypeSpinnerAdapter(this, android.R.layout.simple_list_item_1,
                 Primitive.Type.values());
         mTypeSpinner.setAdapter(typeAdapter);
-        mTypeSpinner.setSelection(mElement.getType());
+        mTypeSpinner.setSelection(mElementType);
 
-        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point, R.id.text_point, mElement.getVertices());
+        LinkedList<Float3Wrapper> wrapped = new LinkedList<Float3Wrapper>();
+        for (Float3 e : mElementVertices)
+            wrapped.add(e.wrap());
+        mAdapter = new ArrayAdapter<Float3Wrapper>(this, R.layout.listitem_point, R.id.text_point, wrapped);
         setListAdapter(mAdapter);
 
         // XXX reference https://github.com/romannurik/Android-SwipeToDismiss
@@ -108,7 +118,7 @@ public class PrimitiveActivity extends ListActivity {
                     @Override
                     public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                         for (int position : reverseSortedPositions) {
-                            mAdapter.remove((Float3) mAdapter.getItem(position));
+                            mAdapter.remove(mAdapter.getItem(position));
                         }
                         mAdapter.notifyDataSetChanged();
                     }
@@ -125,16 +135,16 @@ public class PrimitiveActivity extends ListActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
                 // Instantiate and display a float picker dialogue
-                AlertDialog.Builder builder = new AlertDialog.Builder(PrimitiveActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(BuildPrimitiveActivity.this);
                 builder.setTitle(R.string.dialogue_title_point);
 
-                LayoutInflater inflater = PrimitiveActivity.this.getLayoutInflater();
+                LayoutInflater inflater = BuildPrimitiveActivity.this.getLayoutInflater();
                 View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
 
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
                 final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
                 final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
-                final Float3 thisPoint = mAdapter.getItem(position);
+                final Float3Wrapper thisPoint = mAdapter.getItem(position);
 
                 builder.setView(dialogueView);
                 builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
@@ -142,7 +152,7 @@ public class PrimitiveActivity extends ListActivity {
                         float x = Float.valueOf(editX.getText().toString());
                         float y = Float.valueOf(editY.getText().toString());
                         float z = Float.valueOf(editZ.getText().toString());
-                        thisPoint.setCoordinates(x, y, z);
+                        thisPoint.wrap(new Float3(x, y, z));
                         mAdapter.notifyDataSetChanged();
                     }
                 });
@@ -155,44 +165,30 @@ public class PrimitiveActivity extends ListActivity {
                 // Get the AlertDialog, initialise values and show it.
                 AlertDialog dialogue = builder.create();
 
-                editX.setText(String.valueOf(thisPoint.getX()));
-                editY.setText(String.valueOf(thisPoint.getY()));
-                editZ.setText(String.valueOf(thisPoint.getZ()));
+                editX.setText(String.valueOf(thisPoint.unwrap().getX()));
+                editY.setText(String.valueOf(thisPoint.unwrap().getY()));
+                editZ.setText(String.valueOf(thisPoint.unwrap().getZ()));
                 dialogue.show();
             }
         });
 
         final ImageButton buttonColour = (ImageButton) findViewById(R.id.button_element_colour);
         final View swatch = (View) findViewById(R.id.element_colour_swatch);
-        swatch.setBackgroundColor(mElement.getColourArgb());
-        buttonColour.setOnClickListener(new EditColourHandler(this, mElement.getColour(), new OnColourChangedListener() {
+        swatch.setBackgroundColor(mElementColour.toArgb());
+        buttonColour.setOnClickListener(new EditColourHandler(this, mElementColour, new OnColourChangedListener() {
 
             @Override
             public void notifyColourChanged(Colour colour) {
-                mElement.setColour(colour);
+                mElementColour = colour;
                 swatch.setBackgroundColor(colour.toArgb());
             }
 
         }));
     }
 
-    long mBackPressed = 0;
-
     @Override
     public void onBackPressed() {
-        long time = SystemClock.uptimeMillis();
-        long elapsed = time - mBackPressed;
-
-        if (elapsed < 2000)
-            discardAndQuit();
-
-        else {
-            if (mEditMode)
-                Toast.makeText(this, R.string.warning_element_discard_changes, Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this, R.string.warning_element_discard, Toast.LENGTH_SHORT).show();
-            mBackPressed = time;
-        }
+        saveAndQuit(false);
     }
 
     protected void saveAndQuit(boolean delete) {
@@ -200,13 +196,12 @@ public class PrimitiveActivity extends ListActivity {
         result.putExtra("delete", delete);
 
         if (!delete) {
-            mElement.setType((Type) mTypeSpinner.getSelectedItem());
-            LinkedList<Float3> points = new LinkedList<Float3>();
+            Type type = (Type) mTypeSpinner.getSelectedItem();
+            LinkedList<Float3> vertices = new LinkedList<Float3>();
             for (int i = 0; i < mAdapter.getCount(); i++) {
-                points.add((Float3) mAdapter.getItem(i));
+                vertices.add(mAdapter.getItem(i).unwrap());
             }
-            mElement.setVertices(points);
-            result.putExtra("element", mElement);
+            result.putExtra("element", new Primitive(type, vertices, mElementColour));
         }
 
         setResult(RESULT_OK, result);
@@ -233,7 +228,7 @@ public class PrimitiveActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_points_new:
-                mAdapter.add(new Float3(0f, 0f, 0f));
+                mAdapter.add(new Float3(0f, 0f, 0f).wrap());
                 mAdapter.notifyDataSetChanged();
                 break;
 
@@ -249,10 +244,9 @@ public class PrimitiveActivity extends ListActivity {
     // http://www.piwai.info/android-adapter-good-practices/
     // TODO: Consider using a ViewHolder -- see
     // http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
-    class PointAdapter extends ArrayAdapter<Float3> {
+    class PointAdapter extends ArrayAdapter<Float3Wrapper> {
 
         final Context mContext;
-        final ArrayList<Float3> mPoints;
         final LayoutInflater mInflater;
 
         public PointAdapter(Context context, Collection<Float3> points) {
@@ -260,7 +254,6 @@ public class PrimitiveActivity extends ListActivity {
 
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mPoints = new ArrayList<Float3>(points);
 
         }
 
@@ -275,10 +268,8 @@ public class PrimitiveActivity extends ListActivity {
         }
 
         protected void updatePoint(int position, float x, float y, float z) {
-            Float3 point = (Float3) getItem(position);
-            point.setX(x);
-            point.setY(y);
-            point.setZ(z);
+            Float3Wrapper pointWrapper = getItem(position);
+            pointWrapper.wrap(new Float3(x, y, z));
         }
 
     }

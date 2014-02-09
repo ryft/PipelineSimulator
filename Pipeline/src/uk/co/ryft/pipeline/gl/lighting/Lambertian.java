@@ -85,11 +85,12 @@ public class Lambertian extends InterpolatedLighting {
 
     @Override
     public String getFragmentShader(int primitiveType) {
-        return   "precision mediump float;       \n"
-                + "varying vec4 v_Color;          \n"
-                + "                               \n"
-                + "void main() {                  \n"
-                + "   gl_FragColor = v_Color;     \n"
-                + "}                              \n";
+        return   "precision mediump float;                     \n"
+                + "uniform float u_LightLevel;                  \n" // Light level parameter for use in transition animations
+                + "varying vec4 v_Color;                        \n"
+                + "                                             \n"
+                + "void main() {                                \n"
+                + "   gl_FragColor = v_Color * u_LightLevel;    \n"
+                + "}                                            \n";
     }
 }

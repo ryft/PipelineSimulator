@@ -64,6 +64,7 @@ public abstract class InterpolatedLighting extends LightingModel {
         int mMVPMatrixHandle;
         int mMVMatrixHandle;
         int mLightPosHandle;
+        int mLightLevelHandle;
         int mPositionHandle;
         int mColourHandle;
         int mNormalHandle;
@@ -72,6 +73,7 @@ public abstract class InterpolatedLighting extends LightingModel {
         mMVPMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVPMatrix");
         mMVMatrixHandle = GLES20.glGetUniformLocation(glProgram, "u_MVMatrix");
         mLightPosHandle = GLES20.glGetUniformLocation(glProgram, "u_LightPos");
+        mLightLevelHandle = GLES20.glGetUniformLocation(glProgram, "u_LightLevel");
         mPositionHandle = GLES20.glGetAttribLocation(glProgram, "a_Position");
         mColourHandle = GLES20.glGetAttribLocation(glProgram, "a_Color");
         mNormalHandle = GLES20.glGetAttribLocation(glProgram, "a_Normal");
@@ -104,6 +106,9 @@ public abstract class InterpolatedLighting extends LightingModel {
         GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.sLightPosition.getX(),
                 PipelineRenderer.sLightPosition.getY(), PipelineRenderer.sLightPosition.getZ());
 
+        // Pass in the overall light level for transitions (fading in/out)
+        GLES20.glUniform1f(mLightLevelHandle, mLightLevel);
+
         // Draw the primitive
         GLES20.glDrawArrays(primitive.mPrimitiveType, 0, primitive.mVertexCount);
         
@@ -117,6 +122,7 @@ public abstract class InterpolatedLighting extends LightingModel {
     
     @Override
     public void reset() {
+        super.reset();
         mProgram1D = 0;
         mProgram2D = 0;
     }

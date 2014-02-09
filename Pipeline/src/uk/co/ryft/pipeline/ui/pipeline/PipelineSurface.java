@@ -1,28 +1,31 @@
-package uk.co.ryft.pipeline.ui.simulator;
-
-import java.util.List;
+package uk.co.ryft.pipeline.ui.pipeline;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.gl.lighting.LightingModel;
-import uk.co.ryft.pipeline.model.Element;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
-import android.widget.Toast;
 
 public class PipelineSurface extends GLSurfaceView {
+    
+    @SuppressWarnings("unused")
+    private static final String TAG = "PipelineSurface";
 
-    private final PipelineRenderer mRenderer = new PipelineRenderer();
+    private final PipelineRenderer mRenderer;
     // XXX This is very unsafe but required for saving and restoring state.
     // Can we do better by implementing it in onPause() etc here?
     public PipelineRenderer getRenderer() { return mRenderer; }
     
-    Context mContext;
+    protected Context mContext;
+    
+    protected boolean mIsScrolling = false;
+    protected float mScrollStartX = 0;
     
     public PipelineSurface(Context context) {
         super(context);
@@ -32,6 +35,7 @@ public class PipelineSurface extends GLSurfaceView {
     public PipelineSurface(Context context, Bundle params) {
         super(context);
         mContext = context;
+        mRenderer = new PipelineRenderer(params);
         
         final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
             @Override
@@ -44,14 +48,52 @@ public class PipelineSurface extends GLSurfaceView {
                 // Consume all events between a double-tap to prevent "jumping"
                 return true;
             }
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                if (!mEditMode) {
+                    mIsScrolling = true;
+                    mScrollStartX = e1.getX();
+                    return true;
+                } else
+                    return false;
+            }
+        });
+        
+        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(context, new SimpleOnScaleGestureListener() {
+            
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                mRenderer.setScaleFactor(detector.getScaleFactor());
+                return true;
+            }
         });
         
         setOnTouchListener(new OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (!gestureDetector.onTouchEvent(event))
+
+                // Detect if a scroll event has finished for pipeline transitions
+                if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
+                    mIsScrolling = false;
+                    
+                    if (event.getX() - mScrollStartX <= 0)
+                        // Scrolled left
+                        mRenderer.next();
+                    
+                    else
+                        // Scrolled right
+                        mRenderer.previous();
+                }
+
+                // Consume all double-tap and swipe events as next highest priority
+                if (!gestureDetector.onTouchEvent(event) && mEditMode) {
+
+                    // XXX There is a bug in ScaleGestureDetector where it always returns true
+                    // See https://code.google.com/p/android/issues/detail?id=42591
+                    scaleDetector.onTouchEvent(event);
                     onSceneMove(event);
+                }
                 
                 return true;
             }
@@ -90,44 +132,18 @@ public class PipelineSurface extends GLSurfaceView {
             setBackgroundResource(0);
     }
 
-    static int mCurrentModel = 0;
-
     public void toggle() {
-        mCurrentModel = (mCurrentModel + 1) % 3;
-
-        switch (mCurrentModel) {
-            case 0:
-                PipelineRenderer.mLighting = LightingModel.UNIFORM;
-                break;
-            case 1:
-                PipelineRenderer.mLighting = LightingModel.LAMBERTIAN;
-                break;
-            case 2:
-                PipelineRenderer.mLighting = LightingModel.PHONG;
-                break;
-        }
-        
-        Toast.makeText(mContext, PipelineRenderer.mLighting.toString(), Toast.LENGTH_SHORT).show();
-            
-        requestRender();
-    }
-
-    public void updateScene(List<Element> elements) {
-        mRenderer.updateScene(elements);
-        requestRender();
+        mRenderer.interact();
     }
 
     private float mPreviousX = 0;
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;
 
-    public void onSceneMove(MotionEvent e) {
+    public boolean onSceneMove(MotionEvent e) {
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
-        
-        if (!mEditMode)
-            return;
 
         float x = e.getX();
         float y = e.getY();
@@ -152,6 +168,8 @@ public class PipelineSurface extends GLSurfaceView {
 
         mPreviousX = x;
         mPreviousY = y;
+        
+        return true;
     }
 
 }

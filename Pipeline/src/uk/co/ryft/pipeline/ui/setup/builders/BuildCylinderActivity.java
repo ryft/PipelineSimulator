@@ -58,8 +58,8 @@ public class BuildCylinderActivity extends Activity {
         mTextRotation = (EditText) findViewById(R.id.edit_element_rotation);
         mTextStepCount = (EditText) findViewById(R.id.edit_element_stepcount);
 
-        mButtonSave = (Button) findViewById(R.id.button_element_save);
-        mButtonDiscard = (Button) findViewById(R.id.button_element_discard);
+        mButtonSave = (Button) findViewById(R.id.button_row_positive);
+        mButtonDiscard = (Button) findViewById(R.id.button_row_negative);
 
         // Set up listeners
         mTextCentre.setOnClickListener(new EditPointHandler(this, mPointCentre, new OnPointChangedListener() {

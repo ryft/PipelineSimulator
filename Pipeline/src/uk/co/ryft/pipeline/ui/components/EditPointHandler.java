@@ -50,7 +50,7 @@ public class EditPointHandler implements OnClickListener {
                         float x = Float.valueOf(editX.getText().toString());
                         float y = Float.valueOf(editY.getText().toString());
                         float z = Float.valueOf(editZ.getText().toString());
-                        mPoint.setCoordinates(x, y, z);
+                        mPoint = new Float3(x, y, z);
                         mListener.notifyPointChanged(mPoint);
                     }
                 });

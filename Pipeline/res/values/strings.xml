@@ -17,6 +17,8 @@
     <string name="action_button_delete">Delete</string>
     <string name="action_button_discard">Discard</string>
     <string name="action_button_cancel">Cancel</string>
+    <string name="action_button_simulate">Simulate</string>
+    <string name="action_button_exit">Exit</string>
     
     <string name="title_activity_setup">Configure Pipeline</string>
     <string name="title_activity_setup_scene">Scene Composition</string>
@@ -32,9 +34,6 @@
     <string name="message_element_discarded">Element discarded</string>
     <string name="message_element_updated">Element updated</string>
     <string name="message_element_deleted">Element deleted</string>
-    
-    <string name="warning_element_discard_changes">Press back again to discard changes</string>
-    <string name="warning_element_discard">Press back again to discard</string>
     
     <string name="label_element_centre">Centre point</string>
     <string name="label_element_eye">Eye point</string>
@@ -104,10 +103,9 @@
     
     <string name="button_scene_composition">Scene composition</string>
     <string name="button_camera_parameters">Camera parameters</string>
-    <string name="button_lighting_model">Lighting model</string>
+    <string name="button_lighting_model">Shader previews</string>
     <string name="button_vertex_processing">Vertex assembly</string>
     <string name="button_vertex_shading">Vertex shading</string>
-    <string name="button_geometry_shading">Geometry shading</string>
     <string name="button_clipping">Viewport mapping and clipping</string>
     <string name="button_multisampling">Multisampling</string>
     <string name="button_face_culling">Face culling</string>

@@ -4,35 +4,22 @@ import java.io.Serializable;
 
 import uk.co.ryft.pipeline.gl.Float3;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 
 //XXX Virtual camera parameters including camera location and projection
 // Necessary because android.graphics.camera doesn't hold projection parameters
-public class Camera implements Serializable {
+public class Camera implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2169762992472303103L;
+    @SuppressWarnings("unused")
+    private static final String TAG = "Camera";
     
     // View parameters
     private Float3 mEye;
     private Float3 mFocus;
     private Float3 mUp;
-
-    // Projection parameters
-//    private float 
     
-    
-//    // Transition view parameters
-//    private FloatPoint mEyeTarget;
-//    private FloatPoint mFocusTarget;
-//    private FloatPoint mUpTarget;
-//    
-//    private FloatPoint mEyeStep;
-//    private FloatPoint mFocusStep;
-//    private FloatPoint mUpStep;
-//    
-//    private int mSteps = 0;
-//    private int mStep = 0;
-//    
-//    private float[] mPrevView;
+    private Transformation<Camera> mTransformation;
     
     public Camera(Float3 eye, Float3 focus, Float3 up, float left, float right, float bottom, float top, float near, float far) {
         mEye = (Float3) eye.clone();
@@ -41,57 +28,66 @@ public class Camera implements Serializable {
         setProjection(left, right, bottom, top, near, far);
     }
 
-//    public void transformTo(Camera camera, int steps) {
-//        transformTo(camera.mEye, camera.mFocus, camera.mUp, steps);
-//    }
-//
-//    public void transformTo(FloatPoint eye, FloatPoint focus, FloatPoint up, int steps) {
-//        
-//        mSteps = steps;
-//        
-//        mEyeTarget = (FloatPoint) eye.clone();
-//        mFocusTarget = (FloatPoint) focus.clone();
-//        mUpTarget = (FloatPoint) up.clone();
-//
-//        FloatPoint eyeDiff = mEyeTarget.minus(mEye);
-//        FloatPoint focusDiff = mFocusTarget.minus(mFocus);
-//        FloatPoint upDiff = mUpTarget.minus(mUp);
-//        
-//        mEyeStep = eyeDiff.scale(1.0f / mSteps);
-//        mFocusStep = focusDiff.scale(1.0f / mSteps);
-//        mUpStep = upDiff.scale(1.0f / mSteps);
-//        
-//        // Invalidate previous completed view matrix
-//        mPrevView = null;
-//        mStep = 0;
-//    }
+    public void transformTo(Camera destination) {
+        mTransformation = new CameraTransformation(this, destination);
+    }
 
     public Float3 getEye() { return (Float3) mEye.clone(); }
     public Float3 getFocus() { return (Float3) mFocus.clone(); }
     public Float3 getUp() { return (Float3) mUp.clone(); }
+
+    // For touch events
+    // TODO: Implement a monitor for this.
+    private volatile float mRotation = 0f;
+    
+    public float getRotation() {
+        return mRotation;
+    }
+    
+    public void setRotation(float rotation) {
+        mRotation = rotation % 360;
+    }
+    
+    private float mScaleFactor = 1;
+    
+    public float getScaleFactor() {
+        return mScaleFactor;
+    }
+    
+    public void setScaleFactor(float scaleFactor) {
+        mScaleFactor = scaleFactor;
+    }
+
+    public void updateScaleFactor(float scaleFactor) {
+        // XXX Zooming implemented as described here: http://www.opengl.org/archives/resources/faq/technical/viewing.htm#view0040
+        mScaleFactor /= scaleFactor;
+    }
     
     public void setViewMatrix(float[] viewMatrix, int offset) {
         
-//        if (mStep < mSteps) {
-//            mEye = mEye.plus(mEyeStep);
-//            mFocus = mFocus.plus(mFocusStep);
-//            mUp = mUp.plus(mUpStep);
-//
-//            if (mPrevView == null)
-//                mPrevView = new float[16];
-            
-            Matrix.setLookAtM(viewMatrix, offset, mEye.getX(), mEye.getY(), mEye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
-//            mStep++;
-//            
-//        } else if (mPrevView == null) {
-//            mPrevView = new float[16];
-//            Matrix.setLookAtM(mPrevView, 0, mEye.getX(), mEye.getY(), mEye.getZ(), mFocus.getX(), mFocus.getY(), mFocus.getY(), mUp.getX(), mUp.getY(), mUp.getZ());
-//            
-//        } // Otherwise the animation has completed and we can reuse the last view matrix
-//        
-//        return mPrevView;
+        if (mTransformation != null) {
+            long time = SystemClock.uptimeMillis();
+            Camera newCamera = mTransformation.getTransformation(time);
+            mEye = newCamera.getEye();
+            mFocus = newCamera.getFocus();
+            mUp = newCamera.getUp();
+            setProjection(newCamera.getLeft(), newCamera.getRight(), newCamera.getBottom(), newCamera.getTop(), newCamera.getNear(), newCamera.getFar());
+            mRotation = newCamera.mRotation;
+
+            if (mTransformation.isComplete(time))
+                mTransformation = null;
+        }
+
+        // Use negative angle to rotate in the correct direction about the y-axis
+        Float3 eye = mEye.rotate(-mRotation, 0, 1, 0);
+        
+        Matrix.setLookAtM(viewMatrix, offset,
+                eye.getX(), eye.getY(), eye.getZ(),
+                getFocus().getX(), getFocus().getY(), getFocus().getZ(),
+                getUp().getX(), getUp().getY(), getUp().getZ());
     }
 
+    // Projection parameters
     float frustumLeft;
     float frustumRight;
     float frustumBottom;
@@ -115,22 +111,50 @@ public class Camera implements Serializable {
         frustumFar = far;
     }
     
+    // Determine whether a projection re-calculation is required at render time
+    public boolean isTransforming() {
+        
+        return (mTransformation != null && !mTransformation.isComplete(SystemClock.uptimeMillis()));
+    }
+
     public void setProjectionMatrix(float[] projectionMatrix, int offset, int width, int height) {
+        
+        if (mTransformation != null) {
+            Camera newCamera = mTransformation.getTransformation(SystemClock.uptimeMillis());
+            mScaleFactor = newCamera.mScaleFactor;
+        }
 
         // XXX display a unit square with correct aspect ratio, regardless of screen orientation
         if (width >= height) {
             float ratio = (float) width / height;
-            
-            Matrix.frustumM(projectionMatrix, offset, -ratio, ratio, frustumBottom, frustumTop, frustumNear, frustumFar);
-            // (float[] m, int offset, float left, float right, float bottom, float top, float near, float far)
+            Matrix.frustumM(projectionMatrix, offset, -ratio * mScaleFactor, ratio * mScaleFactor, frustumBottom * mScaleFactor, frustumTop * mScaleFactor, frustumNear, frustumFar);
 
         } else {
             float ratio = (float) height / width;
-            Matrix.frustumM(projectionMatrix, offset, frustumLeft, frustumRight, -ratio, ratio, frustumNear, frustumFar);
-//            float ratio = (float) width / height;
-//            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+            Matrix.frustumM(projectionMatrix, offset, frustumLeft * mScaleFactor, frustumRight * mScaleFactor, -ratio * mScaleFactor, ratio * mScaleFactor, frustumNear, frustumFar);
 
         }
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder summary = new StringBuilder("View Parameters\n");
+        summary.append("Eye point: " + getEye() + "\n");
+        summary.append("Focus point: " + getFocus() + "\n");
+        summary.append("Up direction: " + getUp() + "\n");
+        summary.append("\nProjection parameters\n");
+        summary.append("Left " + getLeft() + ", Right " + getRight() + ", Bottom " + getBottom() + ", Top " + getTop() + ", Near " + getNear() + ", Far " + getFar() + "\n");
+        summary.append("\nDynamic parameters\n");
+        summary.append("Rotation " + getRotation() + ", Scale factor " + getScaleFactor());
+        return summary.toString();
+    }
+    
+    @Override
+    public Object clone() {
+        Camera cloned = new Camera(getEye(), getFocus(), getUp(), getLeft(), getRight(), getBottom(), getTop(), getNear(), getFar());
+        cloned.setRotation(getRotation());
+        cloned.setScaleFactor(getScaleFactor());
+        return cloned;
     }
     
 }

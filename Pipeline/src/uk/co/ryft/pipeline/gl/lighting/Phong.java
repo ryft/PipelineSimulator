@@ -42,6 +42,7 @@ public class Phong extends InterpolatedLighting {
             return   "precision mediump float;       \n"
                     + "                               \n"
                     + "uniform vec3 u_LightPos;       \n"     // The position of the light in eye space
+                    + "uniform float u_LightLevel;    \n"     // Light level parameter for use in transition animations
                     + "                               \n"
                     + "varying vec3 v_Position;       \n"     // Interpolated position for this fragment
                     + "varying vec4 v_Color;          \n"     // This is the colour from the vertex shader interpolated across the triangle per fragment
@@ -56,13 +57,14 @@ public class Phong extends InterpolatedLighting {
                     + "    diffuse = diffuse * (15.0 / (1.0 + (distance * distance)));        \n" // Add attenuation using the inverse square law
                     + "    float ambient = 0.25;                                              \n" // Add an ambient lighting level term
                     + "                                                                       \n"
-                    + "    gl_FragColor = v_Color * (diffuse + ambient);                      \n" // Multiply the colour by the diffuse illumination level
+                    + "    gl_FragColor = v_Color * (diffuse + ambient) * u_LightLevel;       \n" // Multiply the colour by the diffuse illumination level
                     + "}                                                                      \n";
         
         else
             return   "precision mediump float;       \n"
                     + "                               \n"
                     + "uniform vec3 u_LightPos;       \n"     // The position of the light in eye space
+                    + "uniform float u_LightLevel;    \n"     // Light level parameter for use in transition animations
                     + "                               \n"
                     + "varying vec3 v_Position;       \n"     // Interpolated position for this fragment
                     + "varying vec4 v_Color;          \n"     // This is the colour from the vertex shader interpolated across the triangle per fragment
@@ -75,7 +77,7 @@ public class Phong extends InterpolatedLighting {
                     + "    float diffuse = 10.0 / (1.0 + (distance * distance));              \n" // Add attenuation using the inverse square law
                     + "    float ambient = 0.1;                                               \n" // Add an ambient lighting level term
                     + "                                                                       \n"
-                    + "    gl_FragColor = v_Color * (diffuse + ambient);                      \n" // Multiply the colour by the diffuse illumination level
+                    + "    gl_FragColor = v_Color * (diffuse + ambient) * u_LightLevel;       \n" // Multiply the colour by the diffuse illumination level
                     + "}                                                                      \n";
     }
 }
