@@ -5,12 +5,6 @@ import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
-import android.view.View;
 
 public class PipelineSurface extends GLSurfaceView {
     
@@ -24,9 +18,6 @@ public class PipelineSurface extends GLSurfaceView {
     
     protected Context mContext;
     
-    protected boolean mIsScrolling = false;
-    protected float mScrollStartX = 0;
-    
     public PipelineSurface(Context context) {
         super(context);
         throw new RuntimeException("Pipeline surface called with no parameters");
@@ -36,69 +27,6 @@ public class PipelineSurface extends GLSurfaceView {
         super(context);
         mContext = context;
         mRenderer = new PipelineRenderer(params);
-        
-        final GestureDetector gestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                toggleEditMode();
-                return true;
-            }
-            @Override
-            public boolean onDoubleTapEvent(MotionEvent e) {
-                // Consume all events between a double-tap to prevent "jumping"
-                return true;
-            }
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (!mEditMode) {
-                    mIsScrolling = true;
-                    mScrollStartX = e1.getX();
-                    return true;
-                } else
-                    return false;
-            }
-        });
-        
-        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(context, new SimpleOnScaleGestureListener() {
-            
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                mRenderer.setScaleFactor(detector.getScaleFactor());
-                return true;
-            }
-        });
-        
-        setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                // Detect if a scroll event has finished for pipeline transitions
-                if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
-                    mIsScrolling = false;
-                    
-                    if (event.getX() - mScrollStartX <= 0)
-                        // Scrolled left
-                        mRenderer.next();
-                    
-                    else
-                        // Scrolled right
-                        mRenderer.previous();
-                }
-
-                // Consume all double-tap and swipe events as next highest priority
-                if (!gestureDetector.onTouchEvent(event) && mEditMode) {
-
-                    // XXX There is a bug in ScaleGestureDetector where it always returns true
-                    // See https://code.google.com/p/android/issues/detail?id=42591
-                    scaleDetector.onTouchEvent(event);
-                    onSceneMove(event);
-                }
-                
-                return true;
-            }
-            
-        });
 
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
@@ -134,42 +62,6 @@ public class PipelineSurface extends GLSurfaceView {
 
     public void toggle() {
         mRenderer.interact();
-    }
-
-    private float mPreviousX = 0;
-    private float mPreviousY = 0;
-    private float TOUCH_SCALE_FACTOR = 0.3f;
-
-    public boolean onSceneMove(MotionEvent e) {
-        // MotionEvent reports input details from the touch screen
-        // and other input controls. In this case, you are only
-        // interested in events where the touch position changed.
-
-        float x = e.getX();
-        float y = e.getY();
-
-        switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-
-                float dx = x - mPreviousX;
-                float dy = y - mPreviousY;
-
-                // reverse direction of rotation above the mid-line
-                if (y > getHeight() / 2)
-                  dx = dx * -1;
-
-                // reverse direction of rotation to left of the mid-line
-                if (x < getWidth() / 2)
-                  dy = dy * -1;
-
-                mRenderer.setRotation(mRenderer.getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
-                requestRender();
-        }
-
-        mPreviousX = x;
-        mPreviousY = y;
-        
-        return true;
     }
 
 }

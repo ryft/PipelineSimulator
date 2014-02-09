@@ -8,6 +8,7 @@ import uk.co.ryft.pipeline.ui.components.OnPointChangedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -71,6 +72,7 @@ public class SetupCameraActivity extends Activity {
         mButtonDiscard.setText(R.string.action_button_cancel);
 
         // Set up listeners
+        mTextEye.setGravity(Gravity.RIGHT);
         mTextEye.setOnClickListener(new EditPointHandler(this, mPointEye, new OnPointChangedListener() {
 
             @Override
@@ -80,7 +82,8 @@ public class SetupCameraActivity extends Activity {
             }
 
         }));
-        
+
+        mTextFocus.setGravity(Gravity.RIGHT);
         mTextFocus.setOnClickListener(new EditPointHandler(this, mPointFocus, new OnPointChangedListener() {
 
             @Override
@@ -90,7 +93,8 @@ public class SetupCameraActivity extends Activity {
             }
 
         }));
-        
+
+        mTextUp.setGravity(Gravity.RIGHT);
         mTextUp.setOnClickListener(new EditPointHandler(this, mPointUp, new OnPointChangedListener() {
 
             @Override

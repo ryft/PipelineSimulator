@@ -90,7 +90,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     public void interact() {
-//        mActualCamera.transformTo(mVirtualCamera);
+        // mActualCamera.transformTo(mVirtualCamera);
         Log.d(TAG, mActualCamera.toString());
     }
 
@@ -293,12 +293,12 @@ public class PipelineRenderer implements Renderer, Serializable {
     public static final int STEP_INITIAL = 0;
     public static final int STEP_VERTEX_ASSEMBLY = 1; // Add one element at a time
     public static final int STEP_VERTEX_SHADING = 2; // Apply shader gradually?
-    public static final int STEP_CLIPPING = 4; // Zoom to virtual camera
-    public static final int STEP_MULTISAMPLING = 5; // XX
-    public static final int STEP_FACE_CULLING = 6; // ?
-    public static final int STEP_FRAGMENT_SHADING = 7; // ?
-    public static final int STEP_DEPTH_BUFFER = 8; // ?
-    public static final int STEP_BLENDING = 9; // XX
+    public static final int STEP_CLIPPING = 3; // Zoom to virtual camera
+    public static final int STEP_MULTISAMPLING = 4; // XX
+    public static final int STEP_FACE_CULLING = 5; // ?
+    public static final int STEP_FRAGMENT_SHADING = 6; // ?
+    public static final int STEP_DEPTH_BUFFER = 7; // ?
+    public static final int STEP_BLENDING = 8; // XX
     public static final int STEP_FINAL = STEP_BLENDING;
 
     class TransitionAnimator extends Thread {
@@ -454,6 +454,38 @@ public class PipelineRenderer implements Renderer, Serializable {
             mPipelineState--;
             Log.d(TAG, "Step " + mPipelineState);
 
+        }
+    }
+    
+    public String getState() {
+        return getStateDescription(mPipelineState) + " <> " + getStateDescription(mPipelineState + 1);
+        
+    }
+
+    private String getStateDescription(int state) {
+        switch (state) {
+            case STEP_INITIAL:
+                return "Empty Scene";
+            case STEP_VERTEX_ASSEMBLY:
+                return "Vertex Assembly";
+            case STEP_VERTEX_SHADING:
+                return "Vertex Shading";
+            case STEP_CLIPPING:
+                return "Viewport Mapping and Clipping";
+            case STEP_MULTISAMPLING:
+                return "Multisampling";
+            case STEP_FACE_CULLING:
+                return "Back Face Culling";
+            case STEP_FRAGMENT_SHADING:
+                return "Fragment Shading";
+            case STEP_DEPTH_BUFFER:
+                return "Depth Buffer Test";
+            case STEP_BLENDING:
+                return "Blending";
+            case STEP_FINAL + 1:
+                return "Render Complete";
+            default:
+                return "Undefined Step";
         }
     }
 }
