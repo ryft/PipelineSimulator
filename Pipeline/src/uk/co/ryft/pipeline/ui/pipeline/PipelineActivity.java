@@ -8,6 +8,8 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -20,8 +22,7 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public class PipelineActivity extends Activity {
@@ -29,8 +30,11 @@ public class PipelineActivity extends Activity {
     @SuppressWarnings("unused")
     private static final String TAG = "SimulatorActivity";
 
-    protected PipelineSurface mPipelineView;
+    protected PipelineSurface mPipelineSurface;
     protected TextView mPipelineIndicator;
+    protected View mPipelineMap;
+    private int mAnimationDuration;
+    
     protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
 
@@ -42,17 +46,23 @@ public class PipelineActivity extends Activity {
         mPipelineParams = getIntent().getExtras();
         
         // Set up view objects
-        mPipelineView = new PipelineSurface(this, mPipelineParams);
+        // Pipeline surface needs to be constructed here with specific parameters
+        mPipelineSurface = new PipelineSurface(this, mPipelineParams);
         
         setContentView(R.layout.activity_pipeline);
-        LinearLayout layout = (LinearLayout) findViewById(R.id.pipeline_layout);
+        FrameLayout pipelineFrame = (FrameLayout) findViewById(R.id.pipeline_frame);
         mPipelineIndicator = (TextView) findViewById(R.id.pipeline_indicator);
+        mPipelineMap = findViewById(R.id.pipeline_map);
         updateIndicator();
         
-        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
-        mPipelineView.setLayoutParams(params);
-        layout.addView(mPipelineView, 0);
-        mPipelineView.setPadding(2, 2, 2, 2);
+        mPipelineSurface.setPadding(2, 2, 2, 2);
+        pipelineFrame.addView(mPipelineSurface);
+        
+        mPipelineMap.setVisibility(View.GONE);
+        mPipelineSurface.setVisibility(View.VISIBLE);
+        
+        // Set up frame layout animation
+        mAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         mElements = (ArrayList<Element>) mPipelineParams.getSerializable("elements");
         List<Drawable> scene = new LinkedList<Drawable>();
@@ -61,10 +71,10 @@ public class PipelineActivity extends Activity {
             scene.add(d);
         }
         
-        final GestureDetector gestureDetector = new GestureDetector(mPipelineView.mContext, new SimpleOnGestureListener() {
+        final GestureDetector gestureDetector = new GestureDetector(mPipelineSurface.mContext, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                mPipelineView.toggleEditMode();
+                mPipelineSurface.toggleEditMode();
                 return true;
             }
             @Override
@@ -74,7 +84,7 @@ public class PipelineActivity extends Activity {
             }
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (!mPipelineView.isEditMode()) {
+                if (!mPipelineSurface.isEditMode()) {
                     mIsScrolling = true;
                     mScrollStartX = e1.getX();
                     return true;
@@ -83,16 +93,16 @@ public class PipelineActivity extends Activity {
             }
         });
         
-        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(mPipelineView.mContext, new SimpleOnScaleGestureListener() {
+        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(mPipelineSurface.mContext, new SimpleOnScaleGestureListener() {
             
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
-                mPipelineView.getRenderer().setScaleFactor(detector.getScaleFactor());
+                mPipelineSurface.getRenderer().setScaleFactor(detector.getScaleFactor());
                 return true;
             }
         });
         
-        mPipelineView.setOnTouchListener(new OnTouchListener() {
+        mPipelineSurface.setOnTouchListener(new OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -101,19 +111,19 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
                     
-                    if (mScrollStartX - event.getX() >= mPipelineView.getWidth() / 2)
+                    if (mScrollStartX - event.getX() >= mPipelineSurface.getWidth() / 2)
                         // Scrolled left
-                        mPipelineView.getRenderer().next();
+                        mPipelineSurface.getRenderer().next();
                     
-                    else if (event.getX() - mScrollStartX >= mPipelineView.getWidth() / 2)
+                    else if (event.getX() - mScrollStartX >= mPipelineSurface.getWidth() / 2)
                         // Scrolled right
-                        mPipelineView.getRenderer().previous();
+                        mPipelineSurface.getRenderer().previous();
 
                     updateIndicator();
                 }
 
                 // Consume all double-tap and swipe events as next highest priority
-                if (!gestureDetector.onTouchEvent(event) && mPipelineView.isEditMode()) {
+                if (!gestureDetector.onTouchEvent(event) && mPipelineSurface.isEditMode()) {
 
                     // XXX There is a bug in ScaleGestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
@@ -126,6 +136,41 @@ public class PipelineActivity extends Activity {
             
         });
 
+    }
+    
+    private boolean mPipelineMapShown = false;
+    
+    private void crossfade() {
+        
+        final View sourceView = (mPipelineMapShown) ? mPipelineMap : mPipelineSurface;
+        final View destView = (mPipelineMapShown) ? mPipelineSurface : mPipelineMap;
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        destView.setAlpha(0f);
+        destView.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        destView.animate()
+                .alpha(1f)
+                .setDuration(mAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        sourceView.animate()
+                .alpha(0f)
+                .setDuration(mAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        sourceView.setVisibility(View.GONE);
+                    }
+                });
+        
+        mPipelineMapShown = !mPipelineMapShown;
     }
     
     protected boolean mIsScrolling = false;
@@ -150,15 +195,15 @@ public class PipelineActivity extends Activity {
                 float dy = y - mPreviousY;
 
                 // reverse direction of rotation above the mid-line
-                if (y > mPipelineView.getHeight() / 2)
+                if (y > mPipelineSurface.getHeight() / 2)
                   dx = dx * -1;
 
                 // reverse direction of rotation to left of the mid-line
-                if (x < mPipelineView.getWidth() / 2)
+                if (x < mPipelineSurface.getWidth() / 2)
                   dy = dy * -1;
 
-                mPipelineView.getRenderer().setRotation(mPipelineView.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
-                mPipelineView.requestRender();
+                mPipelineSurface.getRenderer().setRotation(mPipelineSurface.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
+                mPipelineSurface.requestRender();
         }
 
         mPreviousX = x;
@@ -168,13 +213,13 @@ public class PipelineActivity extends Activity {
     }
     
     protected void updateIndicator() {
-        mPipelineIndicator.setText(mPipelineView.getRenderer().getState());
+        mPipelineIndicator.setText(mPipelineSurface.getRenderer().getState());
     }
 
     @Override
     public void onBackPressed() {
-        if (mPipelineView.isEditMode())
-            mPipelineView.toggleEditMode();
+        if (mPipelineSurface.isEditMode())
+            mPipelineSurface.toggleEditMode();
         else
             super.onBackPressed();
     }
@@ -194,7 +239,7 @@ public class PipelineActivity extends Activity {
         switch (item.getItemId()) {
 
             case R.id.action_change_perspective:
-                mPipelineView.toggle();
+                crossfade();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -203,10 +248,10 @@ public class PipelineActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        PipelineRenderer renderer = mPipelineView.getRenderer();
+        PipelineRenderer renderer = mPipelineSurface.getRenderer();
         // TODO check out GLSurfaceView.setPreserveEGLContextOnPause()
 
-        savedInstanceState.putBoolean("edit_mode", mPipelineView.isEditMode());
+        savedInstanceState.putBoolean("edit_mode", mPipelineSurface.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());
     }
 
@@ -214,22 +259,22 @@ public class PipelineActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        PipelineRenderer renderer = mPipelineView.getRenderer();
+        PipelineRenderer renderer = mPipelineSurface.getRenderer();
 
-        mPipelineView.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
+        mPipelineSurface.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
         renderer.setRotation(savedInstanceState.getFloat("angle", 0));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mPipelineView.onPause();
+        mPipelineSurface.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mPipelineView.onResume();
+        mPipelineSurface.onResume();
     }
 
 }

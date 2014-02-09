@@ -1,10 +1,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pipeline_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".PipelineActivity" >
+
+    <FrameLayout
+        android:id="@+id/pipeline_frame"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1" >
+
+        <!-- Pipeline Surface will be added here as it needs to be constructed with specific parameters -->
+
+        <View
+            android:id="@+id/pipeline_map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/list_item_hairline"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <View
         android:id="@+id/hairline"
@@ -16,7 +31,9 @@
         android:id="@+id/pipeline_indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:ellipsize="none"
         android:gravity="center"
+        android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/white"
         android:typeface="monospace" />
