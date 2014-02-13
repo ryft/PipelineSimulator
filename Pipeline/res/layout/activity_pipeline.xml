@@ -13,11 +13,11 @@
 
         <!-- Pipeline Surface will be added here as it needs to be constructed with specific parameters -->
 
-        <View
+        <include
             android:id="@+id/pipeline_map"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/list_item_hairline"
+            layout="@layout/component_pipeline_map"
             android:visibility="gone" />
     </FrameLayout>
 

@@ -3,5 +3,8 @@
     
     <dimen name="activity_horizontal_margin">8dip</dimen>
     <dimen name="activity_vertical_margin">8dip</dimen>
+    <dimen name="navigator_box_margin">15dip</dimen>
+    <dimen name="navigator_box_margin_large">50dip</dimen>
+    <dimen name="navigator_corner_radius">10dip</dimen>
 
 </resources>

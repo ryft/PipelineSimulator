@@ -109,6 +109,11 @@ public class Colour implements Serializable, Cloneable {
             return super.toArray();
         }
         
+        public int toArgb() {
+            randomise();
+            return super.toArgb();
+        }
+        
         private void randomise() {
             red = r.nextInt(256);
             green = r.nextInt(256);

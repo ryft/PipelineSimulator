@@ -10,7 +10,10 @@ import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -21,9 +24,12 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PipelineActivity extends Activity {
 
@@ -57,6 +63,7 @@ public class PipelineActivity extends Activity {
         
         mPipelineSurface.setPadding(2, 2, 2, 2);
         pipelineFrame.addView(mPipelineSurface);
+        setupPipelineNavigator();
         
         mPipelineMap.setVisibility(View.GONE);
         mPipelineSurface.setVisibility(View.VISIBLE);
@@ -138,6 +145,104 @@ public class PipelineActivity extends Activity {
 
     }
     
+    static class Navigator {
+        LinearLayout groupVertexProcessing;
+        LinearLayout groupPrimitiveProcessing;
+        LinearLayout groupRasterisation;
+        LinearLayout groupFragmentProcessing;
+        LinearLayout groupPixelProcessing;
+        
+        TextView headingVertexProcessing;
+        TextView headingPrimitiveProcessing;
+        TextView headingRasterisation;
+        TextView headingFragmentProcessing;
+        TextView headingPixelProcessing;
+        
+        TextView blockVertexAssembly;
+        TextView blockVertexShading;
+        TextView blockClipping;
+        TextView blockMultisampling;
+        TextView blockFaceCulling;
+        TextView blockFragmentShading;
+        TextView blockDepthBufferTest;
+        TextView blockBlending;
+    }
+    
+    Navigator mNavigator = new Navigator();
+    
+    private void setupPipelineNavigator() {
+
+        mNavigator.groupVertexProcessing = (LinearLayout) findViewById(R.id.group_vertex_processing);
+        mNavigator.groupPrimitiveProcessing = (LinearLayout) findViewById(R.id.group_primitive_processing);
+        mNavigator.groupRasterisation = (LinearLayout) findViewById(R.id.group_rasterisation);
+        mNavigator.groupFragmentProcessing = (LinearLayout) findViewById(R.id.group_fragment_processing);
+        mNavigator.groupPixelProcessing = (LinearLayout) findViewById(R.id.group_pixel_processing);
+
+        mNavigator.headingVertexProcessing = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.group_heading);
+        mNavigator.headingPrimitiveProcessing = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.group_heading);
+        mNavigator.headingRasterisation = (TextView) mNavigator.groupRasterisation.findViewById(R.id.group_heading);
+        mNavigator.headingFragmentProcessing = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.group_heading);
+        mNavigator.headingPixelProcessing = (TextView) mNavigator.groupPixelProcessing.findViewById(R.id.group_heading);
+
+        mNavigator.headingVertexProcessing.setText(R.string.heading_group_vertex_processing);
+        mNavigator.headingPrimitiveProcessing.setText(R.string.heading_group_primitive_processing);
+        mNavigator.headingRasterisation.setText(R.string.heading_group_rasterisation);
+        mNavigator.headingFragmentProcessing.setText(R.string.heading_group_fragment_processing);
+        mNavigator.headingPixelProcessing.setText(R.string.heading_group_pixel_processing);
+
+        mNavigator.blockVertexAssembly = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.block_1);
+        mNavigator.blockVertexShading = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.block_2);
+        mNavigator.blockClipping = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.block);
+        mNavigator.blockMultisampling = (TextView) mNavigator.groupRasterisation.findViewById(R.id.block_1);
+        mNavigator.blockFaceCulling = (TextView) mNavigator.groupRasterisation.findViewById(R.id.block_2);
+        mNavigator.blockFragmentShading = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.block_1);
+        mNavigator.blockDepthBufferTest = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.block_2);
+        mNavigator.blockBlending = (TextView) mNavigator.groupPixelProcessing.findViewById(R.id.block);
+
+        // Use deprecated BackgroundDrawable methods for older APIs
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            setupNavigatorBackgroundsNew();
+        else
+            setupNavigatorBackgroundsOld();
+
+        mNavigator.blockVertexAssembly.setText(R.string.label_vertex_assembly);
+        mNavigator.blockVertexShading.setText(R.string.label_vertex_shading);
+        mNavigator.blockClipping.setText(R.string.label_clipping);
+        mNavigator.blockMultisampling.setText(R.string.label_multisampling);
+        mNavigator.blockFaceCulling.setText(R.string.label_face_culling);
+        mNavigator.blockFragmentShading.setText(R.string.label_fragment_shading);
+        mNavigator.blockDepthBufferTest.setText(R.string.label_depth_buffer_test);
+        mNavigator.blockBlending.setText(R.string.label_blending);
+        
+        mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
+    
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "debug", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void setupNavigatorBackgroundsNew() {
+        Resources r = getResources();
+        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_1));
+        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_2));
+        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_3));
+        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_4));
+        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_5));
+    }
+    
+    @SuppressWarnings("deprecation")
+    private void setupNavigatorBackgroundsOld() {
+        Resources r = getResources();
+        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_1));
+        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_2));
+        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_3));
+        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_4));
+        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_5));
+    }
+
     private boolean mPipelineMapShown = false;
     
     private void crossfade() {
