@@ -2,13 +2,13 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle" >
 
-    <corners android:radius="@dimen/navigator_corner_radius" />
+    <corners android:radius="@dimen/navigator_block_corner_radius" />
 
     <padding
-        android:bottom="@dimen/navigator_box_margin"
-        android:left="@dimen/navigator_box_margin"
-        android:right="@dimen/navigator_box_margin"
-        android:top="@dimen/navigator_box_margin" />
+        android:bottom="@dimen/navigator_block_innermargin"
+        android:left="@dimen/navigator_block_innermargin"
+        android:right="@dimen/navigator_block_innermargin"
+        android:top="@dimen/navigator_block_innermargin" />
 
     <solid android:color="@color/navigator_bg_yellow" />
 

@@ -214,6 +214,25 @@ public class PipelineActivity extends Activity {
         mNavigator.blockDepthBufferTest.setText(R.string.label_depth_buffer_test);
         mNavigator.blockBlending.setText(R.string.label_blending);
         
+        TextView connectorTitle;
+        connectorTitle = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle.setText("vertices");
+        connectorTitle = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle.setText("primitives");
+        connectorTitle = (TextView) mNavigator.groupRasterisation.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle.setText("fragments");
+        connectorTitle = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle.setText("pixels");
+        mNavigator.groupPixelProcessing.removeView(mNavigator.groupPixelProcessing.findViewById(R.id.map_connector));
+        
+        LinearLayout detailsLayout;
+        detailsLayout = (LinearLayout) mNavigator.groupVertexProcessing.findViewById(R.id.navigator_details);
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.component_map_vertex_assembly, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.component_map_vertex_shading, null));
+
+        detailsLayout = (LinearLayout) mNavigator.groupPrimitiveProcessing.findViewById(R.id.navigator_details);
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.component_map_clipping, null));
+        
         mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
     
             @Override

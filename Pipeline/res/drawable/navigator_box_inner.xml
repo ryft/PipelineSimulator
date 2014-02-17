@@ -3,10 +3,10 @@
     android:shape="rectangle" >
 
     <padding
-        android:bottom="@dimen/navigator_box_margin_large"
-        android:left="@dimen/navigator_box_margin"
-        android:right="@dimen/navigator_box_margin"
-        android:top="@dimen/navigator_box_margin_large" />
+        android:bottom="@dimen/navigator_block_innermargin_large"
+        android:left="@dimen/navigator_block_innermargin"
+        android:right="@dimen/navigator_block_innermargin"
+        android:top="@dimen/navigator_block_innermargin_large" />
 
     <solid android:color="#FFFFFFFF" />
 
