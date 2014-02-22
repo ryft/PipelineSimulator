@@ -13,6 +13,8 @@
     
     <string name="action_points_new">New vertex</string>
     <string name="action_points_discard">Discard vertices</string>
+    <string name="action_button_help">Help</string>
+    <string name="action_button_okay">OK</string>
     <string name="action_button_save">Save</string>
     <string name="action_button_delete">Delete</string>
     <string name="action_button_discard">Discard</string>

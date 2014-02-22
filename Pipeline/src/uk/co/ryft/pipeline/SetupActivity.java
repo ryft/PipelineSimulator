@@ -3,6 +3,9 @@ package uk.co.ryft.pipeline;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.targets.ViewTarget;
+
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
@@ -19,10 +22,12 @@ import android.content.Intent;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SetupActivity extends Activity {
 
@@ -250,6 +255,115 @@ public class SetupActivity extends Activity {
         updateViews();
     }
 
+    private void updateViews() {
+    
+        // Generate scene composition summary
+        String sceneCompositionSummary = mSceneElements.size() + " element";
+        if (mSceneElements.size() != 1)
+            sceneCompositionSummary += "s";
+    
+        // Generate camera parameters summary
+        String cameraParametersSummary = "Eye point " + mCamera.getEye() + ", focus point " + mCamera.getFocus() + ".";
+    
+        // Generate lighting model summary
+        String lightingModelSummary = mPreviewLightingModel.toString();
+    
+        // Generate vertex processing summary
+        String vertexProcessingSummary;
+        int primitiveCount = 0;
+        for (Element e : mSceneElements)
+            primitiveCount += e.getPrimitiveCount();
+        int vertexCount = 0;
+        for (Element e : mSceneElements)
+            vertexCount += e.getVertexCount();
+    
+        vertexProcessingSummary = primitiveCount + " primitive";
+        if (primitiveCount != 1)
+            vertexProcessingSummary += "s";
+        vertexProcessingSummary += " (" + vertexCount;
+        if (vertexCount == 1)
+            vertexProcessingSummary += " vertex)";
+        else
+            vertexProcessingSummary += " vertices)";
+    
+        // Generate vertex shading summary
+        String vertexShadingSummary = "Undefined vertex shader";
+        switch (mPreviewLightingModel.getModel()) {
+            case UNIFORM:
+                vertexShadingSummary = "Project vertices into eye space";
+                break;
+            case LAMBERTIAN:
+                vertexShadingSummary = "Calculate diffuse light intensity using normal direction";
+                break;
+            case PHONG:
+                vertexShadingSummary = "Project normal direction for use in fragment shader";
+                break;
+            case POINT_SOURCE:
+                vertexShadingSummary = "Project vertices into eye space and fix a preset size";
+                break;
+        }
+    
+        // Generate multisampling summary
+        String multisamplingSummary = "TODO";
+    
+        // Generate face culling summary
+        String cullingSummary;
+        if (!mCullingClockwise)
+            cullingSummary = "Counter-clockwise face winding";
+        else
+            cullingSummary = "Clockwise face winding";
+    
+        // Generate fragment shading summary
+        String fragmentShadingSummary = "Undefined fragment shader";
+        switch (mPreviewLightingModel.getModel()) {
+            case UNIFORM:
+                fragmentShadingSummary = "Apply a per-primitive uniform light level";
+                break;
+            case LAMBERTIAN:
+                fragmentShadingSummary = "Apply the Gouraud interpolated vertex colour";
+                break;
+            case PHONG:
+                fragmentShadingSummary = "Use interpolated normal to calculate per-pixel intensity";
+                break;
+            case POINT_SOURCE:
+                fragmentShadingSummary = "Apply white colour regardless of light source position";
+                break;
+        }
+    
+        // Generate depth buffer summary
+        String depthBufferSummary = "TODO";
+    
+        // Generate blending summary
+        String blendingSummary = "TODO";
+    
+        // TODO Update these properly
+    
+        setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
+        setText(steps.cameraParameters, android.R.id.summary, cameraParametersSummary);
+        setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
+        setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
+        setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
+        setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
+        setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
+        setText(steps.faceCulling, android.R.id.summary, cullingSummary);
+        setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
+        setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
+        setText(steps.blending, android.R.id.summary, blendingSummary);
+    
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_primitive_help:
+                View showcasedView = steps.vertexProcessing;
+                ViewTarget target = new ViewTarget(showcasedView);
+                ShowcaseView.insertShowcaseView(target, this, "Title", "Description");
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -273,103 +387,6 @@ public class SetupActivity extends Activity {
         }
 
         updateViews();
-
-    }
-
-    private void updateViews() {
-
-        // Generate scene composition summary
-        String sceneCompositionSummary = mSceneElements.size() + " element";
-        if (mSceneElements.size() != 1)
-            sceneCompositionSummary += "s";
-
-        // Generate camera parameters summary
-        String cameraParametersSummary = "Eye point " + mCamera.getEye() + ", focus point " + mCamera.getFocus() + ".";
-
-        // Generate lighting model summary
-        String lightingModelSummary = mPreviewLightingModel.toString();
-
-        // Generate vertex processing summary
-        String vertexProcessingSummary;
-        int primitiveCount = 0;
-        for (Element e : mSceneElements)
-            primitiveCount += e.getPrimitiveCount();
-        int vertexCount = 0;
-        for (Element e : mSceneElements)
-            vertexCount += e.getVertexCount();
-
-        vertexProcessingSummary = primitiveCount + " primitive";
-        if (primitiveCount != 1)
-            vertexProcessingSummary += "s";
-        vertexProcessingSummary += " (" + vertexCount;
-        if (vertexCount == 1)
-            vertexProcessingSummary += " vertex)";
-        else
-            vertexProcessingSummary += " vertices)";
-
-        // Generate vertex shading summary
-        String vertexShadingSummary = "Undefined vertex shader";
-        switch (mPreviewLightingModel.getModel()) {
-            case UNIFORM:
-                vertexShadingSummary = "Project vertices into eye space";
-                break;
-            case LAMBERTIAN:
-                vertexShadingSummary = "Calculate diffuse light intensity using normal direction";
-                break;
-            case PHONG:
-                vertexShadingSummary = "Project normal direction for use in fragment shader";
-                break;
-            case POINT_SOURCE:
-                vertexShadingSummary = "Project vertices into eye space and fix a preset size";
-                break;
-        }
-
-        // Generate multisampling summary
-        String multisamplingSummary = "TODO";
-
-        // Generate face culling summary
-        String cullingSummary;
-        if (!mCullingClockwise)
-            cullingSummary = "Counter-clockwise face winding";
-        else
-            cullingSummary = "Clockwise face winding";
-
-        // Generate fragment shading summary
-        String fragmentShadingSummary = "Undefined fragment shader";
-        switch (mPreviewLightingModel.getModel()) {
-            case UNIFORM:
-                fragmentShadingSummary = "Apply a per-primitive uniform light level";
-                break;
-            case LAMBERTIAN:
-                fragmentShadingSummary = "Apply the Gouraud interpolated vertex colour";
-                break;
-            case PHONG:
-                fragmentShadingSummary = "Use interpolated normal to calculate per-pixel intensity";
-                break;
-            case POINT_SOURCE:
-                fragmentShadingSummary = "Apply white colour regardless of light source position";
-                break;
-        }
-
-        // Generate depth buffer summary
-        String depthBufferSummary = "TODO";
-
-        // Generate blending summary
-        String blendingSummary = "TODO";
-
-        // TODO Update these properly
-
-        setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
-        setText(steps.cameraParameters, android.R.id.summary, cameraParametersSummary);
-        setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
-        setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
-        setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
-        setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
-        setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
-        setText(steps.faceCulling, android.R.id.summary, cullingSummary);
-        setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
-        setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
-        setText(steps.blending, android.R.id.summary, blendingSummary);
 
     }
 
