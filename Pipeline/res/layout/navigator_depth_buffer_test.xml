@@ -22,8 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
-            android:gravity="center_horizontal"
-            android:text="Camera\nparameters"
+            android:text="Z-buffer"
             android:textColor="@android:color/white" />
     </LinearLayout>
 
@@ -45,7 +44,7 @@
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
             android:gravity="center_horizontal"
-            android:text="Projection\nparameters"
+            android:text="Depth comparison\nfunction"
             android:textColor="@android:color/white" />
     </LinearLayout>
 

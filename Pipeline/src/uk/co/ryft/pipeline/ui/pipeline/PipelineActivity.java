@@ -216,22 +216,33 @@ public class PipelineActivity extends Activity {
         
         TextView connectorTitle;
         connectorTitle = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
-        connectorTitle.setText("vertices");
+        connectorTitle.setText("> vertices >");
         connectorTitle = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
-        connectorTitle.setText("primitives");
+        connectorTitle.setText("> primitives >");
         connectorTitle = (TextView) mNavigator.groupRasterisation.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
-        connectorTitle.setText("fragments");
+        connectorTitle.setText("> fragments >");
         connectorTitle = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
-        connectorTitle.setText("pixels");
+        connectorTitle.setText("> pixels >");
         mNavigator.groupPixelProcessing.removeView(mNavigator.groupPixelProcessing.findViewById(R.id.map_connector));
         
         LinearLayout detailsLayout;
         detailsLayout = (LinearLayout) mNavigator.groupVertexProcessing.findViewById(R.id.navigator_details);
         detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_vertex_assembly, null));
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_vertex_shading, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_shading, null));
 
         detailsLayout = (LinearLayout) mNavigator.groupPrimitiveProcessing.findViewById(R.id.navigator_details);
         detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_clipping, null));
+
+        detailsLayout = (LinearLayout) mNavigator.groupRasterisation.findViewById(R.id.navigator_details);
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_multisampling, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_face_culling, null));
+
+        detailsLayout = (LinearLayout) mNavigator.groupFragmentProcessing.findViewById(R.id.navigator_details);
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_shading, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_depth_buffer_test, null));
+
+        detailsLayout = (LinearLayout) mNavigator.groupPixelProcessing.findViewById(R.id.navigator_details);
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_blending, null));
         
         mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
     

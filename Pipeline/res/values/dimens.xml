@@ -4,13 +4,13 @@
     <dimen name="activity_horizontal_margin">8dip</dimen>
     <dimen name="activity_vertical_margin">8dip</dimen>
     <dimen name="navigator_block_innermargin">15dip</dimen>
-    <dimen name="navigator_block_innermargin_large">50dip</dimen>
+    <dimen name="navigator_block_innermargin_large">20dip</dimen>
     <dimen name="navigator_block_connector_length">100dip</dimen>
     <dimen name="navigator_block_connector_thickness">2dip</dimen>
     <dimen name="navigator_detail_connector_length">50dip</dimen>
     <dimen name="navigator_detail_connector_thickness">2dip</dimen>
     <dimen name="navigator_block_corner_radius">10dip</dimen>
-    <dimen name="navigator_block_connector_margintop">80dip</dimen>
+    <dimen name="navigator_block_connector_margintop">50dip</dimen>
     <dimen name="navigator_detail_text_margin">5dip</dimen>
 
 </resources>
