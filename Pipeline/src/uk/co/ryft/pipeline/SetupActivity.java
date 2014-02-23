@@ -24,11 +24,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.Button;
+import android.widget.RelativeLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.espian.showcaseview.OnShowcaseEventListener;
 import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.ShowcaseView.ConfigOptions;
+import com.espian.showcaseview.SimpleShowcaseEventListener;
 import com.espian.showcaseview.targets.ActionItemTarget;
 import com.espian.showcaseview.targets.ViewTarget;
 
@@ -50,7 +56,7 @@ public class SetupActivity extends Activity {
     protected boolean mCullingClockwise = false;
     // TODO Allow choice of depth buffer test using glDepthFunc
     // See http://www.opengl.org/sdk/docs/man/xhtml/glDepthFunc.xml
-    
+
     SharedPreferences prefs = null;
 
     ViewHolder steps = new ViewHolder();
@@ -62,7 +68,7 @@ public class SetupActivity extends Activity {
         View groupRasterisation;
         View groupFragmentProcessing;
         View groupPixelProcessing;
-        
+
         View stepSceneComposition;
         View stepCameraParameters;
         View stepLightingModel;
@@ -90,7 +96,7 @@ public class SetupActivity extends Activity {
         steps.groupRasterisation = findViewById(R.id.group_rasterisation);
         steps.groupFragmentProcessing = findViewById(R.id.group_fragment_processing);
         steps.groupPixelProcessing = findViewById(R.id.group_pixel_processing);
-        
+
         steps.stepSceneComposition = findViewById(R.id.step_scene_composition);
         steps.stepCameraParameters = findViewById(R.id.step_camera_parameters);
         steps.stepLightingModel = findViewById(R.id.step_lighting_model);
@@ -113,18 +119,19 @@ public class SetupActivity extends Activity {
         }
 
         initialiseViews();
-        
+
         // Get shared preferences reference for first run detection
         prefs = getSharedPreferences("uk.co.ryft.pipeline", MODE_PRIVATE);
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
 
         // Show First Run help message if necessary
         if (prefs.getBoolean("firstrun", true)) {
-            ShowcaseView.insertShowcaseView(new ActionItemTarget(this, R.id.action_help), this, R.string.help_firstrun_title, R.string.help_firstrun_desc);
+            ShowcaseView.insertShowcaseView(new ActionItemTarget(this, R.id.action_help), this, R.string.help_firstrun_title,
+                    R.string.help_firstrun_desc);
             prefs.edit().putBoolean("firstrun", false).commit();
         }
     }
@@ -289,18 +296,18 @@ public class SetupActivity extends Activity {
     }
 
     private void updateViews() {
-    
+
         // Generate scene composition summary
         String sceneCompositionSummary = mSceneElements.size() + " element";
         if (mSceneElements.size() != 1)
             sceneCompositionSummary += "s";
-    
+
         // Generate camera parameters summary
         String cameraParametersSummary = "Eye point " + mCamera.getEye() + ", focus point " + mCamera.getFocus() + ".";
-    
+
         // Generate lighting model summary
         String lightingModelSummary = mPreviewLightingModel.toString();
-    
+
         // Generate vertex processing summary
         String vertexProcessingSummary;
         int primitiveCount = 0;
@@ -309,7 +316,7 @@ public class SetupActivity extends Activity {
         int vertexCount = 0;
         for (Element e : mSceneElements)
             vertexCount += e.getVertexCount();
-    
+
         vertexProcessingSummary = primitiveCount + " primitive";
         if (primitiveCount != 1)
             vertexProcessingSummary += "s";
@@ -318,7 +325,7 @@ public class SetupActivity extends Activity {
             vertexProcessingSummary += " vertex)";
         else
             vertexProcessingSummary += " vertices)";
-    
+
         // Generate vertex shading summary
         String vertexShadingSummary = "Undefined vertex shader";
         switch (mPreviewLightingModel.getModel()) {
@@ -335,17 +342,17 @@ public class SetupActivity extends Activity {
                 vertexShadingSummary = "Project vertices into eye space and fix a preset size";
                 break;
         }
-    
+
         // Generate multisampling summary
         String multisamplingSummary = "TODO";
-    
+
         // Generate face culling summary
         String cullingSummary;
         if (!mCullingClockwise)
             cullingSummary = "Counter-clockwise face winding";
         else
             cullingSummary = "Clockwise face winding";
-    
+
         // Generate fragment shading summary
         String fragmentShadingSummary = "Undefined fragment shader";
         switch (mPreviewLightingModel.getModel()) {
@@ -362,15 +369,15 @@ public class SetupActivity extends Activity {
                 fragmentShadingSummary = "Apply white colour regardless of light source position";
                 break;
         }
-    
+
         // Generate depth buffer summary
         String depthBufferSummary = "TODO";
-    
+
         // Generate blending summary
         String blendingSummary = "TODO";
-    
+
         // TODO Update these properly
-    
+
         setText(steps.stepSceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.stepCameraParameters, android.R.id.summary, cameraParametersSummary);
         setText(steps.stepLightingModel, android.R.id.summary, lightingModelSummary);
@@ -382,21 +389,63 @@ public class SetupActivity extends Activity {
         setText(steps.stepFragmentShading, android.R.id.summary, fragmentShadingSummary);
         setText(steps.stepDepthBufferTest, android.R.id.summary, depthBufferSummary);
         setText(steps.stepBlending, android.R.id.summary, blendingSummary);
-    
+
     }
-    
-    protected void showcaseView(View target, String title, String description) {
-        ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description);
+
+    protected void insertShowcaseView(View target, String title, String description, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options).setOnShowcaseEventListener(
+                listener);
+    }
+
+    protected void insertShowcaseView(View target, int title, int description, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options).setOnShowcaseEventListener(
+                listener);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_help:
-                
-                ScrollView scroll = (ScrollView) findViewById(R.id.setup_scrollview);
-                scroll.smoothScrollTo(0, steps.groupRasterisation.getBottom() + steps.stepMultisampling.getBottom());
-                showcaseView(steps.stepCameraParameters, "Multisampling", "Test description"); // FIXME
+                final ScrollView scroll = (ScrollView) findViewById(R.id.setup_scrollview);
+
+                final OnShowcaseEventListener help4 = new SimpleShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        LayoutParams lps = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                        lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                        lps.setMargins(12, 12, 12, 12);
+                        ConfigOptions options = new ConfigOptions();
+                        options.buttonLayoutParams = lps;
+                        insertShowcaseView(findViewById(R.id.button_row_positive), R.string.help_simulate_title,
+                                R.string.help_simulate_desc, options, OnShowcaseEventListener.NONE);
+                    }
+                };
+
+                final OnShowcaseEventListener help3 = new SimpleShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        scroll.smoothScrollTo(0, (int) steps.stepClipping.getY());
+                        insertShowcaseView(steps.stepClipping, R.string.help_disabled_title, R.string.help_disabled_desc, null,
+                                help4);
+                    }
+                };
+
+                final OnShowcaseEventListener help2 = new SimpleShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        scroll.smoothScrollTo(0, (int) steps.stepLightingModel.getY());
+                        insertShowcaseView(steps.stepLightingModel, R.string.help_lighting_preview_title,
+                                R.string.help_lighting_preview_desc, null, help3);
+                    }
+                };
+
+                scroll.smoothScrollTo(0, (int) steps.stepCameraParameters.getY());
+                insertShowcaseView(steps.stepCameraParameters, R.string.heading_group_scene_definition,
+                        R.string.help_scene_definition_desc, null, help2);
+
                 break;
         }
         return super.onOptionsItemSelected(item);
