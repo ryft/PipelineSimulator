@@ -3,9 +3,6 @@ package uk.co.ryft.pipeline;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.espian.showcaseview.ShowcaseView;
-import com.espian.showcaseview.targets.ViewTarget;
-
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
@@ -19,15 +16,21 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.opengl.GLES20;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.targets.ActionItemTarget;
+import com.espian.showcaseview.targets.ViewTarget;
 
 public class SetupActivity extends Activity {
 
@@ -47,21 +50,30 @@ public class SetupActivity extends Activity {
     protected boolean mCullingClockwise = false;
     // TODO Allow choice of depth buffer test using glDepthFunc
     // See http://www.opengl.org/sdk/docs/man/xhtml/glDepthFunc.xml
+    
+    SharedPreferences prefs = null;
 
     ViewHolder steps = new ViewHolder();
 
     static class ViewHolder {
-        View sceneComposition;
-        View cameraParameters;
-        View lightingModel;
-        View vertexProcessing;
-        View vertexShading;
-        View clipping;
-        View multisampling;
-        View faceCulling;
-        View fragmentShading;
-        View depthBufferTest;
-        View blending;
+        View groupSceneDefinition;
+        View groupVertexProcessing;
+        View groupPrimitiveProcessing;
+        View groupRasterisation;
+        View groupFragmentProcessing;
+        View groupPixelProcessing;
+        
+        View stepSceneComposition;
+        View stepCameraParameters;
+        View stepLightingModel;
+        View stepVertexAssembly;
+        View stepVertexShading;
+        View stepClipping;
+        View stepMultisampling;
+        View stepFaceCulling;
+        View stepFragmentShading;
+        View stepDepthBufferTest;
+        View stepBlending;
     }
 
     @Override
@@ -72,17 +84,24 @@ public class SetupActivity extends Activity {
         // TODO return from saved instance state or extras bundle
 
         // Find all views associated with individual pipeline steps
-        steps.sceneComposition = findViewById(R.id.step_scene_composition);
-        steps.cameraParameters = findViewById(R.id.step_camera_parameters);
-        steps.lightingModel = findViewById(R.id.step_lighting_model);
-        steps.vertexProcessing = findViewById(R.id.step_vertex_processing);
-        steps.vertexShading = findViewById(R.id.step_vertex_shading);
-        steps.clipping = findViewById(R.id.step_clipping);
-        steps.multisampling = findViewById(R.id.step_multisampling);
-        steps.faceCulling = findViewById(R.id.step_face_culling);
-        steps.fragmentShading = findViewById(R.id.step_fragment_shading);
-        steps.depthBufferTest = findViewById(R.id.step_depth_buffer_test);
-        steps.blending = findViewById(R.id.step_blending);
+        steps.groupSceneDefinition = findViewById(R.id.group_scene_definition);
+        steps.groupVertexProcessing = findViewById(R.id.group_vertex_processing);
+        steps.groupPrimitiveProcessing = findViewById(R.id.group_primitive_processing);
+        steps.groupRasterisation = findViewById(R.id.group_rasterisation);
+        steps.groupFragmentProcessing = findViewById(R.id.group_fragment_processing);
+        steps.groupPixelProcessing = findViewById(R.id.group_pixel_processing);
+        
+        steps.stepSceneComposition = findViewById(R.id.step_scene_composition);
+        steps.stepCameraParameters = findViewById(R.id.step_camera_parameters);
+        steps.stepLightingModel = findViewById(R.id.step_lighting_model);
+        steps.stepVertexAssembly = findViewById(R.id.step_vertex_assembly);
+        steps.stepVertexShading = findViewById(R.id.step_vertex_shading);
+        steps.stepClipping = findViewById(R.id.step_clipping);
+        steps.stepMultisampling = findViewById(R.id.step_multisampling);
+        steps.stepFaceCulling = findViewById(R.id.step_face_culling);
+        steps.stepFragmentShading = findViewById(R.id.step_fragment_shading);
+        steps.stepDepthBufferTest = findViewById(R.id.step_depth_buffer_test);
+        steps.stepBlending = findViewById(R.id.step_blending);
 
         // Put some interesting things in the scene for testing purposes
         Random r = new Random();
@@ -94,24 +113,38 @@ public class SetupActivity extends Activity {
         }
 
         initialiseViews();
+        
+        // Get shared preferences reference for first run detection
+        prefs = getSharedPreferences("uk.co.ryft.pipeline", MODE_PRIVATE);
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Show First Run help message if necessary
+        if (prefs.getBoolean("firstrun", true)) {
+            ShowcaseView.insertShowcaseView(new ActionItemTarget(this, R.id.action_help), this, R.string.help_firstrun_title, R.string.help_firstrun_desc);
+            prefs.edit().putBoolean("firstrun", false).commit();
+        }
     }
 
     // XXX To be called once, sets up listeners
     private void initialiseViews() {
 
-        setText(steps.sceneComposition, android.R.id.title, R.string.button_scene_composition);
-        setText(steps.cameraParameters, android.R.id.title, R.string.button_camera_parameters);
-        setText(steps.lightingModel, android.R.id.title, R.string.button_lighting_model);
-        setText(steps.vertexProcessing, android.R.id.title, R.string.button_vertex_processing);
-        setText(steps.vertexShading, android.R.id.title, R.string.button_vertex_shading);
-        setText(steps.clipping, android.R.id.title, R.string.button_clipping);
-        setText(steps.multisampling, android.R.id.title, R.string.button_multisampling);
-        setText(steps.faceCulling, android.R.id.title, R.string.button_face_culling);
-        setText(steps.fragmentShading, android.R.id.title, R.string.button_fragment_shading);
-        setText(steps.depthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
-        setText(steps.blending, android.R.id.title, R.string.button_blending);
+        setText(steps.stepSceneComposition, android.R.id.title, R.string.button_scene_composition);
+        setText(steps.stepCameraParameters, android.R.id.title, R.string.button_camera_parameters);
+        setText(steps.stepLightingModel, android.R.id.title, R.string.button_lighting_model);
+        setText(steps.stepVertexAssembly, android.R.id.title, R.string.button_vertex_processing);
+        setText(steps.stepVertexShading, android.R.id.title, R.string.button_vertex_shading);
+        setText(steps.stepClipping, android.R.id.title, R.string.button_clipping);
+        setText(steps.stepMultisampling, android.R.id.title, R.string.button_multisampling);
+        setText(steps.stepFaceCulling, android.R.id.title, R.string.button_face_culling);
+        setText(steps.stepFragmentShading, android.R.id.title, R.string.button_fragment_shading);
+        setText(steps.stepDepthBufferTest, android.R.id.title, R.string.button_depth_buffer_test);
+        setText(steps.stepBlending, android.R.id.title, R.string.button_blending);
 
-        steps.sceneComposition.setOnClickListener(new OnClickListener() {
+        steps.stepSceneComposition.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO Do this for all items
@@ -123,7 +156,7 @@ public class SetupActivity extends Activity {
             }
         });
 
-        steps.cameraParameters.setOnClickListener(new OnClickListener() {
+        steps.stepCameraParameters.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -133,7 +166,7 @@ public class SetupActivity extends Activity {
             }
         });
 
-        steps.lightingModel.setOnClickListener(new OnClickListener() {
+        steps.stepLightingModel.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Instantiate and display a configuration dialogue
@@ -155,10 +188,10 @@ public class SetupActivity extends Activity {
             }
         });
 
-        TextView titleVertexProcessing = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
+        TextView titleVertexProcessing = (TextView) steps.stepVertexAssembly.findViewById(android.R.id.title);
         titleVertexProcessing.setEnabled(false);
 
-        steps.vertexShading.setOnClickListener(new OnClickListener() {
+        steps.stepVertexShading.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -179,10 +212,10 @@ public class SetupActivity extends Activity {
 
         });
 
-        TextView titleClipping = (TextView) steps.clipping.findViewById(android.R.id.title);
+        TextView titleClipping = (TextView) steps.stepClipping.findViewById(android.R.id.title);
         titleClipping.setEnabled(false);
 
-        steps.faceCulling.setOnClickListener(new OnClickListener() {
+        steps.stepFaceCulling.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Instantiate and display a configuration dialogue
@@ -201,7 +234,7 @@ public class SetupActivity extends Activity {
             }
         });
 
-        steps.fragmentShading.setOnClickListener(new OnClickListener() {
+        steps.stepFragmentShading.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -222,10 +255,10 @@ public class SetupActivity extends Activity {
 
         });
 
-        TextView titleDepthBuffer = (TextView) steps.depthBufferTest.findViewById(android.R.id.title);
+        TextView titleDepthBuffer = (TextView) steps.stepDepthBufferTest.findViewById(android.R.id.title);
         titleDepthBuffer.setEnabled(false);
 
-        TextView titleBlending = (TextView) steps.blending.findViewById(android.R.id.title);
+        TextView titleBlending = (TextView) steps.stepBlending.findViewById(android.R.id.title);
         titleBlending.setEnabled(false);
 
         Button buttonExit = (Button) findViewById(R.id.button_row_negative);
@@ -338,27 +371,32 @@ public class SetupActivity extends Activity {
     
         // TODO Update these properly
     
-        setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
-        setText(steps.cameraParameters, android.R.id.summary, cameraParametersSummary);
-        setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
-        setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
-        setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
-        setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
-        setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
-        setText(steps.faceCulling, android.R.id.summary, cullingSummary);
-        setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
-        setText(steps.depthBufferTest, android.R.id.summary, depthBufferSummary);
-        setText(steps.blending, android.R.id.summary, blendingSummary);
+        setText(steps.stepSceneComposition, android.R.id.summary, sceneCompositionSummary);
+        setText(steps.stepCameraParameters, android.R.id.summary, cameraParametersSummary);
+        setText(steps.stepLightingModel, android.R.id.summary, lightingModelSummary);
+        setText(steps.stepVertexAssembly, android.R.id.summary, vertexProcessingSummary);
+        setText(steps.stepVertexShading, android.R.id.summary, vertexShadingSummary);
+        setText(steps.stepClipping, android.R.id.summary, R.string.label_clipping);
+        setText(steps.stepMultisampling, android.R.id.summary, multisamplingSummary);
+        setText(steps.stepFaceCulling, android.R.id.summary, cullingSummary);
+        setText(steps.stepFragmentShading, android.R.id.summary, fragmentShadingSummary);
+        setText(steps.stepDepthBufferTest, android.R.id.summary, depthBufferSummary);
+        setText(steps.stepBlending, android.R.id.summary, blendingSummary);
     
+    }
+    
+    protected void showcaseView(View target, String title, String description) {
+        ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_primitive_help:
-                View showcasedView = steps.vertexProcessing;
-                ViewTarget target = new ViewTarget(showcasedView);
-                ShowcaseView.insertShowcaseView(target, this, "Title", "Description");
+            case R.id.action_help:
+                
+                ScrollView scroll = (ScrollView) findViewById(R.id.setup_scrollview);
+                scroll.smoothScrollTo(0, steps.groupRasterisation.getBottom() + steps.stepMultisampling.getBottom());
+                showcaseView(steps.stepCameraParameters, "Multisampling", "Test description"); // FIXME
                 break;
         }
         return super.onOptionsItemSelected(item);

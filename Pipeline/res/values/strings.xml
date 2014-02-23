@@ -94,7 +94,7 @@
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_title_composite_new">Select Type</string>
-    <string name="dialogue_title_lighting_model">Select Lighting Model</string>
+    <string name="dialogue_title_lighting_model">Preview Shaders For:</string>
     <string name="dialogue_title_vertex_shading">Vertex Shader Code</string>
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
@@ -105,7 +105,7 @@
     
     <string name="button_scene_composition">Scene composition</string>
     <string name="button_camera_parameters">Camera parameters</string>
-    <string name="button_lighting_model">Shader previews</string>
+    <string name="button_lighting_model">Lighting preview</string>
     <string name="button_vertex_processing">Vertex assembly</string>
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_clipping">Viewport mapping and clipping</string>
@@ -118,5 +118,8 @@
     <string name="label_clipping">Viewport and clip planes defined by camera parameters</string>
     
     <string name="button_simulate">Simulate</string>
+    
+    <string name="help_firstrun_title">First Run</string>
+    <string name="help_firstrun_desc">Welcome to the Graphics Pipeline Simulator. Tap the help icon at any time for a guided tour of the app.</string>
 
 </resources>
