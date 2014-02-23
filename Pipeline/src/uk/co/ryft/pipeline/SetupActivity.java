@@ -19,15 +19,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.opengl.GLES20;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.Button;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -130,8 +128,8 @@ public class SetupActivity extends Activity {
 
         // Show First Run help message if necessary
         if (prefs.getBoolean("firstrun", true)) {
-            ShowcaseView.insertShowcaseView(new ActionItemTarget(this, R.id.action_help), this, R.string.help_firstrun_title,
-                    R.string.help_firstrun_desc);
+            ShowcaseView.insertShowcaseView(new ActionItemTarget(this, R.id.action_setup_help), this,
+                    R.string.help_firstrun_title, R.string.help_firstrun_desc);
             prefs.edit().putBoolean("firstrun", false).commit();
         }
     }
@@ -392,22 +390,18 @@ public class SetupActivity extends Activity {
 
     }
 
-    protected void insertShowcaseView(View target, String title, String description, ConfigOptions options,
+    protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
             OnShowcaseEventListener listener) {
-        ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options).setOnShowcaseEventListener(
-                listener);
-    }
-
-    protected void insertShowcaseView(View target, int title, int description, ConfigOptions options,
-            OnShowcaseEventListener listener) {
-        ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options).setOnShowcaseEventListener(
-                listener);
+        ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options);
+        sv.setOnShowcaseEventListener(listener);
+        sv.setScaleMultiplier(scale);
+        return sv;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_help:
+            case R.id.action_setup_help:
                 final ScrollView scroll = (ScrollView) findViewById(R.id.setup_scrollview);
 
                 final OnShowcaseEventListener help4 = new SimpleShowcaseEventListener() {
@@ -420,16 +414,17 @@ public class SetupActivity extends Activity {
                         ConfigOptions options = new ConfigOptions();
                         options.buttonLayoutParams = lps;
                         insertShowcaseView(findViewById(R.id.button_row_positive), R.string.help_simulate_title,
-                                R.string.help_simulate_desc, options, OnShowcaseEventListener.NONE);
+                                R.string.help_simulate_desc, 0.9f, options, OnShowcaseEventListener.NONE);
                     }
                 };
 
                 final OnShowcaseEventListener help3 = new SimpleShowcaseEventListener() {
+
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                        scroll.smoothScrollTo(0, (int) steps.stepClipping.getY());
-                        insertShowcaseView(steps.stepClipping, R.string.help_disabled_title, R.string.help_disabled_desc, null,
-                                help4);
+                        scroll.scrollTo(0, (int) steps.stepBlending.getY());
+                        insertShowcaseView(steps.stepClipping.findViewById(android.R.id.title), R.string.help_disabled_title,
+                                R.string.help_disabled_desc, 1.8f, null, help4);
                     }
                 };
 
@@ -437,14 +432,14 @@ public class SetupActivity extends Activity {
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         scroll.smoothScrollTo(0, (int) steps.stepLightingModel.getY());
-                        insertShowcaseView(steps.stepLightingModel, R.string.help_lighting_preview_title,
-                                R.string.help_lighting_preview_desc, null, help3);
+                        insertShowcaseView(steps.stepLightingModel.findViewById(android.R.id.title),
+                                R.string.help_lighting_preview_title, R.string.help_lighting_preview_desc, 1, null, help3);
                     }
                 };
 
-                scroll.smoothScrollTo(0, (int) steps.stepCameraParameters.getY());
-                insertShowcaseView(steps.stepCameraParameters, R.string.heading_group_scene_definition,
-                        R.string.help_scene_definition_desc, null, help2);
+                scroll.smoothScrollTo(0, 0);
+                insertShowcaseView(steps.stepSceneComposition.findViewById(android.R.id.title),
+                        R.string.heading_group_scene_definition, R.string.help_scene_definition_desc, 1.5f, null, help2);
 
                 break;
         }

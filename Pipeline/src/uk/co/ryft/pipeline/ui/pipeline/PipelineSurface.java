@@ -132,10 +132,6 @@ public class PipelineSurface extends GLSurfaceView {
             setBackgroundResource(0);
     }
 
-    public void toggle() {
-        mRenderer.interact();
-    }
-
     private float mPreviousX = 0;
     private float mPreviousY = 0;
     private float TOUCH_SCALE_FACTOR = 0.3f;

@@ -92,6 +92,10 @@ public class ShowcaseView extends RelativeLayout
     };
 
     private boolean mHasNoTarget = false;
+    
+    protected ShowcaseView(Context context) {
+        this(context, null, R.styleable.CustomTheme_showcaseViewStyle, null);
+    }
 
     protected ShowcaseView(Context context, ConfigOptions options) {
         this(context, null, R.styleable.CustomTheme_showcaseViewStyle, options);

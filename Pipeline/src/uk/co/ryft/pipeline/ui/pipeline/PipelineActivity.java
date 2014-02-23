@@ -53,7 +53,7 @@ public class PipelineActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.main, menu);
+        menuInflater.inflate(R.menu.pipeline, menu);
 
         // Calling super after populating the menu is necessary here to ensure
         // that the bar helpers have a chance to handle this event.
@@ -64,8 +64,7 @@ public class PipelineActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
-            case R.id.action_change_perspective:
-                mPipelineView.toggle();
+            case R.id.action_pipeline_help:
                 break;
         }
         return super.onOptionsItemSelected(item);
