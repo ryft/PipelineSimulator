@@ -93,11 +93,11 @@ public class ShowcaseView extends RelativeLayout
 
     private boolean mHasNoTarget = false;
 
-    protected ShowcaseView(Context context) {
-        this(context, null, R.styleable.CustomTheme_showcaseViewStyle);
+    protected ShowcaseView(Context context, ConfigOptions options) {
+        this(context, null, R.styleable.CustomTheme_showcaseViewStyle, options);
     }
 
-    protected ShowcaseView(Context context, AttributeSet attrs, int defStyle) {
+    protected ShowcaseView(Context context, AttributeSet attrs, int defStyle, ConfigOptions options) {
         super(context, attrs, defStyle);
 
         // Get the attributes for the ShowcaseView
@@ -129,7 +129,8 @@ public class ShowcaseView extends RelativeLayout
         mTextDrawer.setTitleStyling(context, titleTextAppearance);
         mTextDrawer.setDetailStyling(context, detailTextAppearance);
 
-        ConfigOptions options = new ConfigOptions();
+        if (options == null)
+            options = new ConfigOptions();
         options.showcaseId = getId();
         setConfigOptions(options);
 
@@ -637,10 +638,7 @@ public class ShowcaseView extends RelativeLayout
     public static ShowcaseView insertShowcaseView(View viewToShowcase, Activity activity,
             String title,
             String detailText, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        if (options != null) {
-            sv.setConfigOptions(options);
-        }
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
@@ -665,10 +663,7 @@ public class ShowcaseView extends RelativeLayout
     @Deprecated
     public static ShowcaseView insertShowcaseView(View viewToShowcase, Activity activity, int title,
             int detailText, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        if (options != null) {
-            sv.setConfigOptions(options);
-        }
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
@@ -711,10 +706,7 @@ public class ShowcaseView extends RelativeLayout
     @Deprecated
     public static ShowcaseView insertShowcaseView(int x, int y, Activity activity, String title,
             String detailText, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        if (options != null) {
-            sv.setConfigOptions(options);
-        }
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
@@ -731,10 +723,7 @@ public class ShowcaseView extends RelativeLayout
     @Deprecated
     public static ShowcaseView insertShowcaseView(int x, int y, Activity activity, int title,
             int detailText, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        if (options != null) {
-            sv.setConfigOptions(options);
-        }
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
@@ -769,10 +758,7 @@ public class ShowcaseView extends RelativeLayout
     @Deprecated
     public static ShowcaseView insertShowcaseViewWithType(int type, int itemId, Activity activity,
             String title, String detailText, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        if (options != null) {
-            sv.setConfigOptions(options);
-        }
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
@@ -798,10 +784,7 @@ public class ShowcaseView extends RelativeLayout
     @Deprecated
     public static ShowcaseView insertShowcaseViewWithType(int type, int itemId, Activity activity,
             int title, int detailText, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        if (options != null) {
-            sv.setConfigOptions(options);
-        }
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
@@ -822,8 +805,7 @@ public class ShowcaseView extends RelativeLayout
      */
     private static ShowcaseView insertShowcaseViewInternal(Target target, Activity activity, String title,
                                                            String detail, ConfigOptions options) {
-        ShowcaseView sv = new ShowcaseView(activity);
-        sv.setConfigOptions(options);
+        ShowcaseView sv = new ShowcaseView(activity, options);
         if (sv.getConfigOptions().insert == INSERT_TO_DECOR) {
             ((ViewGroup) activity.getWindow().getDecorView()).addView(sv);
         } else {
