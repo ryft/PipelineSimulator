@@ -1,39 +1,51 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pipeline_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@android:color/black"
     tools:context=".PipelineActivity" >
 
-    <FrameLayout
-        android:id="@+id/pipeline_frame"
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1" >
+    <!-- Pipeline Surface will be added here as it needs to be constructed with specific parameters -->
 
-        <!-- Pipeline Surface will be added here as it needs to be constructed with specific parameters -->
-
-        <include
-            android:id="@+id/pipeline_map"
-            layout="@layout/navigator"
-            android:visibility="gone" />
-    </FrameLayout>
-
-    <View
-        android:id="@+id/hairline"
-        android:layout_width="match_parent"
-        android:layout_height="1dip"
-        android:background="@color/list_item_hairline" />
-
-    <TextView
-        android:id="@+id/pipeline_indicator"
+    <com.slidinglayer.SlidingLayer
+        xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="none"
-        android:gravity="center"
-        android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@android:color/white"
-        android:typeface="monospace" />
+        slidingLayer:closeOnTapEnabled="false"
+        slidingLayer:offsetWidth="@dimen/slider_offset_width"
+        slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
+        slidingLayer:shadowWidth="@dimen/slider_shadow_width"
+        slidingLayer:stickTo="bottom" >
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#AA000000"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/pipeline_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="none"
+                android:gravity="center"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/white"
+                android:typeface="monospace"
+                android:textStyle="bold" />
+
+            <View
+                android:id="@+id/hairline"
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="@color/list_item_hairline" />
+
+            <include
+                android:id="@+id/pipeline_map"
+                layout="@layout/navigator" />
+        </LinearLayout>
+    </com.slidinglayer.SlidingLayer>
+
+</RelativeLayout>

@@ -12,5 +12,9 @@
     <dimen name="navigator_block_corner_radius">10dip</dimen>
     <dimen name="navigator_block_connector_margintop">50dip</dimen>
     <dimen name="navigator_detail_text_margin">5dip</dimen>
+    
+    <dimen name="slider_shadow_width">6dp</dimen>
+    <dimen name="slider_layer_width">300dp</dimen>
+    <dimen name="slider_offset_width">26dp</dimen>
 
 </resources>

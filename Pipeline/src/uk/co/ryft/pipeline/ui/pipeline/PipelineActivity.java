@@ -8,8 +8,6 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -19,15 +17,15 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,8 +36,6 @@ public class PipelineActivity extends Activity {
 
     protected PipelineSurface mPipelineSurface;
     protected TextView mPipelineIndicator;
-    protected View mPipelineMap;
-    private int mAnimationDuration;
     
     protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
@@ -56,20 +52,19 @@ public class PipelineActivity extends Activity {
         mPipelineSurface = new PipelineSurface(this, mPipelineParams);
         
         setContentView(R.layout.activity_pipeline);
-        FrameLayout pipelineFrame = (FrameLayout) findViewById(R.id.pipeline_frame);
+        RelativeLayout pipelineFrame = (RelativeLayout) findViewById(R.id.pipeline_frame);
         mPipelineIndicator = (TextView) findViewById(R.id.pipeline_indicator);
-        mPipelineMap = findViewById(R.id.pipeline_map);
         updateIndicator();
         
         mPipelineSurface.setPadding(2, 2, 2, 2);
-        pipelineFrame.addView(mPipelineSurface);
+        LayoutParams params = new LayoutParams(
+                LayoutParams.WRAP_CONTENT,      
+                LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 48);
+        mPipelineSurface.setLayoutParams(params);
+        pipelineFrame.addView(mPipelineSurface, 0);
         setupPipelineNavigator();
-        
-        mPipelineMap.setVisibility(View.GONE);
-        mPipelineSurface.setVisibility(View.VISIBLE);
-        
-        // Set up frame layout animation
-        mAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         mElements = (ArrayList<Element>) mPipelineParams.getSerializable("elements");
         List<Drawable> scene = new LinkedList<Drawable>();
@@ -272,41 +267,6 @@ public class PipelineActivity extends Activity {
         mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_4));
         mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_5));
     }
-
-    private boolean mPipelineMapShown = false;
-    
-    private void crossfade() {
-        
-        final View sourceView = (mPipelineMapShown) ? mPipelineMap : mPipelineSurface;
-        final View destView = (mPipelineMapShown) ? mPipelineSurface : mPipelineMap;
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        destView.setAlpha(0f);
-        destView.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        destView.animate()
-                .alpha(1f)
-                .setDuration(mAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        sourceView.animate()
-                .alpha(0f)
-                .setDuration(mAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        sourceView.setVisibility(View.GONE);
-                    }
-                });
-        
-        mPipelineMapShown = !mPipelineMapShown;
-    }
     
     protected boolean mIsScrolling = false;
     protected float mScrollStartX = 0;
@@ -367,17 +327,6 @@ public class PipelineActivity extends Activity {
         // Calling super after populating the menu is necessary here to ensure
         // that the bar helpers have a chance to handle this event.
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            case R.id.action_change_perspective:
-                crossfade();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
