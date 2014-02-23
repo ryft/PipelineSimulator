@@ -227,11 +227,11 @@ public class PipelineActivity extends Activity {
         
         LinearLayout detailsLayout;
         detailsLayout = (LinearLayout) mNavigator.groupVertexProcessing.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.component_map_vertex_assembly, null));
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.component_map_vertex_shading, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_vertex_assembly, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_vertex_shading, null));
 
         detailsLayout = (LinearLayout) mNavigator.groupPrimitiveProcessing.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.component_map_clipping, null));
+        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_clipping, null));
         
         mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
     

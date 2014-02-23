@@ -15,7 +15,7 @@
 
         <include
             android:id="@+id/pipeline_map"
-            layout="@layout/component_pipeline_map"
+            layout="@layout/navigator"
             android:visibility="gone" />
     </FrameLayout>
 

@@ -11,27 +11,27 @@
         <include
             android:id="@+id/group_vertex_processing"
             android:layout_height="wrap_content"
-            layout="@layout/component_map_block_double" />
+            layout="@layout/navigator_block_double" />
 
         <include
             android:id="@+id/group_primitive_processing"
             android:layout_height="wrap_content"
-            layout="@layout/component_map_block_single" />
+            layout="@layout/navigator_block_single" />
 
         <include
             android:id="@+id/group_rasterisation"
             android:layout_height="wrap_content"
-            layout="@layout/component_map_block_double" />
+            layout="@layout/navigator_block_double" />
 
         <include
             android:id="@+id/group_fragment_processing"
             android:layout_height="wrap_content"
-            layout="@layout/component_map_block_double" />
+            layout="@layout/navigator_block_double" />
 
         <include
             android:id="@+id/group_pixel_processing"
             android:layout_height="wrap_content"
-            layout="@layout/component_map_block_single" />
+            layout="@layout/navigator_block_single" />
     </LinearLayout>
 
 </HorizontalScrollView>

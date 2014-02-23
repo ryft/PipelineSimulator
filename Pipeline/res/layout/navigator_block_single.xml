@@ -48,6 +48,6 @@
         android:id="@+id/map_connector"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        layout="@layout/component_map_connector" />
+        layout="@layout/navigator_connector" />
 
 </LinearLayout>
