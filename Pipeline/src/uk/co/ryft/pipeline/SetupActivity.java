@@ -368,20 +368,20 @@ public class SetupActivity extends Activity {
                 break;
         }
 
+        // TODO Update these properly
+
         // Generate depth buffer summary
         String depthBufferSummary = "TODO";
 
         // Generate blending summary
         String blendingSummary = "TODO";
 
-        // TODO Update these properly
-
         setText(steps.stepSceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.stepCameraParameters, android.R.id.summary, cameraParametersSummary);
         setText(steps.stepLightingModel, android.R.id.summary, lightingModelSummary);
         setText(steps.stepVertexAssembly, android.R.id.summary, vertexAssemblySummary);
         setText(steps.stepVertexShading, android.R.id.summary, vertexShadingSummary);
-        setText(steps.stepClipping, android.R.id.summary, R.string.label_clipping);
+        setText(steps.stepClipping, android.R.id.summary, R.string.desc_clipping);
         setText(steps.stepMultisampling, android.R.id.summary, multisamplingSummary);
         setText(steps.stepFaceCulling, android.R.id.summary, cullingSummary);
         setText(steps.stepFragmentShading, android.R.id.summary, fragmentShadingSummary);

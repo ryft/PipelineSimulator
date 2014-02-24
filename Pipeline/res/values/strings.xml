@@ -105,7 +105,7 @@
     
     <string name="button_scene_composition">Scene composition</string>
     <string name="button_camera_parameters">Camera parameters</string>
-    <string name="button_lighting_model">Shader previews</string>
+    <string name="button_lighting_model">Lighting preview</string>
     <string name="button_vertex_assembly">Vertex assembly</string>
     <string name="button_vertex_shading">Vertex shading</string>
     <string name="button_clipping">Viewport mapping and clipping</string>
@@ -114,7 +114,7 @@
     <string name="button_fragment_shading">Fragment shading</string>
     <string name="button_depth_buffer_test">Depth buffer test</string>
     <string name="button_blending">Blending</string>
-    
+   
     <string name="label_vertex_assembly">Vertex Assembly</string>
     <string name="label_vertex_shading">Vertex Shading</string>
     <string name="label_clipping">Viewport Mapping, Clipping</string>
