@@ -13,6 +13,8 @@
     
     <string name="action_points_new">New vertex</string>
     <string name="action_points_discard">Discard vertices</string>
+    <string name="action_button_help">Help</string>
+    <string name="action_button_okay">OK</string>
     <string name="action_button_save">Save</string>
     <string name="action_button_delete">Delete</string>
     <string name="action_button_discard">Discard</string>
@@ -92,7 +94,7 @@
     <string name="dialogue_title_point">Edit Vertex</string>
     <string name="dialogue_title_colour">Select Colour</string>
     <string name="dialogue_title_composite_new">Select Type</string>
-    <string name="dialogue_title_lighting_model">Select Lighting Model</string>
+    <string name="dialogue_title_lighting_model">Preview Shaders For:</string>
     <string name="dialogue_title_vertex_shading">Vertex Shader Code</string>
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
@@ -125,5 +127,19 @@
     <string name="desc_clipping">Viewport and clip planes defined by camera parameters</string>
     
     <string name="button_simulate">Simulate</string>
+    
+    <string name="help_firstrun_title">First Run</string>
+    <string name="help_firstrun_desc">Welcome to the Graphics Pipeline Simulator. Tap the help icon at any time for a guided tour of the app.</string>
+    
+    <string name="help_scene_definition_desc">Use these options to modify the scene which will be simulated, as well as the virtual camera location and parameters.</string>
+    
+    <string name="help_lighting_preview_title">Lighting previews</string>
+    <string name="help_lighting_preview_desc">Change the lighting preview mode to examine different shaders using the options below.</string>
+    
+    <string name="help_disabled_title">Disabled options</string>
+    <string name="help_disabled_desc">Options which are greyed out cannot be modified but will provide a summary of their action.</string>
+    
+    <string name="help_simulate_title">When you\'re ready…</string>
+    <string name="help_simulate_desc">Tap the Simulate button to build the scene and start the simulation.</string>
 
 </resources>

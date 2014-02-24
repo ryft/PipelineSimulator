@@ -105,7 +105,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static Drawable sAxesDrawable;
 
     public PipelineRenderer(Bundle params) {
-
+        
         sAxes = ShapeFactory.buildAxes();
 
         // Get list of elements from the parameters bundle

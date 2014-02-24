@@ -1,3 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <item
+        android:id="@+id/action_setup_help"
+        android:title="@string/action_button_help"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="ifRoom|withText" />
 
 </menu>
