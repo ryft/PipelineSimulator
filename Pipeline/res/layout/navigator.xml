@@ -1,0 +1,38 @@
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="0dip"
+    android:layout_weight="1" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <include
+            android:id="@+id/group_vertex_processing"
+            android:layout_height="wrap_content"
+            layout="@layout/navigator_block_double" />
+
+        <include
+            android:id="@+id/group_primitive_processing"
+            android:layout_height="wrap_content"
+            layout="@layout/navigator_block_single" />
+
+        <include
+            android:id="@+id/group_rasterisation"
+            android:layout_height="wrap_content"
+            layout="@layout/navigator_block_double" />
+
+        <include
+            android:id="@+id/group_fragment_processing"
+            android:layout_height="wrap_content"
+            layout="@layout/navigator_block_double" />
+
+        <include
+            android:id="@+id/group_pixel_processing"
+            android:layout_height="wrap_content"
+            layout="@layout/navigator_block_single" />
+    </LinearLayout>
+
+</HorizontalScrollView>

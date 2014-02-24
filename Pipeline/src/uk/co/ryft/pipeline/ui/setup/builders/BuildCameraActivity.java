@@ -11,6 +11,7 @@ import uk.co.ryft.pipeline.ui.components.OnPointChangedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -61,6 +62,7 @@ public class BuildCameraActivity extends Activity {
         mButtonDiscard = (Button) findViewById(R.id.button_row_negative);
 
         // Set up listeners
+        mTextEye.setGravity(Gravity.RIGHT);
         mTextEye.setOnClickListener(new EditPointHandler(this, mPointEye, new OnPointChangedListener() {
 
             @Override

@@ -11,6 +11,7 @@ import uk.co.ryft.pipeline.ui.components.OnPointChangedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -62,6 +63,7 @@ public class BuildCylinderActivity extends Activity {
         mButtonDiscard = (Button) findViewById(R.id.button_row_negative);
 
         // Set up listeners
+        mTextCentre.setGravity(Gravity.RIGHT);
         mTextCentre.setOnClickListener(new EditPointHandler(this, mPointCentre, new OnPointChangedListener() {
 
             @Override

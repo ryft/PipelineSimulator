@@ -70,7 +70,7 @@ public class SetupActivity extends Activity {
         steps.sceneComposition = findViewById(R.id.step_scene_composition);
         steps.cameraParameters = findViewById(R.id.step_camera_parameters);
         steps.lightingModel = findViewById(R.id.step_lighting_model);
-        steps.vertexProcessing = findViewById(R.id.step_vertex_processing);
+        steps.vertexProcessing = findViewById(R.id.step_vertex_assembly);
         steps.vertexShading = findViewById(R.id.step_vertex_shading);
         steps.clipping = findViewById(R.id.step_clipping);
         steps.multisampling = findViewById(R.id.step_multisampling);
@@ -97,7 +97,7 @@ public class SetupActivity extends Activity {
         setText(steps.sceneComposition, android.R.id.title, R.string.button_scene_composition);
         setText(steps.cameraParameters, android.R.id.title, R.string.button_camera_parameters);
         setText(steps.lightingModel, android.R.id.title, R.string.button_lighting_model);
-        setText(steps.vertexProcessing, android.R.id.title, R.string.button_vertex_processing);
+        setText(steps.vertexProcessing, android.R.id.title, R.string.button_vertex_assembly);
         setText(steps.vertexShading, android.R.id.title, R.string.button_vertex_shading);
         setText(steps.clipping, android.R.id.title, R.string.button_clipping);
         setText(steps.multisampling, android.R.id.title, R.string.button_multisampling);
@@ -150,8 +150,8 @@ public class SetupActivity extends Activity {
             }
         });
 
-        TextView titleVertexProcessing = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
-        titleVertexProcessing.setEnabled(false);
+        TextView titleVertexAssembly = (TextView) steps.vertexProcessing.findViewById(android.R.id.title);
+        titleVertexAssembly.setEnabled(false);
 
         steps.vertexShading.setOnClickListener(new OnClickListener() {
 
@@ -289,8 +289,8 @@ public class SetupActivity extends Activity {
         // Generate lighting model summary
         String lightingModelSummary = mPreviewLightingModel.toString();
 
-        // Generate vertex processing summary
-        String vertexProcessingSummary;
+        // Generate vertex assembly summary
+        String vertexAssemblySummary;
         int primitiveCount = 0;
         for (Element e : mSceneElements)
             primitiveCount += e.getPrimitiveCount();
@@ -298,14 +298,14 @@ public class SetupActivity extends Activity {
         for (Element e : mSceneElements)
             vertexCount += e.getVertexCount();
 
-        vertexProcessingSummary = primitiveCount + " primitive";
+        vertexAssemblySummary = primitiveCount + " primitive";
         if (primitiveCount != 1)
-            vertexProcessingSummary += "s";
-        vertexProcessingSummary += " (" + vertexCount;
+            vertexAssemblySummary += "s";
+        vertexAssemblySummary += " (" + vertexCount;
         if (vertexCount == 1)
-            vertexProcessingSummary += " vertex)";
+            vertexAssemblySummary += " vertex)";
         else
-            vertexProcessingSummary += " vertices)";
+            vertexAssemblySummary += " vertices)";
 
         // Generate vertex shading summary
         String vertexShadingSummary = "Undefined vertex shader";
@@ -362,9 +362,9 @@ public class SetupActivity extends Activity {
         setText(steps.sceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.cameraParameters, android.R.id.summary, cameraParametersSummary);
         setText(steps.lightingModel, android.R.id.summary, lightingModelSummary);
-        setText(steps.vertexProcessing, android.R.id.summary, vertexProcessingSummary);
+        setText(steps.vertexProcessing, android.R.id.summary, vertexAssemblySummary);
         setText(steps.vertexShading, android.R.id.summary, vertexShadingSummary);
-        setText(steps.clipping, android.R.id.summary, R.string.label_clipping);
+        setText(steps.clipping, android.R.id.summary, R.string.desc_clipping);
         setText(steps.multisampling, android.R.id.summary, multisamplingSummary);
         setText(steps.faceCulling, android.R.id.summary, cullingSummary);
         setText(steps.fragmentShading, android.R.id.summary, fragmentShadingSummary);
