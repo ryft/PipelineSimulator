@@ -105,7 +105,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static Drawable sAxesDrawable;
 
     public PipelineRenderer(Bundle params) {
-        
+
         sAxes = ShapeFactory.buildAxes();
 
         // Get list of elements from the parameters bundle
@@ -128,6 +128,14 @@ public class PipelineRenderer implements Renderer, Serializable {
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
         mGLDepthBufferEnabled = false;
         mGLBlendingEnabled = false;
+
+        GLES20.glCullFace(GLES20.GL_BACK);
+        if (mGLCullingClockwise)
+            GLES20.glFrontFace(GLES20.GL_CW);
+        else
+            GLES20.glFrontFace(GLES20.GL_CCW);
+
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
     }
 
     @Override
@@ -170,31 +178,38 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
 
-    protected void setGLParameters() {
+    protected void setGLParameters(boolean forCamera) {
 
-        // Set depth buffer parameters
-        if (mGLDepthBufferEnabled)
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        else
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        if (forCamera) {
 
-        // Set face culling parameters
-        if (mGLCullingEnabled)
+            // Reset selected scene GL parameters for drawing scene accessories
+            // e.g. axes, virtual camera model
             GLES20.glEnable(GLES20.GL_CULL_FACE);
-        else
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
-        GLES20.glCullFace(GLES20.GL_BACK);
-        if (mGLCullingClockwise)
-            GLES20.glFrontFace(GLES20.GL_CW);
-        else
-            GLES20.glFrontFace(GLES20.GL_CCW);
-
-        // Set blending parameters
-        if (mGLBlendingEnabled)
-            GLES20.glEnable(GLES20.GL_BLEND);
-        else
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
             GLES20.glDisable(GLES20.GL_BLEND);
+        } else {
+
+            // Set depth buffer parameters
+            if (mGLDepthBufferEnabled)
+                GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+            else
+                GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+            // Set face culling parameters
+            if (mGLCullingEnabled)
+                GLES20.glEnable(GLES20.GL_CULL_FACE);
+            else
+                GLES20.glDisable(GLES20.GL_CULL_FACE);
+
+            // Set blending parameters
+            if (mGLBlendingEnabled) {
+
+                GLES20.glEnable(GLES20.GL_BLEND);
+                GLES20.glBlendFunc(GLES20.GL_ONE_MINUS_SRC_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+                GLES20.glBlendEquation(GLES20.GL_FUNC_ADD);
+            } else
+                GLES20.glDisable(GLES20.GL_BLEND);
+        }
     }
 
     @Override
@@ -241,8 +256,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (mFrustumDrawable == null)
             mFrustumDrawable = mFrustumElement.getDrawable();
 
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        setGLParameters(true);
 
         // Draw axes and virtual camera
         if (mDrawAxes)
@@ -250,7 +264,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
         mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
-        setGLParameters();
+        setGLParameters(false);
 
         // Draw world objects in the scene
         for (Element e : mSceneElements.keySet()) {
@@ -456,10 +470,10 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         }
     }
-    
+
     public String getState() {
         return getStateDescription(mPipelineState) + " <> " + getStateDescription(mPipelineState + 1);
-        
+
     }
 
     private String getStateDescription(int state) {

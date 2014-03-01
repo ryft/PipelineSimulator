@@ -6,17 +6,18 @@
     android:padding="10dp" >
 
     <TextView
-        android:id="@+id/spinner_type_item_name"
+        android:id="@+id/spinner_config_item_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="0"
         android:ellipsize="end"
         android:gravity="left|center_vertical"
         android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:typeface="monospace" />
 
     <TextView
-        android:id="@+id/spinner_type_item_value"
+        android:id="@+id/spinner_config_item_value"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"

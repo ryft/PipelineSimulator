@@ -37,7 +37,7 @@ public class PipelineActivity extends Activity {
 
     protected PipelineSurface mPipelineSurface;
     protected TextView mPipelineIndicator;
-    
+
     protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
 
@@ -47,21 +47,18 @@ public class PipelineActivity extends Activity {
 
         // Get data from activity intent
         mPipelineParams = getIntent().getExtras();
-        
+
         // Set up view objects
         // Pipeline surface needs to be constructed here with specific parameters
         mPipelineSurface = new PipelineSurface(this, mPipelineParams);
-        
+
         setContentView(R.layout.activity_pipeline);
         RelativeLayout pipelineFrame = (RelativeLayout) findViewById(R.id.pipeline_frame);
         mPipelineIndicator = (TextView) findViewById(R.id.pipeline_indicator);
         updateIndicator();
-        
+
         mPipelineSurface.setPadding(2, 2, 2, 2);
-        LayoutParams params = new LayoutParams(
-                LayoutParams.WRAP_CONTENT,      
-                LayoutParams.WRAP_CONTENT
-        );
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 0, 0, 48);
         mPipelineSurface.setLayoutParams(params);
         pipelineFrame.addView(mPipelineSurface, 0);
@@ -73,18 +70,20 @@ public class PipelineActivity extends Activity {
             Drawable d = e.getDrawable();
             scene.add(d);
         }
-        
+
         final GestureDetector gestureDetector = new GestureDetector(mPipelineSurface.mContext, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 mPipelineSurface.toggleEditMode();
                 return true;
             }
+
             @Override
             public boolean onDoubleTapEvent(MotionEvent e) {
                 // Consume all events between a double-tap to prevent "jumping"
                 return true;
             }
+
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 if (!mPipelineSurface.isEditMode()) {
@@ -95,16 +94,17 @@ public class PipelineActivity extends Activity {
                     return false;
             }
         });
-        
-        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(mPipelineSurface.mContext, new SimpleOnScaleGestureListener() {
-            
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                mPipelineSurface.getRenderer().setScaleFactor(detector.getScaleFactor());
-                return true;
-            }
-        });
-        
+
+        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(mPipelineSurface.mContext,
+                new SimpleOnScaleGestureListener() {
+
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detector) {
+                        mPipelineSurface.getRenderer().setScaleFactor(detector.getScaleFactor());
+                        return true;
+                    }
+                });
+
         mPipelineSurface.setOnTouchListener(new OnTouchListener() {
 
             @Override
@@ -113,11 +113,11 @@ public class PipelineActivity extends Activity {
                 // Detect if a scroll event has finished for pipeline transitions
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
-                    
+
                     if (mScrollStartX - event.getX() >= mPipelineSurface.getWidth() / 2)
                         // Scrolled left
                         mPipelineSurface.getRenderer().next();
-                    
+
                     else if (event.getX() - mScrollStartX >= mPipelineSurface.getWidth() / 2)
                         // Scrolled right
                         mPipelineSurface.getRenderer().previous();
@@ -133,27 +133,27 @@ public class PipelineActivity extends Activity {
                     scaleDetector.onTouchEvent(event);
                     onSceneMove(event);
                 }
-                
+
                 return true;
             }
-            
+
         });
 
     }
-    
+
     static class Navigator {
         LinearLayout groupVertexProcessing;
         LinearLayout groupPrimitiveProcessing;
         LinearLayout groupRasterisation;
         LinearLayout groupFragmentProcessing;
         LinearLayout groupPixelProcessing;
-        
+
         TextView headingVertexProcessing;
         TextView headingPrimitiveProcessing;
         TextView headingRasterisation;
         TextView headingFragmentProcessing;
         TextView headingPixelProcessing;
-        
+
         TextView blockVertexAssembly;
         TextView blockVertexShading;
         TextView blockClipping;
@@ -163,9 +163,9 @@ public class PipelineActivity extends Activity {
         TextView blockDepthBufferTest;
         TextView blockBlending;
     }
-    
+
     Navigator mNavigator = new Navigator();
-    
+
     private void setupPipelineNavigator() {
 
         mNavigator.groupVertexProcessing = (LinearLayout) findViewById(R.id.group_vertex_processing);
@@ -209,18 +209,22 @@ public class PipelineActivity extends Activity {
         mNavigator.blockFragmentShading.setText(R.string.label_fragment_shading);
         mNavigator.blockDepthBufferTest.setText(R.string.label_depth_buffer_test);
         mNavigator.blockBlending.setText(R.string.label_blending);
-        
+
         TextView connectorTitle;
-        connectorTitle = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.map_connector).findViewById(
+                R.id.map_connector_title);
         connectorTitle.setText("> vertices >");
-        connectorTitle = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_connector).findViewById(
+                R.id.map_connector_title);
         connectorTitle.setText("> primitives >");
-        connectorTitle = (TextView) mNavigator.groupRasterisation.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle = (TextView) mNavigator.groupRasterisation.findViewById(R.id.map_connector).findViewById(
+                R.id.map_connector_title);
         connectorTitle.setText("> fragments >");
-        connectorTitle = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.map_connector).findViewById(R.id.map_connector_title);
+        connectorTitle = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.map_connector).findViewById(
+                R.id.map_connector_title);
         connectorTitle.setText("> pixels >");
         mNavigator.groupPixelProcessing.removeView(mNavigator.groupPixelProcessing.findViewById(R.id.map_connector));
-        
+
         LinearLayout detailsLayout;
         detailsLayout = (LinearLayout) mNavigator.groupVertexProcessing.findViewById(R.id.navigator_details);
         detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_vertex_assembly, null));
@@ -239,36 +243,46 @@ public class PipelineActivity extends Activity {
 
         detailsLayout = (LinearLayout) mNavigator.groupPixelProcessing.findViewById(R.id.navigator_details);
         detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_blending, null));
-        
+
         mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
-    
+
             @Override
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "debug", Toast.LENGTH_SHORT).show();
             }
         });
     }
-    
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void setupNavigatorBackgroundsNew() {
         Resources r = getResources();
-        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_1));
-        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_2));
-        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_3));
-        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_4));
-        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackground(r.getDrawable(R.drawable.navigator_box_outer_5));
+        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackground(
+                r.getDrawable(R.drawable.navigator_box_outer_1));
+        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackground(
+                r.getDrawable(R.drawable.navigator_box_outer_2));
+        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackground(
+                r.getDrawable(R.drawable.navigator_box_outer_3));
+        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackground(
+                r.getDrawable(R.drawable.navigator_box_outer_4));
+        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackground(
+                r.getDrawable(R.drawable.navigator_box_outer_5));
     }
-    
+
     @SuppressWarnings("deprecation")
     private void setupNavigatorBackgroundsOld() {
         Resources r = getResources();
-        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_1));
-        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_2));
-        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_3));
-        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_4));
-        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(r.getDrawable(R.drawable.navigator_box_outer_5));
+        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
+                r.getDrawable(R.drawable.navigator_box_outer_1));
+        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
+                r.getDrawable(R.drawable.navigator_box_outer_2));
+        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
+                r.getDrawable(R.drawable.navigator_box_outer_3));
+        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
+                r.getDrawable(R.drawable.navigator_box_outer_4));
+        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
+                r.getDrawable(R.drawable.navigator_box_outer_5));
     }
-    
+
     protected boolean mIsScrolling = false;
     protected float mScrollStartX = 0;
 
@@ -292,22 +306,23 @@ public class PipelineActivity extends Activity {
 
                 // reverse direction of rotation above the mid-line
                 if (y > mPipelineSurface.getHeight() / 2)
-                  dx = dx * -1;
+                    dx = dx * -1;
 
                 // reverse direction of rotation to left of the mid-line
                 if (x < mPipelineSurface.getWidth() / 2)
-                  dy = dy * -1;
+                    dy = dy * -1;
 
-                mPipelineSurface.getRenderer().setRotation(mPipelineSurface.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
+                mPipelineSurface.getRenderer().setRotation(
+                        mPipelineSurface.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
                 mPipelineSurface.requestRender();
         }
 
         mPreviousX = x;
         mPreviousY = y;
-        
+
         return true;
     }
-    
+
     protected void updateIndicator() {
         mPipelineIndicator.setText(mPipelineSurface.getRenderer().getState());
     }

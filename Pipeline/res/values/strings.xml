@@ -25,6 +25,7 @@
     <string name="title_activity_setup">Configure Pipeline</string>
     <string name="title_activity_setup_scene">Scene Composition</string>
     <string name="title_activity_setup_camera">Camera Parameters</string>
+    <string name="title_activity_setup_blending">Blending Parameters</string>
     <string name="title_activity_primitive_add">New Primitive</string>
     <string name="title_activity_primitive_edit">Edit Primitive</string>
     <string name="title_activity_cylinder_add">New Cylinder</string>
@@ -98,6 +99,8 @@
     <string name="dialogue_title_vertex_shading">Vertex Shader Code</string>
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
+    <string name="dialogue_title_depth_buffer_test">Depth Buffer Comparison</string>
+    <string name="dialogue_title_blending">Fragment Shader Code</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
@@ -125,6 +128,37 @@
     <string name="label_blending">Blending</string>
     
     <string name="desc_clipping">Viewport and clip planes defined by camera parameters</string>
+    
+	<!-- Depth buffer test comparison functions -->
+    <string name="gl_depth_never">Depth comparison never passes</string>
+    <string name="gl_depth_less">Passes if the incoming depth is less than the stored depth</string>
+    <string name="gl_depth_equal">Passes if the incoming depth is equal to the stored depth</string>
+    <string name="gl_depth_lequal">Passes if the incoming depth is less than or equal to the stored depth</string>
+    <string name="gl_depth_greater">Passes if the incoming depth is greater than the stored depth</string>
+    <string name="gl_depth_notequal">Passes if the incoming depth is not equal to the stored depth</string>
+    <string name="gl_depth_gequal">Passes if the incoming depth is greater than or equal to the stored depth</string>
+    <string name="gl_depth_always">Depth comparison always passes</string>
+    
+	<!-- Blending functions -->
+    <string name="gl_blend_zero"></string>
+    <string name="gl_blend_one"></string>
+    <string name="gl_blend_src_color"></string>
+    <string name="gl_blend_one_minus_src_color"></string>
+    <string name="gl_blend_dst_color"></string>
+    <string name="gl_blend_one_minus_dst_color"></string>
+    <string name="gl_blend_src_alpha"></string>
+    <string name="gl_blend_one_minus_src_alpha"></string>
+    <string name="gl_blend_dst_alpha"></string>
+    <string name="gl_blend_one_minus_dst_alpha"></string>
+    <string name="gl_blend_constant_color"></string>
+    <string name="gl_blend_one_minus_constant_color"></string>
+    <string name="gl_blend_constant_alpha"></string>
+    <string name="gl_blend_one_minus_constant_alpha"></string>
+    
+	<!-- Blending equations -->
+    <string name="gl_blend_add">Source and destination colours are added together</string>
+    <string name="gl_blend_sub">Destination colour is subtracted from source colour</string>
+    <string name="gl_blend_rev_sub">Source colour is subtracted from destination colour</string>
     
     <string name="button_simulate">Simulate</string>
     
