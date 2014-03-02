@@ -205,11 +205,11 @@ public class PipelineRenderer implements Renderer, Serializable {
         } else {
 
             // Set depth buffer parameters
-            if (mGLDepthBufferEnabled)
+            if (mGLDepthBufferEnabled) {
                 GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-            else
+                GLES20.glDepthFunc(SetupActivity.DepthFunc.mValues[mGLDepthFunc]);
+            } else
                 GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-            GLES20.glDepthFunc(SetupActivity.DepthFunc.mValues[mGLDepthFunc]);
 
             // Set face culling parameters
             if (mGLCullingEnabled)
