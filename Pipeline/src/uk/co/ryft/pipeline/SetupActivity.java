@@ -480,7 +480,7 @@ public class SetupActivity extends Activity {
             case R.id.action_setup_help:
                 final ScrollView scroll = mScrollView;
 
-                final OnShowcaseEventListener help4 = new SimpleShowcaseEventListener() {
+                final OnShowcaseEventListener tutorialSimulate = new SimpleShowcaseEventListener() {
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         LayoutParams lps = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -494,28 +494,37 @@ public class SetupActivity extends Activity {
                     }
                 };
 
-                final OnShowcaseEventListener help3 = new SimpleShowcaseEventListener() {
+                final OnShowcaseEventListener tutorialDisabledOptions = new SimpleShowcaseEventListener() {
 
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         scroll.scrollTo(0, (int) steps.stepBlending.getY());
                         insertShowcaseView(steps.stepClipping.findViewById(android.R.id.title), R.string.help_disabled_title,
-                                R.string.help_disabled_desc, 1.8f, null, help4);
+                                R.string.help_disabled_desc, 1.8f, null, tutorialSimulate);
                     }
                 };
 
-                final OnShowcaseEventListener help2 = new SimpleShowcaseEventListener() {
+                final OnShowcaseEventListener tutorialLightingPreviews = new SimpleShowcaseEventListener() {
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         scroll.smoothScrollTo(0, (int) steps.stepLightingModel.getY());
                         insertShowcaseView(steps.stepLightingModel.findViewById(android.R.id.title),
-                                R.string.help_lighting_preview_title, R.string.help_lighting_preview_desc, 1, null, help3);
+                                R.string.help_lighting_preview_title, R.string.help_lighting_preview_desc, 1, null, tutorialDisabledOptions);
+                    }
+                };
+
+                final OnShowcaseEventListener tutorialColourCoding = new SimpleShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        scroll.smoothScrollTo(0, (int) steps.groupVertexProcessing.getY());
+                        insertShowcaseView(steps.groupVertexProcessing.findViewById(R.id.swatch_vertex_processing),
+                                R.string.help_colour_coding_title, R.string.help_colour_coding_desc, 0.5f, null, tutorialLightingPreviews);
                     }
                 };
 
                 scroll.smoothScrollTo(0, 0);
                 insertShowcaseView(steps.stepSceneComposition.findViewById(android.R.id.title),
-                        R.string.heading_group_scene_definition, R.string.help_scene_definition_desc, 1.5f, null, help2);
+                        R.string.help_scene_definition_title, R.string.help_scene_definition_desc, 1.5f, null, tutorialColourCoding);
 
                 break;
         }

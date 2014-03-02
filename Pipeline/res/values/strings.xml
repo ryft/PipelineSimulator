@@ -162,13 +162,17 @@
     
     <string name="button_simulate">Simulate</string>
     
-    <string name="help_firstrun_title">First Run</string>
+    <string name="help_firstrun_title">First run</string>
     <string name="help_firstrun_desc">Welcome to the Graphics Pipeline Simulator. Tap the help icon at any time for a guided tour of the app.</string>
     
+    <string name="help_scene_definition_title">Scene definition</string>
     <string name="help_scene_definition_desc">Use these options to modify the scene which will be simulated, as well as the virtual camera location and parameters.</string>
     
+    <string name="help_colour_coding_title">Colour coding</string>
+    <string name="help_colour_coding_desc">The coloured squares denote different groups of pipeline steps. They match up with steps on the pipeline navigator after you press \'Simulate\'.</string>
+    
     <string name="help_lighting_preview_title">Lighting previews</string>
-    <string name="help_lighting_preview_desc">Change the lighting preview mode to examine different shaders using the options below.</string>
+    <string name="help_lighting_preview_desc">Change the lighting preview mode to examine different shaders using the \'Vertex Shading\' and \'Fragment Shading\' options below.</string>
     
     <string name="help_disabled_title">Disabled options</string>
     <string name="help_disabled_desc">Options which are greyed out cannot be modified but will provide a summary of their action.</string>

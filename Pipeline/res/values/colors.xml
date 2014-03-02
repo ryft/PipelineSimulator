@@ -4,9 +4,9 @@
     <color name="list_item_hairline">#40ffffff</color>
     <color name="surface_border_edit">#ffff0000</color>
     
-    <color name="navigator_bg_purple">#FFE1D5E7</color>
-    <color name="navigator_bg_green">#FFD5E8D4</color>
-    <color name="navigator_bg_yellow">#FFFFF2CC</color>
-    <color name="navigator_bg_red">#FFF8CECC</color>
-    <color name="navigator_bg_blue">#FFD4E1F5</color>
+    <color name="navigator_bg_purple">#FFCC99FF</color>
+    <color name="navigator_bg_green">#FF99FF99</color>
+    <color name="navigator_bg_yellow">#FFFFFF66</color>
+    <color name="navigator_bg_red">#FFFF6666</color>
+    <color name="navigator_bg_blue">#FF66CCFF</color>
 </resources>
