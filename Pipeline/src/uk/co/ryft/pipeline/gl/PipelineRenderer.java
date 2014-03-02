@@ -495,10 +495,13 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         }
     }
+    
+    public int getCurrentState() {
+        return mPipelineState;
+    }
 
-    public String getState() {
+    public String getStateDescription() {
         return getStateDescription(mPipelineState) + " <> " + getStateDescription(mPipelineState + 1);
-
     }
 
     private String getStateDescription(int state) {

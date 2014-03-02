@@ -24,6 +24,7 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
@@ -55,7 +56,6 @@ public class PipelineActivity extends Activity {
         setContentView(R.layout.activity_pipeline);
         RelativeLayout pipelineFrame = (RelativeLayout) findViewById(R.id.pipeline_frame);
         mPipelineIndicator = (TextView) findViewById(R.id.pipeline_indicator);
-        updateIndicator();
 
         mPipelineSurface.setPadding(2, 2, 2, 2);
         LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -114,15 +114,16 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
 
-                    if (mScrollStartX - event.getX() >= mPipelineSurface.getWidth() / 2)
+                    if (mScrollStartX - event.getX() >= mPipelineSurface.getWidth() / 3) {
                         // Scrolled left
                         mPipelineSurface.getRenderer().next();
+                        updatePipelineNavigator(true);
 
-                    else if (event.getX() - mScrollStartX >= mPipelineSurface.getWidth() / 2)
+                    } else if (event.getX() - mScrollStartX >= mPipelineSurface.getWidth() / 3) {
                         // Scrolled right
                         mPipelineSurface.getRenderer().previous();
-
-                    updateIndicator();
+                        updatePipelineNavigator(false);
+                    }
                 }
 
                 // Consume all double-tap and swipe events as next highest priority
@@ -136,12 +137,13 @@ public class PipelineActivity extends Activity {
 
                 return true;
             }
-
         });
 
     }
 
     static class Navigator {
+        HorizontalScrollView scrollView;
+        
         LinearLayout groupVertexProcessing;
         LinearLayout groupPrimitiveProcessing;
         LinearLayout groupRasterisation;
@@ -162,12 +164,37 @@ public class PipelineActivity extends Activity {
         TextView blockFragmentShading;
         TextView blockDepthBufferTest;
         TextView blockBlending;
+
+        View getStateBlock(int state) {
+            switch (state) {
+                case PipelineRenderer.STEP_VERTEX_ASSEMBLY:
+                    return blockVertexAssembly;
+                case PipelineRenderer.STEP_VERTEX_SHADING:
+                    return blockVertexShading;
+                case PipelineRenderer.STEP_CLIPPING:
+                    return blockClipping;
+                case PipelineRenderer.STEP_MULTISAMPLING:
+                    return blockMultisampling;
+                case PipelineRenderer.STEP_FACE_CULLING:
+                    return blockFaceCulling;
+                case PipelineRenderer.STEP_FRAGMENT_SHADING:
+                    return blockFragmentShading;
+                case PipelineRenderer.STEP_DEPTH_BUFFER:
+                    return blockDepthBufferTest;
+                case PipelineRenderer.STEP_BLENDING:
+                    return blockBlending;
+                default:
+                    return null;
+            }
+        }
     }
 
     Navigator mNavigator = new Navigator();
 
     private void setupPipelineNavigator() {
 
+        mNavigator.scrollView = (HorizontalScrollView) findViewById(R.id.pipeline_navigator);
+        
         mNavigator.groupVertexProcessing = (LinearLayout) findViewById(R.id.group_vertex_processing);
         mNavigator.groupPrimitiveProcessing = (LinearLayout) findViewById(R.id.group_primitive_processing);
         mNavigator.groupRasterisation = (LinearLayout) findViewById(R.id.group_rasterisation);
@@ -195,11 +222,17 @@ public class PipelineActivity extends Activity {
         mNavigator.blockDepthBufferTest = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.block_2);
         mNavigator.blockBlending = (TextView) mNavigator.groupPixelProcessing.findViewById(R.id.block);
 
-        // Use deprecated BackgroundDrawable methods for older APIs
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            setupNavigatorBackgroundsNew();
-        else
-            setupNavigatorBackgroundsOld();
+        Resources r = getResources();
+        setBackgroundDrawable(mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper),
+                r.getDrawable(R.drawable.navigator_box_outer_1));
+        setBackgroundDrawable(mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper),
+                r.getDrawable(R.drawable.navigator_box_outer_2));
+        setBackgroundDrawable(mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper),
+                r.getDrawable(R.drawable.navigator_box_outer_3));
+        setBackgroundDrawable(mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper),
+                r.getDrawable(R.drawable.navigator_box_outer_4));
+        setBackgroundDrawable(mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper),
+                r.getDrawable(R.drawable.navigator_box_outer_5));
 
         mNavigator.blockVertexAssembly.setText(R.string.label_vertex_assembly);
         mNavigator.blockVertexShading.setText(R.string.label_vertex_shading);
@@ -251,36 +284,56 @@ public class PipelineActivity extends Activity {
                 Toast.makeText(getApplicationContext(), "debug", Toast.LENGTH_SHORT).show();
             }
         });
+
+        updatePipelineNavigator(true);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void setupNavigatorBackgroundsNew() {
+    public void updatePipelineNavigator(boolean forward) {
+
+        mPipelineIndicator.setText(mPipelineSurface.getRenderer().getStateDescription());
+
+        // Scroll to the location of the current state's corresponding block
+        int currentState = mPipelineSurface.getRenderer().getCurrentState();
+        int[] location = new int[] {0, 0};
+        View currentBlock = mNavigator.getStateBlock(currentState);
+        if (currentBlock != null) {
+            currentBlock.getLocationInWindow(location);
+            location[0] += currentBlock.getWidth() / 2;
+        }
+        // We don't need to perform a smooth scroll as the navigator should always be hidden
+        mNavigator.scrollView.scrollTo(location[0], location[1]);
+        
+        // Step defines the block which is to be modified
+        // If we've moving backwards, the block following the current state needs to be un-shaded
+        int step = (forward) ? currentState : currentState + 1;
+        View block = mNavigator.getStateBlock(step);
+        
+        if (block == null)
+            return;
+    
         Resources r = getResources();
-        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackground(
-                r.getDrawable(R.drawable.navigator_box_outer_1));
-        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackground(
-                r.getDrawable(R.drawable.navigator_box_outer_2));
-        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackground(
-                r.getDrawable(R.drawable.navigator_box_outer_3));
-        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackground(
-                r.getDrawable(R.drawable.navigator_box_outer_4));
-        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackground(
-                r.getDrawable(R.drawable.navigator_box_outer_5));
+        int resource = (forward) ? R.drawable.navigator_box_inner_dark : R.drawable.navigator_box_inner_light;
+        android.graphics.drawable.Drawable background = r.getDrawable(resource);
+        setBackgroundDrawable(block, background);
+    }
+
+    private void setBackgroundDrawable(View view, android.graphics.drawable.Drawable background) {
+
+        // Use deprecated BackgroundDrawable methods for older APIs
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            setBackgroundDrawableJB(view, background);
+        else
+            setBackgroundDrawableOld(view, background);
     }
 
     @SuppressWarnings("deprecation")
-    private void setupNavigatorBackgroundsOld() {
-        Resources r = getResources();
-        mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
-                r.getDrawable(R.drawable.navigator_box_outer_1));
-        mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
-                r.getDrawable(R.drawable.navigator_box_outer_2));
-        mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
-                r.getDrawable(R.drawable.navigator_box_outer_3));
-        mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
-                r.getDrawable(R.drawable.navigator_box_outer_4));
-        mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper).setBackgroundDrawable(
-                r.getDrawable(R.drawable.navigator_box_outer_5));
+    private void setBackgroundDrawableOld(View view, android.graphics.drawable.Drawable background) {
+        view.setBackgroundDrawable(background);
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void setBackgroundDrawableJB(View view, android.graphics.drawable.Drawable background) {
+        view.setBackground(background);
     }
 
     protected boolean mIsScrolling = false;
@@ -321,10 +374,6 @@ public class PipelineActivity extends Activity {
         mPreviousY = y;
 
         return true;
-    }
-
-    protected void updateIndicator() {
-        mPipelineIndicator.setText(mPipelineSurface.getRenderer().getState());
     }
 
     @Override
