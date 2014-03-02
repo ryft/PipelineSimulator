@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import uk.co.ryft.pipeline.SetupActivity;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
@@ -41,9 +42,17 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private boolean mGLCullingEnabled = false;
     private boolean mGLCullingClockwise;
+    
     private boolean mGLDepthBufferEnabled = false;
-    private boolean mGLBlendingEnabled = false;
+    private int mGLDepthFunc = 1;
+    
+    private boolean mGLBlendEnabled = false;
+    private int mGLBlendFuncSrc = 1;
+    private int mGLBlendFuncDst = 0;
+    private int mGLBlendEquation = 0;
+    
     private boolean mDrawAxes = true;
+    private boolean mDrawCamera = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -126,8 +135,14 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         mGLCullingEnabled = false;
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
+        
         mGLDepthBufferEnabled = false;
-        mGLBlendingEnabled = false;
+        mGLDepthFunc = params.getInt("depth_func", mGLDepthFunc);
+        
+        mGLBlendEnabled = false;
+        mGLBlendFuncSrc = params.getInt("blend_func_src", mGLBlendFuncSrc);
+        mGLBlendFuncDst = params.getInt("blend_func_dst", mGLBlendFuncDst);
+        mGLBlendEquation = params.getInt("blend_equation", mGLBlendEquation);
 
         GLES20.glCullFace(GLES20.GL_BACK);
         if (mGLCullingClockwise)
@@ -194,6 +209,7 @@ public class PipelineRenderer implements Renderer, Serializable {
                 GLES20.glEnable(GLES20.GL_DEPTH_TEST);
             else
                 GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+            GLES20.glDepthFunc(SetupActivity.DepthFunc.mValues[mGLDepthFunc]);
 
             // Set face culling parameters
             if (mGLCullingEnabled)
@@ -202,11 +218,17 @@ public class PipelineRenderer implements Renderer, Serializable {
                 GLES20.glDisable(GLES20.GL_CULL_FACE);
 
             // Set blending parameters
-            if (mGLBlendingEnabled) {
+            if (mGLBlendEnabled) {
 
                 GLES20.glEnable(GLES20.GL_BLEND);
-                GLES20.glBlendFunc(GLES20.GL_ONE_MINUS_SRC_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-                GLES20.glBlendEquation(GLES20.GL_FUNC_ADD);
+                System.out.println("Indices: BlendFuncSrc " + mGLBlendFuncSrc + ", BlendFuncDst " + mGLBlendFuncDst);
+                System.out.println("Names:   BlendFuncSrc " + SetupActivity.BlendFunc.mNames[mGLBlendFuncSrc] + ", BlendFuncDst " + SetupActivity.BlendFunc.mNames[mGLBlendFuncDst]);
+                System.out.println("Values:  BlendFuncSrc " + SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc] + ", BlendFuncDst " + SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
+                GLES20.glBlendFunc(SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc], SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
+                System.out.println("Indices: BlendEquation " + mGLBlendFuncSrc);
+                System.out.println("Names:   BlendEquation " + SetupActivity.BlendFunc.mNames[mGLBlendEquation]);
+                System.out.println("Values:  BlendEquation " + SetupActivity.BlendFunc.mValues[mGLBlendEquation]);
+                GLES20.glBlendEquation(SetupActivity.BlendEquation.mValues[mGLBlendEquation]);
             } else
                 GLES20.glDisable(GLES20.GL_BLEND);
         }
@@ -261,8 +283,10 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Draw axes and virtual camera
         if (mDrawAxes)
             sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
-        mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
-        mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+        if (mDrawCamera) {
+            mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+            mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+        }
 
         setGLParameters(false);
 
@@ -448,7 +472,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateBlending(boolean forward) throws InterruptedException {
-        mGLBlendingEnabled = forward;
+        mGLBlendEnabled = forward;
+        mDrawCamera = !forward;
     }
 
     public void next() {

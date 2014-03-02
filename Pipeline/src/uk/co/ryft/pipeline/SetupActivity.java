@@ -56,7 +56,7 @@ public class SetupActivity extends Activity {
     // Face culling
     protected boolean mCullingClockwise = false;
     // Depth buffer test function (Default: GL_LESS)
-    protected int mDepthBufferTestFunction = 1;
+    protected int mDepthFunc = 1;
     // Blending parameters
     protected int mBlendFuncSrc = 1;
     protected int mBlendFuncDst = 0;
@@ -314,7 +314,7 @@ public class SetupActivity extends Activity {
                 builder.setItems(DepthFunc.mNames, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mDepthBufferTestFunction = which;
+                        mDepthFunc = which;
                         updateViews();
                     }
                 });
@@ -357,6 +357,10 @@ public class SetupActivity extends Activity {
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
                 intent.putExtra("culling_clockwise", mCullingClockwise);
+                intent.putExtra("depth_func", mDepthFunc);
+                intent.putExtra("blend_func_src", mBlendFuncSrc);
+                intent.putExtra("blend_func_dst", mBlendFuncDst);
+                intent.putExtra("blend_equation", mBlendEquation);
                 startActivity(intent);
             }
         });
@@ -443,7 +447,7 @@ public class SetupActivity extends Activity {
         }
 
         // Generate depth buffer summary
-        String depthBufferSummary = DepthFunc.mDescriptions[mDepthBufferTestFunction];
+        String depthBufferSummary = DepthFunc.mDescriptions[mDepthFunc];
 
         // Generate blending summary
         String blendingSummary = BlendEquation.mDescriptions[mBlendEquation];
