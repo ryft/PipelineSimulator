@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/navigator_block_innermargin"
-                android:background="@drawable/navigator_box_inner"
+                android:background="@drawable/navigator_box_inner_light"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
@@ -41,7 +41,7 @@
                 android:id="@+id/block_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/navigator_box_inner"
+                android:background="@drawable/navigator_box_inner_light"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
         </LinearLayout>

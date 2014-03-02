@@ -75,8 +75,8 @@ class TypeSpinnerAdapter extends ArrayAdapter<Type> {
         }
 
         Primitive.Type thisType = getItem(position);
-        TextView typeView = (TextView) convertView.findViewById(R.id.spinner_type_item);
-        TextView descView = (TextView) convertView.findViewById(R.id.spinner_type_item_desc);
+        TextView typeView = (TextView) convertView.findViewById(R.id.spinner_type_item_value);
+        TextView descView = (TextView) convertView.findViewById(R.id.spinner_type_item_name);
 
         typeView.setText(thisType.toString());
         descView.setText(thisType.getDescription());

@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import uk.co.ryft.pipeline.SetupActivity;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
@@ -41,9 +42,17 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private boolean mGLCullingEnabled = false;
     private boolean mGLCullingClockwise;
+    
     private boolean mGLDepthBufferEnabled = false;
-    private boolean mGLBlendingEnabled = false;
+    private int mGLDepthFunc = 1;
+    
+    private boolean mGLBlendEnabled = false;
+    private int mGLBlendFuncSrc = 1;
+    private int mGLBlendFuncDst = 0;
+    private int mGLBlendEquation = 0;
+    
     private boolean mDrawAxes = true;
+    private boolean mDrawCamera = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -105,7 +114,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static Drawable sAxesDrawable;
 
     public PipelineRenderer(Bundle params) {
-        
+
         sAxes = ShapeFactory.buildAxes();
 
         // Get list of elements from the parameters bundle
@@ -126,8 +135,22 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         mGLCullingEnabled = false;
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
+        
         mGLDepthBufferEnabled = false;
-        mGLBlendingEnabled = false;
+        mGLDepthFunc = params.getInt("depth_func", mGLDepthFunc);
+        
+        mGLBlendEnabled = false;
+        mGLBlendFuncSrc = params.getInt("blend_func_src", mGLBlendFuncSrc);
+        mGLBlendFuncDst = params.getInt("blend_func_dst", mGLBlendFuncDst);
+        mGLBlendEquation = params.getInt("blend_equation", mGLBlendEquation);
+
+        GLES20.glCullFace(GLES20.GL_BACK);
+        if (mGLCullingClockwise)
+            GLES20.glFrontFace(GLES20.GL_CW);
+        else
+            GLES20.glFrontFace(GLES20.GL_CCW);
+
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
     }
 
     @Override
@@ -170,31 +193,45 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
 
-    protected void setGLParameters() {
+    protected void setGLParameters(boolean forCamera) {
 
-        // Set depth buffer parameters
-        if (mGLDepthBufferEnabled)
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        else
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        if (forCamera) {
 
-        // Set face culling parameters
-        if (mGLCullingEnabled)
+            // Reset selected scene GL parameters for drawing scene accessories
+            // e.g. axes, virtual camera model
             GLES20.glEnable(GLES20.GL_CULL_FACE);
-        else
-            GLES20.glDisable(GLES20.GL_CULL_FACE);
-        GLES20.glCullFace(GLES20.GL_BACK);
-        if (mGLCullingClockwise)
-            GLES20.glFrontFace(GLES20.GL_CW);
-        else
-            GLES20.glFrontFace(GLES20.GL_CCW);
-
-        // Set blending parameters
-        if (mGLBlendingEnabled)
-            GLES20.glEnable(GLES20.GL_BLEND);
-        else
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
             GLES20.glDisable(GLES20.GL_BLEND);
+        } else {
+
+            // Set depth buffer parameters
+            if (mGLDepthBufferEnabled)
+                GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+            else
+                GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+            GLES20.glDepthFunc(SetupActivity.DepthFunc.mValues[mGLDepthFunc]);
+
+            // Set face culling parameters
+            if (mGLCullingEnabled)
+                GLES20.glEnable(GLES20.GL_CULL_FACE);
+            else
+                GLES20.glDisable(GLES20.GL_CULL_FACE);
+
+            // Set blending parameters
+            if (mGLBlendEnabled) {
+
+                GLES20.glEnable(GLES20.GL_BLEND);
+                System.out.println("Indices: BlendFuncSrc " + mGLBlendFuncSrc + ", BlendFuncDst " + mGLBlendFuncDst);
+                System.out.println("Names:   BlendFuncSrc " + SetupActivity.BlendFunc.mNames[mGLBlendFuncSrc] + ", BlendFuncDst " + SetupActivity.BlendFunc.mNames[mGLBlendFuncDst]);
+                System.out.println("Values:  BlendFuncSrc " + SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc] + ", BlendFuncDst " + SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
+                GLES20.glBlendFunc(SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc], SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
+                System.out.println("Indices: BlendEquation " + mGLBlendFuncSrc);
+                System.out.println("Names:   BlendEquation " + SetupActivity.BlendFunc.mNames[mGLBlendEquation]);
+                System.out.println("Values:  BlendEquation " + SetupActivity.BlendFunc.mValues[mGLBlendEquation]);
+                GLES20.glBlendEquation(SetupActivity.BlendEquation.mValues[mGLBlendEquation]);
+            } else
+                GLES20.glDisable(GLES20.GL_BLEND);
+        }
     }
 
     @Override
@@ -241,16 +278,17 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (mFrustumDrawable == null)
             mFrustumDrawable = mFrustumElement.getDrawable();
 
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        setGLParameters(true);
 
         // Draw axes and virtual camera
         if (mDrawAxes)
             sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
-        mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
-        mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+        if (mDrawCamera) {
+            mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+            mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+        }
 
-        setGLParameters();
+        setGLParameters(false);
 
         // Draw world objects in the scene
         for (Element e : mSceneElements.keySet()) {
@@ -434,7 +472,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateBlending(boolean forward) throws InterruptedException {
-        mGLBlendingEnabled = forward;
+        mGLBlendEnabled = forward;
+        mDrawCamera = !forward;
     }
 
     public void next() {
@@ -457,9 +496,12 @@ public class PipelineRenderer implements Renderer, Serializable {
         }
     }
     
-    public String getState() {
+    public int getCurrentState() {
+        return mPipelineState;
+    }
+
+    public String getStateDescription() {
         return getStateDescription(mPipelineState) + " <> " + getStateDescription(mPipelineState + 1);
-        
     }
 
     private String getStateDescription(int state) {

@@ -43,7 +43,7 @@
                 android:background="@color/list_item_hairline" />
 
             <include
-                android:id="@+id/pipeline_map"
+                android:id="@+id/pipeline_navigator"
                 layout="@layout/navigator" />
         </LinearLayout>
     </com.slidinglayer.SlidingLayer>

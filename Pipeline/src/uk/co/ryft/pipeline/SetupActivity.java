@@ -10,6 +10,8 @@ import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import uk.co.ryft.pipeline.ui.pipeline.PipelineActivity;
+import uk.co.ryft.pipeline.ui.setup.GLConfig;
+import uk.co.ryft.pipeline.ui.setup.SetupBlendingActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupCameraActivity;
 import uk.co.ryft.pipeline.ui.setup.SetupSceneActivity;
 import android.app.Activity;
@@ -41,6 +43,7 @@ public class SetupActivity extends Activity {
     // Activity request codes
     protected static final int REQUEST_STEP_SCENE = 2;
     protected static final int REQUEST_STEP_CAMERA = 3;
+    protected static final int REQUEST_STEP_BLENDING = 4;
 
     // Global state set by step configuration
     // Scene composition
@@ -52,8 +55,16 @@ public class SetupActivity extends Activity {
     protected LightingModel mPreviewLightingModel = LightingModel.PHONG;
     // Face culling
     protected boolean mCullingClockwise = false;
-    // TODO Allow choice of depth buffer test using glDepthFunc
-    // See http://www.opengl.org/sdk/docs/man/xhtml/glDepthFunc.xml
+    // Depth buffer test function (Default: GL_LESS)
+    protected int mDepthFunc = 1;
+    // Blending parameters
+    protected int mBlendFuncSrc = 1;
+    protected int mBlendFuncDst = 0;
+    protected int mBlendEquation = 0;
+
+    public static GLConfig<Integer> DepthFunc;
+    public static GLConfig<Integer> BlendFunc;
+    public static GLConfig<Integer> BlendEquation;
 
     SharedPreferences prefs = null;
 
@@ -80,12 +91,44 @@ public class SetupActivity extends Activity {
         View stepBlending;
     }
 
+    ScrollView mScrollView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
+        DepthFunc = new GLConfig<Integer>(this, new Integer[] { GLES20.GL_NEVER, GLES20.GL_LESS, GLES20.GL_EQUAL,
+                GLES20.GL_LEQUAL, GLES20.GL_GREATER, GLES20.GL_NOTEQUAL, GLES20.GL_GEQUAL, GLES20.GL_ALWAYS }, new String[] {
+                "GL_NEVER", "GL_LESS", "GL_EQUAL", "GL_LEQUAL", "GL_GREATER", "GL_NOTEQUAL", "GL_GEQUAL", "GL_ALWAYS" },
+                new int[] { R.string.gl_depth_never, R.string.gl_depth_less, R.string.gl_depth_equal, R.string.gl_depth_lequal,
+                        R.string.gl_depth_greater, R.string.gl_depth_notequal, R.string.gl_depth_gequal,
+                        R.string.gl_depth_always });
+
+        BlendFunc = new GLConfig<Integer>(this, new Integer[] { GLES20.GL_ZERO, GLES20.GL_ONE, GLES20.GL_SRC_COLOR,
+                GLES20.GL_ONE_MINUS_SRC_COLOR, GLES20.GL_DST_COLOR, GLES20.GL_ONE_MINUS_DST_COLOR, GLES20.GL_SRC_ALPHA,
+                GLES20.GL_ONE_MINUS_SRC_ALPHA, GLES20.GL_DST_ALPHA, GLES20.GL_ONE_MINUS_DST_ALPHA, GLES20.GL_CONSTANT_COLOR,
+                GLES20.GL_ONE_MINUS_CONSTANT_COLOR, GLES20.GL_CONSTANT_ALPHA, GLES20.GL_ONE_MINUS_CONSTANT_ALPHA },
+                new String[] { "GL_ZERO", "GL_ONE", "GL_SRC_COLOR", "GL_ONE_MINUS_SRC_COLOR",
+                        "GL_DST_COLOR", "GL_ONE_MINUS_DST_COLOR", "GL_SRC_ALPHA",
+                        "GL_ONE_MINUS_SRC_ALPHA", "GL_DST_ALPHA", "GL_ONE_MINUS_DST_ALPHA",
+                        "GL_CONSTANT_COLOR", "GL_ONE_MINUS_CONSTANT_COLOR", "GL_CONSTANT_ALPHA",
+                        "GL_ONE_MINUS_CONSTANT_ALPHA" }, new int[] { R.string.gl_blend_zero, R.string.gl_blend_one,
+                        R.string.gl_blend_src_color, R.string.gl_blend_one_minus_src_color, R.string.gl_blend_dst_color,
+                        R.string.gl_blend_one_minus_dst_color, R.string.gl_blend_src_alpha,
+                        R.string.gl_blend_one_minus_src_alpha, R.string.gl_blend_dst_alpha,
+                        R.string.gl_blend_one_minus_dst_alpha, R.string.gl_blend_constant_color,
+                        R.string.gl_blend_one_minus_constant_color, R.string.gl_blend_constant_alpha,
+                        R.string.gl_blend_one_minus_constant_alpha });
+
+        // GL_MIN, GL_MAX are unsupported on this platform
+        BlendEquation = new GLConfig<Integer>(this, new Integer[] { GLES20.GL_FUNC_ADD, GLES20.GL_FUNC_SUBTRACT,
+                GLES20.GL_FUNC_REVERSE_SUBTRACT },
+                new String[] { "GL_FUNC_ADD", "GL_FUNC_SUBTRACT", "GL_FUNC_REVERSE_SUBTRACT" }, new int[] {
+                        R.string.gl_blend_add, R.string.gl_blend_sub, R.string.gl_blend_rev_sub });
+
         // TODO return from saved instance state or extras bundle
+        mScrollView = (ScrollView) findViewById(R.id.setup_scrollview);
 
         // Find all views associated with individual pipeline steps
         steps.groupSceneDefinition = findViewById(R.id.group_scene_definition);
@@ -260,11 +303,39 @@ public class SetupActivity extends Activity {
 
         });
 
-        TextView titleDepthBuffer = (TextView) steps.stepDepthBufferTest.findViewById(android.R.id.title);
-        titleDepthBuffer.setEnabled(false);
+        steps.stepDepthBufferTest.setOnClickListener(new OnClickListener() {
 
-        TextView titleBlending = (TextView) steps.stepBlending.findViewById(android.R.id.title);
-        titleBlending.setEnabled(false);
+            @Override
+            public void onClick(View v) {
+                // Instantiate and display a configuration dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                builder.setTitle(R.string.dialogue_title_depth_buffer_test);
+                // builder.setMessage("Specifies the function used to compare each incoming pixel depth value with the depth value present in the depth buffer.");
+                builder.setItems(DepthFunc.mNames, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mDepthFunc = which;
+                        updateViews();
+                    }
+                });
+                AlertDialog dialogue = builder.create();
+                dialogue.show();
+            }
+
+        });
+
+        steps.stepBlending.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SetupActivity.this, SetupBlendingActivity.class);
+                intent.putExtra("function_src", mBlendFuncSrc);
+                intent.putExtra("function_dst", mBlendFuncDst);
+                intent.putExtra("equation", mBlendEquation);
+                startActivityForResult(intent, REQUEST_STEP_BLENDING);
+            }
+
+        });
 
         Button buttonExit = (Button) findViewById(R.id.button_row_negative);
         buttonExit.setText(R.string.action_button_exit);
@@ -286,9 +357,16 @@ public class SetupActivity extends Activity {
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
                 intent.putExtra("culling_clockwise", mCullingClockwise);
+                intent.putExtra("depth_func", mDepthFunc);
+                intent.putExtra("blend_func_src", mBlendFuncSrc);
+                intent.putExtra("blend_func_dst", mBlendFuncDst);
+                intent.putExtra("blend_equation", mBlendEquation);
                 startActivity(intent);
             }
         });
+
+        // Ensure all TextView marquees start scrolling
+        mScrollView.setSelected(true);
 
         updateViews();
     }
@@ -368,13 +446,11 @@ public class SetupActivity extends Activity {
                 break;
         }
 
-        // TODO Update these properly
-
         // Generate depth buffer summary
-        String depthBufferSummary = "TODO";
+        String depthBufferSummary = DepthFunc.mDescriptions[mDepthFunc];
 
         // Generate blending summary
-        String blendingSummary = "TODO";
+        String blendingSummary = BlendEquation.mDescriptions[mBlendEquation];
 
         setText(steps.stepSceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.stepCameraParameters, android.R.id.summary, cameraParametersSummary);
@@ -402,7 +478,7 @@ public class SetupActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_setup_help:
-                final ScrollView scroll = (ScrollView) findViewById(R.id.setup_scrollview);
+                final ScrollView scroll = mScrollView;
 
                 final OnShowcaseEventListener help4 = new SimpleShowcaseEventListener() {
                     @Override
@@ -461,6 +537,15 @@ public class SetupActivity extends Activity {
 
                 if (resultCode == RESULT_OK)
                     mCamera = (Camera) data.getSerializableExtra("camera");
+                break;
+
+            case REQUEST_STEP_BLENDING:
+
+                if (resultCode == RESULT_OK) {
+                    mBlendFuncSrc = data.getIntExtra("function_src", mBlendFuncSrc);
+                    mBlendFuncDst = data.getIntExtra("function_dst", mBlendFuncDst);
+                    mBlendEquation = data.getIntExtra("equation", mBlendEquation);
+                }
                 break;
 
             default:

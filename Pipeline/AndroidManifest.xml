@@ -29,14 +29,14 @@
             android:label="@string/app_name" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.ryft.pipeline.ui.MainActivity" />
+                android:value="uk.co.ryft.pipeline.ui.SetupActivity" />
         </activity>
         <activity
             android:name="uk.co.ryft.pipeline.ui.setup.SetupSceneActivity"
             android:label="@string/title_activity_setup_scene" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.ryft.pipeline.ui.MainActivity" />
+                android:value="uk.co.ryft.pipeline.ui.SetupActivity" />
         </activity>
         <activity
             android:name="uk.co.ryft.pipeline.ui.setup.SetupCameraActivity"
@@ -44,7 +44,14 @@
             android:windowSoftInputMode="stateUnchanged" ><!-- Prevent soft keyboard incorrectly opening at startup -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.co.ryft.pipeline.ui.MainActivity" />
+                android:value="uk.co.ryft.pipeline.ui.SetupActivity" />
+        </activity>
+        <activity
+            android:name="uk.co.ryft.pipeline.ui.setup.SetupBlendingActivity"
+            android:label="@string/title_activity_setup_blending" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.co.ryft.pipeline.ui.SetupActivity" />
         </activity>
         
         <activity
