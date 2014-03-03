@@ -31,13 +31,15 @@ public class PipelineSurface extends GLSurfaceView {
         super(context);
         mContext = context;
         mRenderer = new PipelineRenderer(params);
+        
+        int minSamples = params.getInt("min_samples", 2);
 
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
         if (multisample)
-            setEGLConfigChooser(new MultisampleConfigChooser());
+            setEGLConfigChooser(new MultisampleConfigChooser(minSamples));
         else
             setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setRenderer(mRenderer);

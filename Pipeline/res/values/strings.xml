@@ -97,6 +97,7 @@
     <string name="dialogue_title_composite_new">Select Type</string>
     <string name="dialogue_title_lighting_model">Preview Shaders For:</string>
     <string name="dialogue_title_vertex_shading">Vertex Shader Code</string>
+    <string name="dialogue_title_multisampling">Select Minimum Samples</string>
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
     <string name="dialogue_title_depth_buffer_test">Depth Buffer Comparison</string>

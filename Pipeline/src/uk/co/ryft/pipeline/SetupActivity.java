@@ -53,6 +53,8 @@ public class SetupActivity extends Activity {
     protected Camera mCamera = new Camera(new Float3(-4, 1, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 3, 5);
     // Lighting model
     protected LightingModel mPreviewLightingModel = LightingModel.getLightingModel(Model.PHONG);
+    // Multisampling
+    protected int mMinSamples = 2;
     // Face culling
     protected boolean mCullingClockwise = false;
     // Depth buffer test function (Default: GL_LESS)
@@ -262,6 +264,25 @@ public class SetupActivity extends Activity {
         TextView titleClipping = (TextView) steps.stepClipping.findViewById(android.R.id.title);
         titleClipping.setEnabled(false);
 
+        steps.stepMultisampling.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Instantiate and display a configuration dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                builder.setTitle(R.string.dialogue_title_multisampling);
+                builder.setItems(new CharSequence[] { "2", "3", "4" },
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mMinSamples = which + 2;
+                                updateViews();
+                            }
+                        });
+                AlertDialog dialogue = builder.create();
+                dialogue.show();
+            }
+        });
+
         steps.stepFaceCulling.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -355,6 +376,7 @@ public class SetupActivity extends Activity {
                 Intent intent = new Intent(SetupActivity.this, PipelineActivity.class);
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
+                intent.putExtra("min_samples", mMinSamples);
                 intent.putExtra("culling_clockwise", mCullingClockwise);
                 intent.putExtra("depth_func", mDepthFunc);
                 intent.putExtra("blend_func_src", mBlendFuncSrc);
@@ -419,7 +441,7 @@ public class SetupActivity extends Activity {
         }
 
         // Generate multisampling summary
-        String multisamplingSummary = "TODO";
+        String multisamplingSummary = mMinSamples + " samples minimum in multisample buffers (" + mMinSamples + "x MSAA)";
 
         // Generate face culling summary
         String cullingSummary;
