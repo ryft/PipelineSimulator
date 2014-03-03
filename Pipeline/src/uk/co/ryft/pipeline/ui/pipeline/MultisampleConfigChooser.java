@@ -19,7 +19,7 @@ public class MultisampleConfigChooser implements GLSurfaceView.EGLConfigChooser 
         mValue = new int[1];
 
         // Try to find a normal multisample configuration first.
-        int[] configSpec = (mMultisampleEnabled) ? new int[] {
+        int[] configSpec = {
                 EGL10.EGL_RED_SIZE, 5,
                 EGL10.EGL_GREEN_SIZE, 6,
                 EGL10.EGL_BLUE_SIZE, 5,
@@ -29,13 +29,6 @@ public class MultisampleConfigChooser implements GLSurfaceView.EGLConfigChooser 
                 EGL10.EGL_SAMPLE_BUFFERS, 1 /* true */,
                 EGL10.EGL_SAMPLES, 2,
                 EGL10.EGL_NONE
-        } : new int[] {
-                EGL10.EGL_RED_SIZE, 5,
-                EGL10.EGL_GREEN_SIZE, 6,
-                EGL10.EGL_BLUE_SIZE, 5,
-                EGL10.EGL_DEPTH_SIZE, 16,
-                EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
-                EGL10.EGL_NONE
         };
 
         if (!egl.eglChooseConfig(display, configSpec, null, 0,
@@ -43,6 +36,53 @@ public class MultisampleConfigChooser implements GLSurfaceView.EGLConfigChooser 
             throw new IllegalArgumentException("eglChooseConfig failed");
         }
         int numConfigs = mValue[0];
+
+        if (numConfigs <= 0) {
+            // No normal multisampling config was found. Try to create a
+            // converage multisampling configuration, for the nVidia Tegra2.
+
+            final int EGL_COVERAGE_BUFFERS_NV = 0x30E0;
+            final int EGL_COVERAGE_SAMPLES_NV = 0x30E1;
+
+            configSpec = new int[]{
+                    EGL10.EGL_RED_SIZE, 5,
+                    EGL10.EGL_GREEN_SIZE, 6,
+                    EGL10.EGL_BLUE_SIZE, 5,
+                    EGL10.EGL_DEPTH_SIZE, 16,
+                    EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
+                    EGL_COVERAGE_BUFFERS_NV, 1 /* true */,
+                    EGL_COVERAGE_SAMPLES_NV, 2,  // always 5 in practice on tegra 2
+                    EGL10.EGL_NONE
+            };
+
+            if (!egl.eglChooseConfig(display, configSpec, null, 0,
+                    mValue)) {
+                throw new IllegalArgumentException("2nd eglChooseConfig failed");
+            }
+            numConfigs = mValue[0];
+
+            if (numConfigs <= 0) {
+                // Give up, try without multisampling.
+                configSpec = new int[]{
+                        EGL10.EGL_RED_SIZE, 5,
+                        EGL10.EGL_GREEN_SIZE, 6,
+                        EGL10.EGL_BLUE_SIZE, 5,
+                        EGL10.EGL_DEPTH_SIZE, 16,
+                        EGL10.EGL_RENDERABLE_TYPE, 4 /* EGL_OPENGL_ES2_BIT */,
+                        EGL10.EGL_NONE
+                };
+
+                if (!egl.eglChooseConfig(display, configSpec, null, 0,
+                        mValue)) {
+                    throw new IllegalArgumentException("3rd eglChooseConfig failed");
+                }
+                numConfigs = mValue[0];
+
+                if (numConfigs <= 0) {
+                  throw new IllegalArgumentException("No configs match configSpec");
+                }
+            }
+        }
 
         // Get all matching configurations.
         EGLConfig[] configs = new EGLConfig[numConfigs];
@@ -79,16 +119,5 @@ public class MultisampleConfigChooser implements GLSurfaceView.EGLConfigChooser 
         }
         return defaultValue;
     }
-
-    public boolean usesCoverageAa() {
-        return mUsesCoverageAa;
-    }
-
     private int[] mValue;
-    private boolean mUsesCoverageAa;
-    private boolean mMultisampleEnabled;
-    
-    public MultisampleConfigChooser(boolean enableMultisampling) {
-        mMultisampleEnabled = enableMultisampling;
-    }
 }

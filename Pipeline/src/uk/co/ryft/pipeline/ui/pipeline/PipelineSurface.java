@@ -8,22 +8,25 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 
 public class PipelineSurface extends GLSurfaceView {
-    
+
     @SuppressWarnings("unused")
     private static final String TAG = "PipelineSurface";
 
     private final PipelineRenderer mRenderer;
+
     // XXX This is very unsafe but required for saving and restoring state.
     // Can we do better by implementing it in onPause() etc here?
-    public PipelineRenderer getRenderer() { return mRenderer; }
-    
+    public PipelineRenderer getRenderer() {
+        return mRenderer;
+    }
+
     protected Context mContext;
-    
+
     public PipelineSurface(Context context) {
         super(context);
         throw new RuntimeException("Pipeline surface called with no parameters");
     }
-        
+
     public PipelineSurface(Context context, Bundle params, boolean multisample) {
         super(context);
         mContext = context;
@@ -33,8 +36,10 @@ public class PipelineSurface extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        setEGLConfigChooser(new MultisampleConfigChooser(multisample));
-//        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        if (multisample)
+            setEGLConfigChooser(new MultisampleConfigChooser());
+        else
+            setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setRenderer(mRenderer);
 
         // Render the view continuously so we can support transition effects.
@@ -44,15 +49,15 @@ public class PipelineSurface extends GLSurfaceView {
     }
 
     private boolean mEditMode;
-    
+
     public boolean isEditMode() {
         return mEditMode;
     }
-    
+
     public void toggleEditMode() {
         setEditMode(!isEditMode());
     }
-    
+
     public void setEditMode(boolean editMode) {
         mEditMode = editMode;
 
@@ -61,7 +66,7 @@ public class PipelineSurface extends GLSurfaceView {
         else
             setBackgroundResource(0);
     }
-    
+
     @Override
     public void setAlpha(float alpha) {
         mRenderer.setGlobalLightLevel(alpha);
@@ -87,19 +92,19 @@ public class PipelineSurface extends GLSurfaceView {
 
                 // reverse direction of rotation above the mid-line
                 if (y > getHeight() / 2)
-                  dx = dx * -1;
+                    dx = dx * -1;
 
                 // reverse direction of rotation to left of the mid-line
                 if (x < getWidth() / 2)
-                  dy = dy * -1;
+                    dy = dy * -1;
 
-                mRenderer.setRotation(mRenderer.getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
+                mRenderer.setRotation(mRenderer.getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
                 requestRender();
         }
 
         mPreviousX = x;
         mPreviousY = y;
-        
+
         return true;
     }
 

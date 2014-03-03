@@ -33,9 +33,8 @@ public class PipelineActivity extends Activity {
     @SuppressWarnings("unused")
     private static final String TAG = "SimulatorActivity";
 
-    protected PipelineSurface mPipelineSurface;
-    protected PipelineSurface mPipelineSurface0;
-    protected PipelineSurface mPipelineSurface1;
+    protected PipelineSurface mSurfaceNOAA;
+    protected PipelineSurface mSurfaceMSAA;
     protected TextView mPipelineIndicator;
 
     protected ArrayList<Element> mElements;
@@ -54,16 +53,13 @@ public class PipelineActivity extends Activity {
 
         // Pipeline surface needs to be constructed here with specific parameters from activity intent
         mPipelineParams = getIntent().getExtras();
-        mPipelineSurface0 = new PipelineSurface(this, mPipelineParams, false);
-        mPipelineSurface1 = new PipelineSurface(this, mPipelineParams, true);
-        mPipelineSurface0.setPadding(2, 2, 2, 2);
-        mPipelineSurface1.setPadding(2, 2, 2, 2);
-        mPipelineSurface1.setAlpha(0);
-        pipelineFrame.addView(mPipelineSurface0);
-        pipelineFrame.addView(mPipelineSurface1);
-        
-        // Create a reference to the current pipeline surface
-        mPipelineSurface = mPipelineSurface0;
+        mSurfaceNOAA = new PipelineSurface(this, mPipelineParams, false);
+        mSurfaceMSAA = new PipelineSurface(this, mPipelineParams, true);
+        mSurfaceNOAA.setPadding(2, 2, 2, 2);
+        mSurfaceMSAA.setPadding(2, 2, 2, 2);
+        mSurfaceMSAA.setAlpha(0);
+        pipelineFrame.addView(mSurfaceNOAA);
+        pipelineFrame.addView(mSurfaceMSAA);
 
         // Retrieve and cache the system's default "short" animation time.
         // TODO Am I actually using an animator?
@@ -76,7 +72,8 @@ public class PipelineActivity extends Activity {
         final GestureDetector gestureDetector = new GestureDetector(this, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                mPipelineSurface.toggleEditMode();
+                mSurfaceNOAA.toggleEditMode();
+                mSurfaceMSAA.toggleEditMode();
                 return true;
             }
 
@@ -88,7 +85,7 @@ public class PipelineActivity extends Activity {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (!mPipelineSurface.isEditMode()) {
+                if (!mSurfaceNOAA.isEditMode()) {
                     mIsScrolling = true;
                     mScrollStartX = e1.getX();
                     return true;
@@ -102,13 +99,14 @@ public class PipelineActivity extends Activity {
 
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
-                mPipelineSurface.getRenderer().setScaleFactor(detector.getScaleFactor());
+                mSurfaceNOAA.getRenderer().updateScaleFactor(detector.getScaleFactor());
+                mSurfaceMSAA.getRenderer().updateScaleFactor(detector.getScaleFactor());
                 return true;
             }
         });
 
         // Combine previous listeners and detect left- and right-swipes
-        mPipelineSurface.setOnTouchListener(new OnTouchListener() {
+        final OnTouchListener touchListener = new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -116,20 +114,26 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
 
-                    if (mScrollStartX - event.getX() >= mPipelineSurface.getWidth() / 3) {
+                    if (mScrollStartX - event.getX() >= mSurfaceNOAA.getWidth() / 3) {
                         // Scrolled left
-                        mPipelineSurface.getRenderer().next();
+                        mSurfaceNOAA.getRenderer().next();
+                        mSurfaceMSAA.getRenderer().next();
+                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
+                            new Thread(crossFader).start();
                         updatePipelineNavigator(true);
 
-                    } else if (event.getX() - mScrollStartX >= mPipelineSurface.getWidth() / 3) {
+                    } else if (event.getX() - mScrollStartX >= mSurfaceNOAA.getWidth() / 3) {
                         // Scrolled right
-                        mPipelineSurface.getRenderer().previous();
+                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
+                            new Thread(crossFader).start();
+                        mSurfaceNOAA.getRenderer().previous();
+                        mSurfaceMSAA.getRenderer().previous();
                         updatePipelineNavigator(false);
                     }
                 }
 
                 // Consume all double-tap and swipe events as next highest priority
-                if (!gestureDetector.onTouchEvent(event) && mPipelineSurface.isEditMode()) {
+                if (!gestureDetector.onTouchEvent(event) && mSurfaceNOAA.isEditMode()) {
 
                     // XXX There is a bug in ScaleGestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
@@ -139,70 +143,66 @@ public class PipelineActivity extends Activity {
 
                 return true;
             }
-        });
+        };
+
+        mSurfaceNOAA.setOnTouchListener(touchListener);
+        mSurfaceMSAA.setOnTouchListener(touchListener);
 
     }
-    
+
     private boolean multisampled = false;
+    private CrossFader crossFader = new CrossFader();
 
-    private void crossfade() {
+    private class CrossFader implements Runnable {
 
-        // // Set the content view to 0% opacity but visible, so that it is visible
-        // // (but fully transparent) during the animation.
-        // mV.setAlpha(0f);
-        // mV.setVisibility(View.VISIBLE);
+        @Override
+        public void run() {
 
-        final View viewSrc = (multisampled) ? mPipelineSurface1 : mPipelineSurface0;
-        final View viewDst = (multisampled) ? mPipelineSurface0 : mPipelineSurface1;
+            final PipelineSurface viewSrc = (multisampled) ? mSurfaceMSAA : mSurfaceNOAA;
+            final PipelineSurface viewDst = (multisampled) ? mSurfaceNOAA : mSurfaceMSAA;
 
-        new Runnable() {
-            @Override
-            public void run() {
-
-                for (float alpha = 1; alpha >= 0; alpha -= 0.01) {
-                    viewSrc.setAlpha(alpha);
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+            Runnable showDst = new Runnable() {
+                @Override
+                public void run() {
+                    viewDst.setAlpha(0);
+                    viewDst.setVisibility(View.VISIBLE);
                 }
-                viewDst.setAlpha(0);
-                viewDst.setVisibility(View.VISIBLE);
-                viewSrc.setVisibility(View.GONE);
-                for (float alpha = 0; alpha <= 1; alpha += 0.01) {
-                    viewDst.setAlpha(alpha);
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+            };
+            Runnable hideSrc = new Runnable() {
+                @Override
+                public void run() {
+                    viewSrc.setVisibility(View.GONE);
                 }
+            };
+            Runnable raiseSrc = new Runnable() {
+                @Override
+                public void run() {
+                    viewSrc.bringToFront();
+                }
+            };
 
+            viewDst.post(showDst);
+            viewSrc.post(raiseSrc);
+            for (float alpha = 1; alpha >= 0; alpha -= 0.01) {
+                viewSrc.setAlpha(alpha);
+                threadSleep(10);
             }
-        }.run();
+            viewSrc.post(hideSrc);
+            for (float alpha = 0; alpha <= 1; alpha += 0.01) {
+                viewDst.setAlpha(alpha);
+                threadSleep(10);
+            }
+            
+            multisampled = !multisampled;
 
-        // // Animate the content view to 100% opacity, and clear any animation
-        // // listener set on the view.
-        // mV.animate()
-        // .alpha(1f)
-        // .setDuration(5000)
-        // .setListener(null);
-        //
-        // // Animate the loading view to 0% opacity. After the animation ends,
-        // // set its visibility to GONE as an optimization step (it won't
-        // // participate in layout passes, etc.)
-        // mPipelineSurface.animate()
-        // .alpha(0f)
-        // .setDuration(5000)
-        // .setListener(new AnimatorListenerAdapter() {
-        // @Override
-        // public void onAnimationEnd(Animator animation) {
-        // mPipelineSurface.setVisibility(View.GONE);
-        // }
-        // });
+        }
+    }
+    
+    private void threadSleep(int length) {
+        try {
+            Thread.sleep(length);
+        } catch (InterruptedException e) {
+        }
     }
 
     static class Navigator {
@@ -354,10 +354,10 @@ public class PipelineActivity extends Activity {
 
     public void updatePipelineNavigator(boolean forward) {
 
-        mPipelineIndicator.setText(mPipelineSurface.getRenderer().getStateDescription());
+        mPipelineIndicator.setText(mSurfaceNOAA.getRenderer().getStateDescription());
 
         // Scroll to the location of the current state's corresponding block
-        int currentState = mPipelineSurface.getRenderer().getCurrentState();
+        int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
         int[] location = new int[] { 0, 0 };
         View currentBlock = mNavigator.getStateBlock(currentState);
         if (currentBlock != null) {
@@ -422,16 +422,17 @@ public class PipelineActivity extends Activity {
                 float dy = y - mPreviousY;
 
                 // reverse direction of rotation above the mid-line
-                if (y > mPipelineSurface.getHeight() / 2)
+                if (y > mSurfaceNOAA.getHeight() / 2)
                     dx = dx * -1;
 
                 // reverse direction of rotation to left of the mid-line
-                if (x < mPipelineSurface.getWidth() / 2)
+                if (x < mSurfaceNOAA.getWidth() / 2)
                     dy = dy * -1;
 
-                mPipelineSurface.getRenderer().setRotation(
-                        mPipelineSurface.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
-                mPipelineSurface.requestRender();
+                mSurfaceNOAA.getRenderer().setRotation(
+                        mSurfaceNOAA.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
+                mSurfaceMSAA.getRenderer().setRotation(
+                        mSurfaceMSAA.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
         }
 
         mPreviousX = x;
@@ -442,9 +443,10 @@ public class PipelineActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (mPipelineSurface.isEditMode())
-            mPipelineSurface.toggleEditMode();
-        else
+        if (mSurfaceNOAA.isEditMode()) {
+            mSurfaceNOAA.toggleEditMode();
+            mSurfaceMSAA.toggleEditMode();
+        } else
             super.onBackPressed();
     }
 
@@ -463,7 +465,6 @@ public class PipelineActivity extends Activity {
         switch (item.getItemId()) {
 
             case R.id.action_pipeline_help:
-                crossfade();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -472,10 +473,10 @@ public class PipelineActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        PipelineRenderer renderer = mPipelineSurface.getRenderer();
+        PipelineRenderer renderer = mSurfaceNOAA.getRenderer();
         // TODO check out GLSurfaceView.setPreserveEGLContextOnPause()
 
-        savedInstanceState.putBoolean("edit_mode", mPipelineSurface.isEditMode());
+        savedInstanceState.putBoolean("edit_mode", mSurfaceNOAA.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());
     }
 
@@ -483,22 +484,27 @@ public class PipelineActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        PipelineRenderer renderer = mPipelineSurface.getRenderer();
+        PipelineRenderer rendererNOAA = mSurfaceNOAA.getRenderer();
+        PipelineRenderer rendererMSAA = mSurfaceMSAA.getRenderer();
 
-        mPipelineSurface.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
-        renderer.setRotation(savedInstanceState.getFloat("angle", 0));
+        mSurfaceNOAA.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
+        mSurfaceMSAA.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
+        rendererNOAA.setRotation(savedInstanceState.getFloat("angle", 0));
+        rendererMSAA.setRotation(savedInstanceState.getFloat("angle", 0));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mPipelineSurface.onPause();
+        mSurfaceNOAA.onPause();
+        mSurfaceMSAA.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mPipelineSurface.onResume();
+        mSurfaceNOAA.onResume();
+        mSurfaceMSAA.onResume();
     }
 
 }

@@ -13,6 +13,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import uk.co.ryft.pipeline.SetupActivity;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
+import uk.co.ryft.pipeline.gl.lighting.LightingModel.Model;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.Transformation;
@@ -34,7 +35,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     // Renderer helper objects passed from the parent
     private final ArrayList<Element> mElements = new ArrayList<Element>();
     private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
+    
     private LightingModel mLighting;
+    private LightingModel mPointLighting;
 
     private final Camera mSceneCamera;
     private final Camera mActualCamera;
@@ -47,12 +50,13 @@ public class PipelineRenderer implements Renderer, Serializable {
     private int mGLDepthFunc = 1;
     
     private boolean mGLBlendEnabled = false;
-    private int mGLBlendFuncSrc = 1;
-    private int mGLBlendFuncDst = 0;
+    private int mGLBlendFuncSrc = 2;
+    private int mGLBlendFuncDst = 3;
     private int mGLBlendEquation = 0;
     
     private boolean mDrawAxes = true;
     private boolean mDrawCamera = true;
+    private boolean mDrawFrustum = true;
 
     // OpenGL matrices stored in float arrays (column-major order)
     private final float[] mModelMatrix = new float[16];
@@ -76,7 +80,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final List<Transformation<float[]>> mModelTransformations = new LinkedList<Transformation<float[]>>();
 
     // Light position, for implementing lighting models
-    public static Float3 sLightPosition = new Float3(-1, 1, -2);
+    public static Float3 sLightPosition = new Float3(-2, 2, -3);
     private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition),
             Colour.WHITE);
     private Drawable sLightDrawable;
@@ -90,7 +94,17 @@ public class PipelineRenderer implements Renderer, Serializable {
             mActualCamera.setRotation(angle);
     }
 
+    public float getScaleFactor() {
+        return mActualCamera.getScaleFactor();
+    }
+
     public void setScaleFactor(float scaleFactor) {
+        mActualCamera.setScaleFactor(scaleFactor);
+        // Force update to projection matrix
+        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+    }
+
+    public void updateScaleFactor(float scaleFactor) {
         if (mPipelineState < STEP_CLIPPING) {
             mActualCamera.updateScaleFactor(scaleFactor);
             // Force update to projection matrix
@@ -134,8 +148,9 @@ public class PipelineRenderer implements Renderer, Serializable {
         mCameraElement = ShapeFactory.buildCamera(0.25f);
         mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
 
-        // Initialise lighting model
-        mLighting = LightingModel.UNIFORM;
+        // Initialise lighting models
+        mLighting = LightingModel.getLightingModel(Model.UNIFORM);
+        mPointLighting = LightingModel.getLightingModel(Model.POINT_SOURCE);
 
         mGLCullingEnabled = false;
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
@@ -161,7 +176,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
         // Set the background frame colour
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClearDepthf(1.0f);
 
         // XXX Turn everything off initially
@@ -173,9 +188,8 @@ public class PipelineRenderer implements Renderer, Serializable {
         mCameraDrawable = null;
         mFrustumDrawable = null;
 
-        LightingModel.resetAll();
-        // FIXME For some reason the next call is required. Find out why if there is time (not a priority)
         mLighting.reset();
+        mPointLighting.reset();
     }
 
     int mSurfaceWidth;
@@ -287,10 +301,10 @@ public class PipelineRenderer implements Renderer, Serializable {
         // Draw axes and virtual camera
         if (mDrawAxes)
             sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
-        if (mDrawCamera) {
+        if (mDrawCamera)
             mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+        if (mDrawFrustum)
             mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
-        }
 
         setGLParameters(false);
 
@@ -309,7 +323,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         if (sLightDrawable == null)
             sLightDrawable = sLightPoint.getDrawable();
-        sLightDrawable.draw(LightingModel.POINT_SOURCE, mLVMatrix, mLVPMatrix);
+        sLightDrawable.draw(mPointLighting, mLVMatrix, mLVPMatrix);
 
     }
 
@@ -436,7 +450,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             mLighting.setGlobalLightLevel(i);
             Thread.sleep(5);
         }
-        mLighting = (forward) ? LightingModel.LAMBERTIAN : LightingModel.UNIFORM;
+        mLighting = (forward) ? LightingModel.getLightingModel(Model.LAMBERTIAN) : LightingModel.getLightingModel(Model.UNIFORM);
         for (float i = 0; i <= 1; i += 0.01) {
             mLighting.setGlobalLightLevel(i);
             Thread.sleep(5);
@@ -452,7 +466,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateMultisampling(boolean forward) throws InterruptedException {
-
+        // This animation is performed by the enclosing activity as we need to swap out the surface
     }
 
     private void animateFaceCulling(boolean forward) throws InterruptedException {
@@ -464,7 +478,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             mLighting.setGlobalLightLevel(i);
             Thread.sleep(5);
         }
-        mLighting = (forward) ? LightingModel.PHONG : LightingModel.LAMBERTIAN;
+        mLighting = (forward) ? LightingModel.getLightingModel(Model.PHONG) : LightingModel.getLightingModel(Model.LAMBERTIAN);
         for (float i = 0; i <= 1; i += 0.01) {
             mLighting.setGlobalLightLevel(i);
             Thread.sleep(5);
@@ -478,6 +492,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private void animateBlending(boolean forward) throws InterruptedException {
         mGLBlendEnabled = forward;
         mDrawCamera = !forward;
+        mDrawFrustum = !forward;
     }
 
     public void next() {

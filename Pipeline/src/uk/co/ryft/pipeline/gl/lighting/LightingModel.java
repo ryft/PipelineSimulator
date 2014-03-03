@@ -25,12 +25,6 @@ public abstract class LightingModel implements Serializable {
     // Bytes between consecutive vertices
     protected static final int vertexStride = COORDS_PER_VERTEX * 4;
 
-    // Each lighting model is a singleton
-    public static LightingModel UNIFORM = new Uniform();
-    public static LightingModel LAMBERTIAN = new Lambertian();
-    public static LightingModel PHONG = new Phong();
-    public static LightingModel POINT_SOURCE = new PointSource();
-
     public static enum Model {
         UNIFORM, LAMBERTIAN, PHONG, POINT_SOURCE;
 
@@ -60,19 +54,19 @@ public abstract class LightingModel implements Serializable {
         return mModel;
     }
 
-    private static final Map<Model, LightingModel> mLightingModelMap;
-    static {
-        Map<Model, LightingModel> lightingModelMap = new HashMap<Model, LightingModel>();
-        lightingModelMap.put(Model.UNIFORM, LightingModel.UNIFORM);
-        lightingModelMap.put(Model.LAMBERTIAN, LightingModel.LAMBERTIAN);
-        lightingModelMap.put(Model.PHONG, LightingModel.PHONG);
-        lightingModelMap.put(Model.POINT_SOURCE, LightingModel.POINT_SOURCE);
-        mLightingModelMap = Collections.unmodifiableMap(lightingModelMap);
-    }
-
-    // XXX Allows us to get a lighting model from its model type without any construction
-    public static LightingModel getLightingModel(Model m) {
-        return mLightingModelMap.get(m);
+    public static LightingModel getLightingModel(Model model) {
+        switch (model) {
+            case UNIFORM:
+                return new Uniform();
+            case LAMBERTIAN:
+                return new Lambertian();
+            case PHONG:
+                return new Phong();
+            case POINT_SOURCE:
+                return new PointSource();
+            default:
+                return null;
+        }
     }
 
     public int getGLProgram(int primitiveType) {
@@ -89,7 +83,7 @@ public abstract class LightingModel implements Serializable {
     }
 
     protected float mLightLevel = 1;
-    
+
     public void setGlobalLightLevel(float lightLevel) {
         mLightLevel = lightLevel;
     }
@@ -99,13 +93,8 @@ public abstract class LightingModel implements Serializable {
     public abstract String getVertexShader(int primitiveType);
 
     public abstract String getFragmentShader(int primitiveType);
-    
-    public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
 
-    public static void resetAll() {
-        for (Model m : Model.values())
-            getLightingModel(m).reset();
-    }
+    public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
 
     // XXX Clears the GL program for use in a new render thread
     public void reset() {

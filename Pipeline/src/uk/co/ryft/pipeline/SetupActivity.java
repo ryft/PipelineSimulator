@@ -6,6 +6,7 @@ import java.util.Random;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.gl.lighting.LightingModel;
+import uk.co.ryft.pipeline.gl.lighting.LightingModel.Model;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
@@ -49,17 +50,16 @@ public class SetupActivity extends Activity {
     // Scene composition
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
     // Camera parameters
-    protected Camera mCamera = new Camera(new Float3(-1.5f, 1, 0), new Float3(1, -0.5f, 0), new Float3(0, 1, 0), -0.5f, 0.5f,
-            -0.5f, 0.5f, 1, 3);
+    protected Camera mCamera = new Camera(new Float3(-4, 1, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 3, 5);
     // Lighting model
-    protected LightingModel mPreviewLightingModel = LightingModel.PHONG;
+    protected LightingModel mPreviewLightingModel = LightingModel.getLightingModel(Model.PHONG);
     // Face culling
     protected boolean mCullingClockwise = false;
     // Depth buffer test function (Default: GL_LESS)
     protected int mDepthFunc = 1;
     // Blending parameters
-    protected int mBlendFuncSrc = 1;
-    protected int mBlendFuncDst = 0;
+    protected int mBlendFuncSrc = 2;
+    protected int mBlendFuncDst = 3;
     protected int mBlendEquation = 0;
 
     public static GLConfig<Integer> DepthFunc;
@@ -109,10 +109,9 @@ public class SetupActivity extends Activity {
                 GLES20.GL_ONE_MINUS_SRC_COLOR, GLES20.GL_DST_COLOR, GLES20.GL_ONE_MINUS_DST_COLOR, GLES20.GL_SRC_ALPHA,
                 GLES20.GL_ONE_MINUS_SRC_ALPHA, GLES20.GL_DST_ALPHA, GLES20.GL_ONE_MINUS_DST_ALPHA, GLES20.GL_CONSTANT_COLOR,
                 GLES20.GL_ONE_MINUS_CONSTANT_COLOR, GLES20.GL_CONSTANT_ALPHA, GLES20.GL_ONE_MINUS_CONSTANT_ALPHA },
-                new String[] { "GL_ZERO", "GL_ONE", "GL_SRC_COLOR", "GL_ONE_MINUS_SRC_COLOR",
-                        "GL_DST_COLOR", "GL_ONE_MINUS_DST_COLOR", "GL_SRC_ALPHA",
-                        "GL_ONE_MINUS_SRC_ALPHA", "GL_DST_ALPHA", "GL_ONE_MINUS_DST_ALPHA",
-                        "GL_CONSTANT_COLOR", "GL_ONE_MINUS_CONSTANT_COLOR", "GL_CONSTANT_ALPHA",
+                new String[] { "GL_ZERO", "GL_ONE", "GL_SRC_COLOR", "GL_ONE_MINUS_SRC_COLOR", "GL_DST_COLOR",
+                        "GL_ONE_MINUS_DST_COLOR", "GL_SRC_ALPHA", "GL_ONE_MINUS_SRC_ALPHA", "GL_DST_ALPHA",
+                        "GL_ONE_MINUS_DST_ALPHA", "GL_CONSTANT_COLOR", "GL_ONE_MINUS_CONSTANT_COLOR", "GL_CONSTANT_ALPHA",
                         "GL_ONE_MINUS_CONSTANT_ALPHA" }, new int[] { R.string.gl_blend_zero, R.string.gl_blend_one,
                         R.string.gl_blend_src_color, R.string.gl_blend_one_minus_src_color, R.string.gl_blend_dst_color,
                         R.string.gl_blend_one_minus_dst_color, R.string.gl_blend_src_alpha,
@@ -152,10 +151,10 @@ public class SetupActivity extends Activity {
 
         // Put some interesting things in the scene for testing purposes
         Random r = new Random();
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < 48; i++) {
             Element e = ShapeFactory.buildCuboid(
-                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1, r.nextFloat() * 2 - 1), r.nextFloat() / 5,
-                    r.nextFloat() / 5, r.nextFloat() / 5, Colour.RANDOM, Colour.RANDOM);
+                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 3 - 1.5f, r.nextFloat() * 3 - 1.5f), r.nextFloat() / 5 + 0.1f,
+                    r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f, Colour.RANDOM, Colour.RANDOM);
             mSceneElements.add(e);
         }
 
@@ -509,7 +508,8 @@ public class SetupActivity extends Activity {
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         scroll.smoothScrollTo(0, (int) steps.stepLightingModel.getY());
                         insertShowcaseView(steps.stepLightingModel.findViewById(android.R.id.title),
-                                R.string.help_lighting_preview_title, R.string.help_lighting_preview_desc, 1, null, tutorialDisabledOptions);
+                                R.string.help_lighting_preview_title, R.string.help_lighting_preview_desc, 1, null,
+                                tutorialDisabledOptions);
                     }
                 };
 
@@ -518,13 +518,15 @@ public class SetupActivity extends Activity {
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         scroll.smoothScrollTo(0, (int) steps.groupVertexProcessing.getY());
                         insertShowcaseView(steps.groupVertexProcessing.findViewById(R.id.swatch_vertex_processing),
-                                R.string.help_colour_coding_title, R.string.help_colour_coding_desc, 0.5f, null, tutorialLightingPreviews);
+                                R.string.help_colour_coding_title, R.string.help_colour_coding_desc, 0.5f, null,
+                                tutorialLightingPreviews);
                     }
                 };
 
                 scroll.smoothScrollTo(0, 0);
                 insertShowcaseView(steps.stepSceneComposition.findViewById(android.R.id.title),
-                        R.string.help_scene_definition_title, R.string.help_scene_definition_desc, 1.5f, null, tutorialColourCoding);
+                        R.string.help_scene_definition_title, R.string.help_scene_definition_desc, 1.5f, null,
+                        tutorialColourCoding);
 
                 break;
         }
