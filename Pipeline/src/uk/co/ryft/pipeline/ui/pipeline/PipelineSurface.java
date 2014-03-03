@@ -24,7 +24,7 @@ public class PipelineSurface extends GLSurfaceView {
         throw new RuntimeException("Pipeline surface called with no parameters");
     }
         
-    public PipelineSurface(Context context, Bundle params) {
+    public PipelineSurface(Context context, Bundle params, boolean multisample) {
         super(context);
         mContext = context;
         mRenderer = new PipelineRenderer(params);
@@ -33,7 +33,8 @@ public class PipelineSurface extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
         // Set the Renderer for drawing on the GLSurfaceView
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        setEGLConfigChooser(new MultisampleConfigChooser(multisample));
+//        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setRenderer(mRenderer);
 
         // Render the view continuously so we can support transition effects.
@@ -59,6 +60,11 @@ public class PipelineSurface extends GLSurfaceView {
             setBackgroundResource(R.drawable.surface_border);
         else
             setBackgroundResource(0);
+    }
+    
+    @Override
+    public void setAlpha(float alpha) {
+        mRenderer.setGlobalLightLevel(alpha);
     }
 
     private float mPreviousX = 0;

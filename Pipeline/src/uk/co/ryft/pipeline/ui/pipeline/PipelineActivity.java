@@ -1,13 +1,11 @@
 package uk.co.ryft.pipeline.ui.pipeline;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Drawable;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -24,10 +22,9 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,41 +34,46 @@ public class PipelineActivity extends Activity {
     private static final String TAG = "SimulatorActivity";
 
     protected PipelineSurface mPipelineSurface;
+    protected PipelineSurface mPipelineSurface0;
+    protected PipelineSurface mPipelineSurface1;
     protected TextView mPipelineIndicator;
 
     protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
 
-    @SuppressWarnings("unchecked")
+    protected int mAnimationDuration;
+
+    @SuppressLint("NewApi")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get data from activity intent
-        mPipelineParams = getIntent().getExtras();
-
-        // Set up view objects
-        // Pipeline surface needs to be constructed here with specific parameters
-        mPipelineSurface = new PipelineSurface(this, mPipelineParams);
-
+        // Inflate layout and find references to views
         setContentView(R.layout.activity_pipeline);
-        RelativeLayout pipelineFrame = (RelativeLayout) findViewById(R.id.pipeline_frame);
+        FrameLayout pipelineFrame = (FrameLayout) findViewById(R.id.simulator_frame);
         mPipelineIndicator = (TextView) findViewById(R.id.pipeline_indicator);
 
-        mPipelineSurface.setPadding(2, 2, 2, 2);
-        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, 0, 48);
-        mPipelineSurface.setLayoutParams(params);
-        pipelineFrame.addView(mPipelineSurface, 0);
+        // Pipeline surface needs to be constructed here with specific parameters from activity intent
+        mPipelineParams = getIntent().getExtras();
+        mPipelineSurface0 = new PipelineSurface(this, mPipelineParams, false);
+        mPipelineSurface1 = new PipelineSurface(this, mPipelineParams, true);
+        mPipelineSurface0.setPadding(2, 2, 2, 2);
+        mPipelineSurface1.setPadding(2, 2, 2, 2);
+        mPipelineSurface1.setAlpha(0);
+        pipelineFrame.addView(mPipelineSurface0);
+        pipelineFrame.addView(mPipelineSurface1);
+        
+        // Create a reference to the current pipeline surface
+        mPipelineSurface = mPipelineSurface0;
+
+        // Retrieve and cache the system's default "short" animation time.
+        // TODO Am I actually using an animator?
+        mAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
+
+        // Initialise pipeline navigator
         setupPipelineNavigator();
 
-        mElements = (ArrayList<Element>) mPipelineParams.getSerializable("elements");
-        List<Drawable> scene = new LinkedList<Drawable>();
-        for (Element e : mElements) {
-            Drawable d = e.getDrawable();
-            scene.add(d);
-        }
-
-        final GestureDetector gestureDetector = new GestureDetector(mPipelineSurface.mContext, new SimpleOnGestureListener() {
+        // Set up a gesture listener for double-taps
+        final GestureDetector gestureDetector = new GestureDetector(this, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 mPipelineSurface.toggleEditMode();
@@ -95,18 +97,18 @@ public class PipelineActivity extends Activity {
             }
         });
 
-        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(mPipelineSurface.mContext,
-                new SimpleOnScaleGestureListener() {
+        // Set up a scale event listener for pinch-to-zoom gestures
+        final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(this, new SimpleOnScaleGestureListener() {
 
-                    @Override
-                    public boolean onScale(ScaleGestureDetector detector) {
-                        mPipelineSurface.getRenderer().setScaleFactor(detector.getScaleFactor());
-                        return true;
-                    }
-                });
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                mPipelineSurface.getRenderer().setScaleFactor(detector.getScaleFactor());
+                return true;
+            }
+        });
 
+        // Combine previous listeners and detect left- and right-swipes
         mPipelineSurface.setOnTouchListener(new OnTouchListener() {
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -140,10 +142,72 @@ public class PipelineActivity extends Activity {
         });
 
     }
+    
+    private boolean multisampled = false;
+
+    private void crossfade() {
+
+        // // Set the content view to 0% opacity but visible, so that it is visible
+        // // (but fully transparent) during the animation.
+        // mV.setAlpha(0f);
+        // mV.setVisibility(View.VISIBLE);
+
+        final View viewSrc = (multisampled) ? mPipelineSurface1 : mPipelineSurface0;
+        final View viewDst = (multisampled) ? mPipelineSurface0 : mPipelineSurface1;
+
+        new Runnable() {
+            @Override
+            public void run() {
+
+                for (float alpha = 1; alpha >= 0; alpha -= 0.01) {
+                    viewSrc.setAlpha(alpha);
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                viewDst.setAlpha(0);
+                viewDst.setVisibility(View.VISIBLE);
+                viewSrc.setVisibility(View.GONE);
+                for (float alpha = 0; alpha <= 1; alpha += 0.01) {
+                    viewDst.setAlpha(alpha);
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }.run();
+
+        // // Animate the content view to 100% opacity, and clear any animation
+        // // listener set on the view.
+        // mV.animate()
+        // .alpha(1f)
+        // .setDuration(5000)
+        // .setListener(null);
+        //
+        // // Animate the loading view to 0% opacity. After the animation ends,
+        // // set its visibility to GONE as an optimization step (it won't
+        // // participate in layout passes, etc.)
+        // mPipelineSurface.animate()
+        // .alpha(0f)
+        // .setDuration(5000)
+        // .setListener(new AnimatorListenerAdapter() {
+        // @Override
+        // public void onAnimationEnd(Animator animation) {
+        // mPipelineSurface.setVisibility(View.GONE);
+        // }
+        // });
+    }
 
     static class Navigator {
         HorizontalScrollView scrollView;
-        
+
         LinearLayout groupVertexProcessing;
         LinearLayout groupPrimitiveProcessing;
         LinearLayout groupRasterisation;
@@ -194,7 +258,7 @@ public class PipelineActivity extends Activity {
     private void setupPipelineNavigator() {
 
         mNavigator.scrollView = (HorizontalScrollView) findViewById(R.id.pipeline_navigator);
-        
+
         mNavigator.groupVertexProcessing = (LinearLayout) findViewById(R.id.group_vertex_processing);
         mNavigator.groupPrimitiveProcessing = (LinearLayout) findViewById(R.id.group_primitive_processing);
         mNavigator.groupRasterisation = (LinearLayout) findViewById(R.id.group_rasterisation);
@@ -294,7 +358,7 @@ public class PipelineActivity extends Activity {
 
         // Scroll to the location of the current state's corresponding block
         int currentState = mPipelineSurface.getRenderer().getCurrentState();
-        int[] location = new int[] {0, 0};
+        int[] location = new int[] { 0, 0 };
         View currentBlock = mNavigator.getStateBlock(currentState);
         if (currentBlock != null) {
             currentBlock.getLocationInWindow(location);
@@ -302,15 +366,15 @@ public class PipelineActivity extends Activity {
         }
         // We don't need to perform a smooth scroll as the navigator should always be hidden
         mNavigator.scrollView.scrollTo(location[0], location[1]);
-        
+
         // Step defines the block which is to be modified
         // If we've moving backwards, the block following the current state needs to be un-shaded
         int step = (forward) ? currentState : currentState + 1;
         View block = mNavigator.getStateBlock(step);
-        
+
         if (block == null)
             return;
-    
+
         Resources r = getResources();
         int resource = (forward) ? R.drawable.navigator_box_inner_dark : R.drawable.navigator_box_inner_light;
         android.graphics.drawable.Drawable background = r.getDrawable(resource);
@@ -399,6 +463,7 @@ public class PipelineActivity extends Activity {
         switch (item.getItemId()) {
 
             case R.id.action_pipeline_help:
+                crossfade();
                 break;
         }
         return super.onOptionsItemSelected(item);

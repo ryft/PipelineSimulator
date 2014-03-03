@@ -97,6 +97,10 @@ public class PipelineRenderer implements Renderer, Serializable {
             mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
         }
     }
+    
+    public void setGlobalLightLevel(float alpha) {
+        mLighting.setGlobalLightLevel(alpha);
+    }
 
     public void interact() {
         // mActualCamera.transformTo(mVirtualCamera);

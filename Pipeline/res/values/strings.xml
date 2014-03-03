@@ -81,12 +81,12 @@
     <string name="heading_element_proportions">Size and proportions</string>
     <string name="heading_element_parameters">Other parameters</string>
     
-    <string name="heading_group_scene_definition">Scene Definition</string>
-    <string name="heading_group_vertex_processing">Vertex Processing</string>
-    <string name="heading_group_primitive_processing">Primitive Processing</string>
-    <string name="heading_group_rasterisation">Rasterisation</string>
-    <string name="heading_group_fragment_processing">Fragment Processing</string>
-    <string name="heading_group_pixel_processing">Pixel Processing</string>
+    <string name="heading_group_scene_definition">SCENE DEFINITION</string>
+    <string name="heading_group_vertex_processing">VERTEX PROCESSING</string>
+    <string name="heading_group_primitive_processing">PRIMITIVE PROCESSING</string>
+    <string name="heading_group_rasterisation">RASTERISATION</string>
+    <string name="heading_group_fragment_processing">FRAGMENT PROCESSING</string>
+    <string name="heading_group_pixel_processing">PIXEL PROCESSING</string>
     
     <string name="desc_element_icon">Element Icon</string>
     <string name="desc_element_edit">Edit Element</string>

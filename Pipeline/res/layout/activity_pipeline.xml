@@ -1,21 +1,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pipeline_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
     tools:context=".PipelineActivity" >
 
-    <!-- Pipeline Surface will be added here as it needs to be constructed with specific parameters -->
+    <FrameLayout
+        android:id="@+id/simulator_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/slider_offset_height" >
+
+        <!-- Pipeline Surface will be added here as it needs to be constructed with specific parameters -->
+
+    </FrameLayout>
 
     <com.slidinglayer.SlidingLayer
         xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         slidingLayer:closeOnTapEnabled="false"
-        slidingLayer:offsetWidth="@dimen/slider_offset_width"
-        slidingLayer:shadowDrawable="@drawable/sidebar_shadow"
-        slidingLayer:shadowWidth="@dimen/slider_shadow_width"
+        slidingLayer:offsetWidth="@dimen/slider_offset_height"
         slidingLayer:stickTo="bottom" >
 
         <LinearLayout
@@ -24,23 +29,21 @@
             android:background="#AA000000"
             android:orientation="vertical" >
 
+            <View style="@style/Hairline" />
+
             <TextView
                 android:id="@+id/pipeline_indicator"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/indicator_text_height"
                 android:ellipsize="none"
                 android:gravity="center"
                 android:singleLine="true"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@android:color/white"
-                android:typeface="monospace"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:typeface="monospace" />
 
-            <View
-                android:id="@+id/hairline"
-                android:layout_width="match_parent"
-                android:layout_height="1dip"
-                android:background="@color/list_item_hairline" />
+            <View style="@style/Hairline" />
 
             <include
                 android:id="@+id/pipeline_navigator"
