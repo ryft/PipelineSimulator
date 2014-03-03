@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
 import uk.co.ryft.pipeline.model.Element;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -13,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -42,7 +42,6 @@ public class PipelineActivity extends Activity {
 
     protected int mAnimationDuration;
 
-    @SuppressLint("NewApi")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -74,6 +73,12 @@ public class PipelineActivity extends Activity {
             public boolean onDoubleTap(MotionEvent e) {
                 mSurfaceNOAA.toggleEditMode();
                 mSurfaceMSAA.toggleEditMode();
+                
+                mPipelineIndicator.setGravity(Gravity.CENTER_HORIZONTAL);
+                if (mSurfaceNOAA.isEditMode())
+                    mPipelineIndicator.setText("Move mode");
+                else
+                    mPipelineIndicator.setText("Simulator mode");
                 return true;
             }
 
@@ -86,8 +91,9 @@ public class PipelineActivity extends Activity {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 if (!mSurfaceNOAA.isEditMode()) {
+                    if (!mIsScrolling)
+                        mScrollOrigin = e1.getX();
                     mIsScrolling = true;
-                    mScrollStartX = e1.getX();
                     return true;
                 } else
                     return false;
@@ -111,24 +117,56 @@ public class PipelineActivity extends Activity {
             public boolean onTouch(View v, MotionEvent event) {
 
                 // Detect if a scroll event has finished for pipeline transitions
-                if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
-                    mIsScrolling = false;
+                if (mIsScrolling) {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        mIsScrolling = false;
 
-                    if (mScrollStartX - event.getX() >= mSurfaceNOAA.getWidth() / 3) {
-                        // Scrolled left
-                        mSurfaceNOAA.getRenderer().next();
-                        mSurfaceMSAA.getRenderer().next();
-                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
-                            new Thread(crossFader).start();
-                        updatePipelineNavigator(true);
+                        if (mScrollOrigin - mScrollCurrentX >= mSurfaceNOAA.getWidth() / 3) {
+                            // Scrolled left
+                            mSurfaceNOAA.getRenderer().next();
+                            mSurfaceMSAA.getRenderer().next();
+                            if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
+                                new Thread(crossFader).start();
+                            updatePipelineNavigator(true);
 
-                    } else if (event.getX() - mScrollStartX >= mSurfaceNOAA.getWidth() / 3) {
-                        // Scrolled right
-                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
-                            new Thread(crossFader).start();
-                        mSurfaceNOAA.getRenderer().previous();
-                        mSurfaceMSAA.getRenderer().previous();
-                        updatePipelineNavigator(false);
+                            mPipelineIndicator.setGravity(Gravity.CENTER_HORIZONTAL);
+                            mPipelineIndicator.setText("Swipe up to show navigator");
+                            mIndicatorCleared = true;
+
+                        } else if (event.getX() - mScrollCurrentX >= mSurfaceNOAA.getWidth() / 3) {
+                            // Scrolled right
+                            if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
+                                new Thread(crossFader).start();
+                            mSurfaceNOAA.getRenderer().previous();
+                            mSurfaceMSAA.getRenderer().previous();
+                            updatePipelineNavigator(false);
+
+                            mPipelineIndicator.setText("");
+                            mIndicatorCleared = true;
+                        }
+
+                    } else { // Still scrolling
+
+                        boolean scrollingRight = mScrollingRight;
+                        // Detect direction of scroll
+                        if (mScrollCurrentX > event.getX())
+                            scrollingRight = false;
+                        else if (event.getX() > mScrollCurrentX)
+                            scrollingRight = true;
+                        
+
+                        if (scrollingRight != mScrollingRight || mIndicatorCleared) {
+                            // Update the indicator if we've changed direction or it's cleared
+                            updatePipelineIndicator();
+
+                            if (scrollingRight != mScrollingRight) {
+                                // Set a new scroll origin if we've changed direction
+                                mScrollOrigin = event.getX();
+                                mScrollingRight = scrollingRight;
+                            }
+                        }
+                        
+                        mScrollCurrentX = event.getX();
                     }
                 }
 
@@ -192,12 +230,12 @@ public class PipelineActivity extends Activity {
                 viewDst.setAlpha(alpha);
                 threadSleep(10);
             }
-            
+
             multisampled = !multisampled;
 
         }
     }
-    
+
     private void threadSleep(int length) {
         try {
             Thread.sleep(length);
@@ -352,9 +390,22 @@ public class PipelineActivity extends Activity {
         updatePipelineNavigator(true);
     }
 
+    protected void updatePipelineIndicator() {
+
+        if (mScrollingRight) {
+            mPipelineIndicator.setGravity(Gravity.RIGHT);
+            mPipelineIndicator.setText("Apply " + mSurfaceNOAA.getRenderer().getNextStepDescription() + " >>");
+        } else {
+            mPipelineIndicator.setGravity(Gravity.LEFT);
+            mPipelineIndicator.setText("<< Undo " + mSurfaceNOAA.getRenderer().getPrevStepDescription());
+        }
+        mIndicatorCleared = false;
+
+    }
+
     public void updatePipelineNavigator(boolean forward) {
 
-        mPipelineIndicator.setText(mSurfaceNOAA.getRenderer().getStateDescription());
+        updatePipelineIndicator();
 
         // Scroll to the location of the current state's corresponding block
         int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
@@ -400,8 +451,11 @@ public class PipelineActivity extends Activity {
         view.setBackground(background);
     }
 
+    protected boolean mIndicatorCleared = true;
     protected boolean mIsScrolling = false;
-    protected float mScrollStartX = 0;
+    protected boolean mScrollingRight = true;
+    protected float mScrollOrigin = 0;
+    protected float mScrollCurrentX = 0;
 
     private float mPreviousX = 0;
     private float mPreviousY = 0;

@@ -519,12 +519,16 @@ public class PipelineRenderer implements Renderer, Serializable {
         return mPipelineState;
     }
 
-    public String getStateDescription() {
-        return getStateDescription(mPipelineState) + " <> " + getStateDescription(mPipelineState + 1);
+    public String getNextStepDescription() {
+        return getStepDescription(mPipelineState + 1);
     }
 
-    private String getStateDescription(int state) {
-        switch (state) {
+    public String getPrevStepDescription() {
+        return getStepDescription(mPipelineState);
+    }
+
+    private String getStepDescription(int step) {
+        switch (step) {
             case STEP_INITIAL:
                 return "Empty Scene";
             case STEP_VERTEX_ASSEMBLY:
