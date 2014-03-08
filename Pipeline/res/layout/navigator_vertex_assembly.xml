@@ -31,7 +31,7 @@
                 android:layout_height="@dimen/navigator_detail_connector_length"
                 android:layout_gravity="center_horizontal"
                 android:background="@android:color/background_light"
-                android:rotation="10" />
+                android:rotation="20" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -72,7 +72,7 @@
                 android:layout_height="@dimen/navigator_detail_connector_length"
                 android:layout_gravity="center_horizontal"
                 android:background="@android:color/background_light"
-                android:rotation="-10" />
+                android:rotation="-20" />
 
             <TextView
                 android:layout_width="wrap_content"

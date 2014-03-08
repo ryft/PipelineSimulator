@@ -519,7 +519,7 @@ public class SetupActivity extends Activity {
 
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                        scroll.scrollTo(0, (int) steps.stepBlending.getY());
+                        scroll.smoothScrollTo(0, (int) steps.stepBlending.getY());
                         insertShowcaseView(steps.stepClipping.findViewById(android.R.id.title), R.string.help_disabled_title,
                                 R.string.help_disabled_desc, 1.8f, null, tutorialSimulate);
                     }

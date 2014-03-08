@@ -26,6 +26,7 @@ import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -98,23 +99,22 @@ public class PipelineActivity extends Activity {
                 if (!mSurfaceNOAA.isEditMode()) {
                     mIsScrolling = true;
 
-                    System.out.println("onScroll(" + e1.getX() + ", " + e2.getX() + ", " + distanceX + ", " + distanceY + ")");
-
                     // Detect direction of scroll
                     boolean scrollingRight = mIsScrollingRight;
                     if (distanceX > 0)
                         scrollingRight = true;
                     else if (distanceX < 0)
                         scrollingRight = false;
-                    
-                    updatePipelineIndicator(!scrollingRight, mScrollOrigin - e2.getX() >= mSurfaceNOAA.getWidth() / 3 || e2.getX() - mScrollOrigin >= mSurfaceNOAA.getWidth() / 3);
+
+                    updatePipelineIndicator(!scrollingRight,
+                            mScrollOrigin - e2.getX() >= mSurfaceNOAA.getWidth() / 3
+                                    || e2.getX() - mScrollOrigin >= mSurfaceNOAA.getWidth() / 3);
 
                     // Update the indicator if we've changed direction or it's been cleared
                     if (scrollingRight != mIsScrollingRight || mIndicatorCleared) {
 
                         // Set a new scroll origin if we've changed direction
                         if (scrollingRight != mIsScrollingRight) {
-                            System.out.println("Changed direction at " + e2.getX());
                             mScrollOrigin = e2.getX();
                             mIsScrollingRight = scrollingRight;
                         }
@@ -164,7 +164,15 @@ public class PipelineActivity extends Activity {
                     }
 
                     if (event.getAction() == MotionEvent.ACTION_UP) {
-                        updatePipelineIndicator("Swipe up to show navigator");
+                        new Thread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                // TODO change this delay to the animation length
+                                threadSleep(1000);
+                                updatePipelineIndicator("Swipe up to show navigator");
+                            }
+                        }).start();
                     }
                 }
 
@@ -184,6 +192,7 @@ public class PipelineActivity extends Activity {
         mSurfaceNOAA.setOnTouchListener(touchListener);
         mSurfaceMSAA.setOnTouchListener(touchListener);
 
+        updatePipelineIndicator("Swipe up to show navigator");
     }
 
     private boolean multisampled = false;
@@ -265,27 +274,23 @@ public class PipelineActivity extends Activity {
         TextView blockDepthBufferTest;
         TextView blockBlending;
 
-        View getStateBlock(int state) {
-            switch (state) {
-                case PipelineRenderer.STEP_VERTEX_ASSEMBLY:
-                    return blockVertexAssembly;
-                case PipelineRenderer.STEP_VERTEX_SHADING:
-                    return blockVertexShading;
-                case PipelineRenderer.STEP_CLIPPING:
-                    return blockClipping;
-                case PipelineRenderer.STEP_MULTISAMPLING:
-                    return blockMultisampling;
-                case PipelineRenderer.STEP_FACE_CULLING:
-                    return blockFaceCulling;
-                case PipelineRenderer.STEP_FRAGMENT_SHADING:
-                    return blockFragmentShading;
-                case PipelineRenderer.STEP_DEPTH_BUFFER:
-                    return blockDepthBufferTest;
-                case PipelineRenderer.STEP_BLENDING:
-                    return blockBlending;
-                default:
-                    return null;
-            }
+        TextView getStepBlock(int step) {
+            TextView[] blocks = new TextView[] { blockVertexAssembly, blockVertexShading, blockClipping, blockMultisampling,
+                    blockFaceCulling, blockFragmentShading, blockDepthBufferTest, blockBlending };
+            if (step < 0 || step >= blocks.length)
+                return null;
+            else
+                return blocks[step];
+        }
+
+        LinearLayout getStepGroup(int step) {
+            LinearLayout[] groups = new LinearLayout[] { groupVertexProcessing, groupVertexProcessing,
+                    groupPrimitiveProcessing, groupRasterisation, groupRasterisation, groupFragmentProcessing,
+                    groupFragmentProcessing, groupPixelProcessing, groupPixelProcessing };
+            if (step < 0 || step >= groups.length)
+                return null;
+            else
+                return groups[step];
         }
     }
 
@@ -346,16 +351,16 @@ public class PipelineActivity extends Activity {
         TextView connectorTitle;
         connectorTitle = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.map_connector).findViewById(
                 R.id.map_connector_title);
-        connectorTitle.setText("> vertices >");
+        connectorTitle.setText("vertices >");
         connectorTitle = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_connector).findViewById(
                 R.id.map_connector_title);
-        connectorTitle.setText("> primitives >");
+        connectorTitle.setText("primitives >");
         connectorTitle = (TextView) mNavigator.groupRasterisation.findViewById(R.id.map_connector).findViewById(
                 R.id.map_connector_title);
-        connectorTitle.setText("> fragments >");
+        connectorTitle.setText("fragments >");
         connectorTitle = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.map_connector).findViewById(
                 R.id.map_connector_title);
-        connectorTitle.setText("> pixels >");
+        connectorTitle.setText("pixels >");
         mNavigator.groupPixelProcessing.removeView(mNavigator.groupPixelProcessing.findViewById(R.id.map_connector));
 
         LinearLayout detailsLayout;
@@ -387,9 +392,9 @@ public class PipelineActivity extends Activity {
 
         updatePipelineNavigator(true);
     }
-    
+
     protected void updatePipelineIndicator(boolean right, boolean thresholdExceeded) {
-        
+
         if (thresholdExceeded) {
             if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_INITIAL && right)
                 mPipelineIndicator.setTextColor(Colour.RED.toArgb());
@@ -408,31 +413,36 @@ public class PipelineActivity extends Activity {
             mPipelineIndicator.setText("Apply " + mSurfaceNOAA.getRenderer().getNextStepDescription() + " <<");
         }
     }
-    
-    protected void updatePipelineIndicator(String text) {
-        mPipelineIndicator.setTextColor(Colour.WHITE.toArgb());
-        mPipelineIndicator.setGravity(Gravity.CENTER_HORIZONTAL);
-        mPipelineIndicator.setText(text);
-        mIndicatorCleared = true;
+
+    protected void updatePipelineIndicator(final String text) {
+        mPipelineIndicator.post(new Runnable() {
+
+            @Override
+            public void run() {
+                mPipelineIndicator.setTextColor(Colour.WHITE.toArgb());
+                mPipelineIndicator.setGravity(Gravity.CENTER_HORIZONTAL);
+                mPipelineIndicator.setText(text);
+                mIndicatorCleared = true;
+            }
+        });
     }
 
     public void updatePipelineNavigator(boolean forward) {
 
         // Scroll to the location of the current state's corresponding block
         int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
-        int[] location = new int[] { 0, 0 };
-        View currentBlock = mNavigator.getStateBlock(currentState);
-        if (currentBlock != null) {
-            currentBlock.getLocationInWindow(location);
-            location[0] += currentBlock.getWidth() / 2;
-        }
-        // We don't need to perform a smooth scroll as the navigator should always be hidden
-        mNavigator.scrollView.scrollTo(location[0], location[1]);
+        LinearLayout currentGroup = mNavigator.getStepGroup(currentState);
+        
+        // Calculate scroll location required to centre the current group
+        int groupWidth = (int) (currentGroup.getWidth() - getResources().getDimension(R.dimen.navigator_block_connector_length));
+        int margin = (mNavigator.scrollView.getWidth() - groupWidth) / 2;
+        int location = currentGroup.getLeft() - margin;
+        mNavigator.scrollView.smoothScrollTo(location, 0);
 
         // Step defines the block which is to be modified
         // If we've moving backwards, the block following the current state needs to be un-shaded
-        int step = (forward) ? currentState : currentState + 1;
-        View block = mNavigator.getStateBlock(step);
+        int step = (forward) ? currentState - 1 : currentState;
+        View block = mNavigator.getStepBlock(step);
 
         if (block == null)
             return;
@@ -524,6 +534,7 @@ public class PipelineActivity extends Activity {
         switch (item.getItemId()) {
 
             case R.id.action_pipeline_help:
+                System.out.println(mNavigator.scrollView.getScrollX());
                 break;
         }
         return super.onOptionsItemSelected(item);
