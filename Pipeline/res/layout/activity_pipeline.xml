@@ -17,6 +17,7 @@
 
     <com.slidinglayer.SlidingLayer
         xmlns:slidingLayer="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/pipeline_navigator_layer"
         android:layout_width="match_parent"
         android:layout_height="@dimen/slider_layer_width"
         android:layout_alignParentBottom="true"

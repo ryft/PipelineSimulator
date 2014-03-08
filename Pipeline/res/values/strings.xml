@@ -167,7 +167,7 @@
     <string name="help_firstrun_desc">Welcome to the Graphics Pipeline Simulator. Tap the help icon at any time for a guided tour of the app.</string>
     
     <string name="help_scene_definition_title">Scene definition</string>
-    <string name="help_scene_definition_desc">Use these options to modify the scene which will be simulated, as well as the virtual camera location and parameters.</string>
+    <string name="help_scene_definition_desc">Use these options to modify the scene which will be simulated, as well as the virtual camera location and parameters.\n\nSensible defaults have been set up for you.</string>
     
     <string name="help_colour_coding_title">Colour coding</string>
     <string name="help_colour_coding_desc">The coloured squares denote different groups of pipeline steps. They match up with steps on the pipeline navigator after you press \'Simulate\'.</string>
@@ -180,5 +180,11 @@
     
     <string name="help_simulate_title">When you\'re ready…</string>
     <string name="help_simulate_desc">Tap the Simulate button to build the scene and start the simulation.</string>
+    
+    <string name="help_scene_viewer_title">Scene viewer</string>
+    <string name="help_scene_viewer_desc">This is where your custom scene is shown at different steps of the graphics pipeline.\n\nSwipe left to advance along the pipeline, or right to move backwards.\n\nDouble-tap the scene to move / scale the scene using touch gestures.</string>
+    
+    <string name="help_navigator_title">Pipeline navigator</string>
+    <string name="help_navigator_desc">The bottom bar will show you the next or previous pipeline step when you swipe left or right.\n\nSwipe up from the bottom bar to display the current location of the scene in the graphics pipeline.</string>
 
 </resources>

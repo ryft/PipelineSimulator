@@ -2,6 +2,12 @@ package uk.co.ryft.pipeline.ui.pipeline;
 
 import java.util.ArrayList;
 
+import com.espian.showcaseview.OnShowcaseEventListener;
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.SimpleShowcaseEventListener;
+import com.espian.showcaseview.ShowcaseView.ConfigOptions;
+import com.espian.showcaseview.targets.ViewTarget;
+
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
@@ -26,7 +32,6 @@ import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -432,7 +437,7 @@ public class PipelineActivity extends Activity {
         // Scroll to the location of the current state's corresponding block
         int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
         LinearLayout currentGroup = mNavigator.getStepGroup(currentState);
-        
+
         // Calculate scroll location required to centre the current group
         int groupWidth = (int) (currentGroup.getWidth() - getResources().getDimension(R.dimen.navigator_block_connector_length));
         int margin = (mNavigator.scrollView.getWidth() - groupWidth) / 2;
@@ -529,12 +534,31 @@ public class PipelineActivity extends Activity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options);
+        sv.setOnShowcaseEventListener(listener);
+        sv.setScaleMultiplier(scale);
+        return sv;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
             case R.id.action_pipeline_help:
-                System.out.println(mNavigator.scrollView.getScrollX());
+
+                final OnShowcaseEventListener tutorialNavigator = new SimpleShowcaseEventListener() {
+
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                        insertShowcaseView(mPipelineIndicator, R.string.help_navigator_title, R.string.help_navigator_desc,
+                                1.5f, null, null);
+                    }
+                };
+
+                insertShowcaseView(mSurfaceNOAA, R.string.help_scene_viewer_title, R.string.help_scene_viewer_desc, 0, null,
+                        tutorialNavigator);
                 break;
         }
         return super.onOptionsItemSelected(item);
