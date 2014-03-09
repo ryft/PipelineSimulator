@@ -5,7 +5,11 @@ import android.os.SystemClock;
 public abstract class Transformation<E> {
     
     protected long mStartTime = SystemClock.uptimeMillis();
-    protected long mLength = 2000;
+    protected final long mDuration;
+    
+    public Transformation(int duration) {
+        mDuration = duration;
+    }
     
     protected abstract E getTransformationState(float progress);
     
@@ -19,13 +23,13 @@ public abstract class Transformation<E> {
         
         else {
             float elapsed = time - mStartTime;
-            float progress = elapsed / mLength;
+            float progress = elapsed / mDuration;
             return getTransformationState(progress);
         }
     }
     
     public boolean isComplete(long time) {
-        if (time > mStartTime + mLength)
+        if (time > mStartTime + mDuration)
             return true;
         else
             return false;

@@ -28,8 +28,8 @@ public class Camera implements Serializable, Cloneable {
         setProjection(left, right, bottom, top, near, far);
     }
 
-    public void transformTo(Camera destination) {
-        mTransformation = new CameraTransformation(this, destination);
+    public void transformTo(Camera destination, int duration) {
+        mTransformation = new CameraTransformation(this, destination, duration);
     }
 
     public Float3 getEye() { return (Float3) mEye.clone(); }

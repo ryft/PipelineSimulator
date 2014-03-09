@@ -154,9 +154,9 @@ public class SetupActivity extends Activity {
         // Put some interesting things in the scene for testing purposes
         Random r = new Random();
         for (int i = 0; i < 48; i++) {
-            Element e = ShapeFactory.buildCuboid(
-                    new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 3 - 1.5f, r.nextFloat() * 3 - 1.5f), r.nextFloat() / 5 + 0.1f,
-                    r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f, Colour.RANDOM, Colour.RANDOM);
+            Element e = ShapeFactory.buildCuboid(new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 3 - 1.5f,
+                    r.nextFloat() * 3 - 1.5f), r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f,
+                    Colour.RANDOM, Colour.RANDOM);
             mSceneElements.add(e);
         }
 
@@ -270,14 +270,13 @@ public class SetupActivity extends Activity {
                 // Instantiate and display a configuration dialogue
                 AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
                 builder.setTitle(R.string.dialogue_title_multisampling);
-                builder.setItems(new CharSequence[] { "2", "3", "4" },
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                mMinSamples = which + 2;
-                                updateViews();
-                            }
-                        });
+                builder.setItems(new CharSequence[] { "2", "3", "4" }, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mMinSamples = which + 2;
+                        updateViews();
+                    }
+                });
                 AlertDialog dialogue = builder.create();
                 dialogue.show();
             }
@@ -374,6 +373,7 @@ public class SetupActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SetupActivity.this, PipelineActivity.class);
+                intent.putExtra("animation_duration", 2000); // TODO configuration for this
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
                 intent.putExtra("min_samples", mMinSamples);

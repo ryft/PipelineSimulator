@@ -2,12 +2,6 @@ package uk.co.ryft.pipeline.ui.pipeline;
 
 import java.util.ArrayList;
 
-import com.espian.showcaseview.OnShowcaseEventListener;
-import com.espian.showcaseview.ShowcaseView;
-import com.espian.showcaseview.SimpleShowcaseEventListener;
-import com.espian.showcaseview.ShowcaseView.ConfigOptions;
-import com.espian.showcaseview.targets.ViewTarget;
-
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.PipelineRenderer;
@@ -35,6 +29,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.espian.showcaseview.OnShowcaseEventListener;
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.ShowcaseView.ConfigOptions;
+import com.espian.showcaseview.SimpleShowcaseEventListener;
+import com.espian.showcaseview.targets.ViewTarget;
+
 public class PipelineActivity extends Activity {
 
     @SuppressWarnings("unused")
@@ -47,7 +47,8 @@ public class PipelineActivity extends Activity {
     protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
 
-    protected int mAnimationDuration;
+    // Animation length in milliseconds
+    protected int mAnimationDuration = 2000;
 
     protected boolean mIndicatorCleared = true;
     protected boolean mIsScrolling = false;
@@ -71,10 +72,6 @@ public class PipelineActivity extends Activity {
         mSurfaceMSAA.setAlpha(0);
         pipelineFrame.addView(mSurfaceNOAA);
         pipelineFrame.addView(mSurfaceMSAA);
-
-        // Retrieve and cache the system's default "short" animation time.
-        // TODO Am I actually using an animator?
-        mAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
 
         // Initialise pipeline navigator
         setupPipelineNavigator();
@@ -151,7 +148,7 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
 
-                    if (mScrollOrigin - event.getX() >= mSurfaceNOAA.getWidth() / 3) {
+                    if (mScrollOrigin - event.getX() >= mSurfaceNOAA.getWidth() / 4) {
                         // Scrolled left
                         mSurfaceNOAA.getRenderer().next();
                         mSurfaceMSAA.getRenderer().next();
@@ -159,7 +156,7 @@ public class PipelineActivity extends Activity {
                             new Thread(crossFader).start();
                         updatePipelineNavigator(true);
 
-                    } else if (event.getX() - mScrollOrigin >= mSurfaceNOAA.getWidth() / 3) {
+                    } else if (event.getX() - mScrollOrigin >= mSurfaceNOAA.getWidth() / 4) {
                         // Scrolled right
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
@@ -173,8 +170,7 @@ public class PipelineActivity extends Activity {
 
                             @Override
                             public void run() {
-                                // TODO change this delay to the animation length
-                                threadSleep(1000);
+                                threadSleep(mAnimationDuration);
                                 updatePipelineIndicator("Swipe up to show navigator");
                             }
                         }).start();
@@ -231,15 +227,19 @@ public class PipelineActivity extends Activity {
                 }
             };
 
+            // Calculate number of steps from (duration = #steps * interval)
+            // Interval is fixed length (10ms)
+            int steps = mAnimationDuration / 20;
+
             viewDst.post(showDst);
             viewSrc.post(raiseSrc);
-            for (float alpha = 1; alpha >= 0; alpha -= 0.01) {
-                viewSrc.setAlpha(alpha);
+            for (int step = 0; step <= steps; step++) {
+                viewSrc.setAlpha(1 - ((float) step / steps));
                 threadSleep(10);
             }
             viewSrc.post(hideSrc);
-            for (float alpha = 0; alpha <= 1; alpha += 0.01) {
-                viewDst.setAlpha(alpha);
+            for (int step = 0; step <= steps; step++) {
+                viewDst.setAlpha((float) step / steps);
                 threadSleep(10);
             }
 

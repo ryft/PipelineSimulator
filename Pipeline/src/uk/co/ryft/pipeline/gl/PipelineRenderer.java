@@ -35,7 +35,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     // Renderer helper objects passed from the parent
     private final ArrayList<Element> mElements = new ArrayList<Element>();
     private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
-    
+
     private LightingModel mLighting;
     private LightingModel mPointLighting;
 
@@ -45,15 +45,15 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     private boolean mGLCullingEnabled = false;
     private boolean mGLCullingClockwise;
-    
+
     private boolean mGLDepthBufferEnabled = false;
     private int mGLDepthFunc = 1;
-    
+
     private boolean mGLBlendEnabled = false;
     private int mGLBlendFuncSrc = 2;
     private int mGLBlendFuncDst = 3;
     private int mGLBlendEquation = 0;
-    
+
     private boolean mDrawAxes = true;
     private boolean mDrawCamera = true;
     private boolean mDrawFrustum = true;
@@ -78,6 +78,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     // List of model transformations
     // FIXME remove all accesses from outside the render thread
     private final List<Transformation<float[]>> mModelTransformations = new LinkedList<Transformation<float[]>>();
+
+    protected int mAnimationDuration = 2000;
 
     // Light position, for implementing lighting models
     public static Float3 sLightPosition = new Float3(-2, 2, -3);
@@ -111,7 +113,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
         }
     }
-    
+
     public void setGlobalLightLevel(float alpha) {
         mLighting.setGlobalLightLevel(alpha);
     }
@@ -154,14 +156,16 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         mGLCullingEnabled = false;
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
-        
+
         mGLDepthBufferEnabled = false;
         mGLDepthFunc = params.getInt("depth_func", mGLDepthFunc);
-        
+
         mGLBlendEnabled = false;
         mGLBlendFuncSrc = params.getInt("blend_func_src", mGLBlendFuncSrc);
         mGLBlendFuncDst = params.getInt("blend_func_dst", mGLBlendFuncDst);
         mGLBlendEquation = params.getInt("blend_equation", mGLBlendEquation);
+
+        mAnimationDuration = params.getInt("animation_duration", mAnimationDuration);
 
         GLES20.glCullFace(GLES20.GL_BACK);
         if (mGLCullingClockwise)
@@ -211,45 +215,57 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
 
-    protected void setGLParameters(boolean forCamera) {
+    protected void setEmptyGLParameters() {
 
-        if (forCamera) {
+        // Reset selected scene GL parameters for drawing scene accessories
+        // e.g. axes, virtual camera model
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDisable(GLES20.GL_BLEND);
+    }
 
-            // Reset selected scene GL parameters for drawing scene accessories
-            // e.g. axes, virtual camera model
+    protected boolean mAnimatingCulling = false;
+    protected boolean mAnimatingDepthBuffer = false;
+    protected boolean mAnimatingBlending = false;
+
+    protected int mAnimatedElements = 0;
+    protected boolean mAnimationForward;
+
+    protected void setGLParameters(int drawn) {
+
+        // Set face culling parameters
+        boolean cullFace = mGLCullingEnabled;
+        if (mAnimatingCulling && drawn < mAnimatedElements)
+            cullFace = mAnimationForward;
+
+        if (cullFace)
             GLES20.glEnable(GLES20.GL_CULL_FACE);
+        else
+            GLES20.glDisable(GLES20.GL_CULL_FACE);
+
+        // Set depth buffer parameters
+        boolean depthBuffer = mGLDepthBufferEnabled;
+        if (mAnimatingDepthBuffer && drawn < mAnimatedElements)
+            depthBuffer = mAnimationForward;
+
+        if (depthBuffer) {
             GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+            GLES20.glDepthFunc(SetupActivity.DepthFunc.mValues[mGLDepthFunc]);
+        } else
+            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+        // Set blending parameters
+        boolean blending = mGLBlendEnabled;
+        if (mAnimatingBlending && drawn < mAnimatedElements)
+            blending = mAnimationForward;
+
+        if (blending) {
+            GLES20.glEnable(GLES20.GL_BLEND);
+            GLES20.glBlendFunc(SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc],
+                    SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
+            GLES20.glBlendEquation(SetupActivity.BlendEquation.mValues[mGLBlendEquation]);
+        } else
             GLES20.glDisable(GLES20.GL_BLEND);
-        } else {
-
-            // Set depth buffer parameters
-            if (mGLDepthBufferEnabled) {
-                GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-                GLES20.glDepthFunc(SetupActivity.DepthFunc.mValues[mGLDepthFunc]);
-            } else
-                GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
-            // Set face culling parameters
-            if (mGLCullingEnabled)
-                GLES20.glEnable(GLES20.GL_CULL_FACE);
-            else
-                GLES20.glDisable(GLES20.GL_CULL_FACE);
-
-            // Set blending parameters
-            if (mGLBlendEnabled) {
-
-                GLES20.glEnable(GLES20.GL_BLEND);
-                System.out.println("Indices: BlendFuncSrc " + mGLBlendFuncSrc + ", BlendFuncDst " + mGLBlendFuncDst);
-                System.out.println("Names:   BlendFuncSrc " + SetupActivity.BlendFunc.mNames[mGLBlendFuncSrc] + ", BlendFuncDst " + SetupActivity.BlendFunc.mNames[mGLBlendFuncDst]);
-                System.out.println("Values:  BlendFuncSrc " + SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc] + ", BlendFuncDst " + SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
-                GLES20.glBlendFunc(SetupActivity.BlendFunc.mValues[mGLBlendFuncSrc], SetupActivity.BlendFunc.mValues[mGLBlendFuncDst]);
-                System.out.println("Indices: BlendEquation " + mGLBlendFuncSrc);
-                System.out.println("Names:   BlendEquation " + SetupActivity.BlendFunc.mNames[mGLBlendEquation]);
-                System.out.println("Values:  BlendEquation " + SetupActivity.BlendFunc.mValues[mGLBlendEquation]);
-                GLES20.glBlendEquation(SetupActivity.BlendEquation.mValues[mGLBlendEquation]);
-            } else
-                GLES20.glDisable(GLES20.GL_BLEND);
-        }
     }
 
     @Override
@@ -296,7 +312,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (mFrustumDrawable == null)
             mFrustumDrawable = mFrustumElement.getDrawable();
 
-        setGLParameters(true);
+        setEmptyGLParameters();
 
         // Draw axes and virtual camera
         if (mDrawAxes)
@@ -306,16 +322,19 @@ public class PipelineRenderer implements Renderer, Serializable {
         if (mDrawFrustum)
             mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
 
-        setGLParameters(false);
+        int drawn = 0;
 
         // Draw world objects in the scene
         for (Element e : mSceneElements.keySet()) {
             if (mSceneElements.get(e) == null)
                 mSceneElements.put(e, e.getDrawable());
             Drawable d = mSceneElements.get(e);
-            if (d != null)
+
+            setGLParameters(drawn);
+            if (d != null) {
                 d.draw(mLighting, mMVMatrix, mMVPMatrix);
-            else
+                drawn++;
+            } else
                 // Occasionally happens when app is quitting
                 // TODO: Investigate turning off continuous rendering when quitting
                 System.out.println("Ruh-roh, null drawable!");
@@ -417,6 +436,7 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     // TODO Decide if implementing a monitor for this is worthwhile
     volatile boolean animationLock = false;
+    boolean tempAnimatingCulling = false;
 
     private void animateVertexAssembly(boolean forward) throws InterruptedException {
 
@@ -434,7 +454,7 @@ public class PipelineRenderer implements Renderer, Serializable {
             message = "Scene cleared";
         Log.d(TAG, message);
 
-        int interval = (int) (1000.0 / mElements.size()); // Allow 1 second for the whole scene
+        int interval = (int) ((double) mAnimationDuration / mElements.size());
         Iterable<Element> elements = (forward) ? mElements : mSceneElements.keySet();
         for (Element e : elements) {
             if (forward)
@@ -446,23 +466,29 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateVertexShading(boolean forward) throws InterruptedException {
-        for (float i = 1; i >= 0; i -= 0.01) {
-            mLighting.setGlobalLightLevel(i);
-            Thread.sleep(5);
+
+        // Calculate number of steps from (duration = #steps * interval)
+        // Interval is fixed length (10ms)
+        int steps = mAnimationDuration / 20;
+
+        for (int step = 0; step <= steps; step++) {
+            mLighting.setGlobalLightLevel(1 - ((float) step / steps));
+            Thread.sleep(10);
         }
-        mLighting = (forward) ? LightingModel.getLightingModel(Model.LAMBERTIAN) : LightingModel.getLightingModel(Model.UNIFORM);
-        for (float i = 0; i <= 1; i += 0.01) {
-            mLighting.setGlobalLightLevel(i);
-            Thread.sleep(5);
+        mLighting = (forward) ? LightingModel.getLightingModel(Model.LAMBERTIAN) : LightingModel
+                .getLightingModel(Model.UNIFORM);
+        for (int step = 0; step <= steps; step++) {
+            mLighting.setGlobalLightLevel((float) step / steps);
+            Thread.sleep(10);
         }
     }
 
     private void animateClipping(boolean forward) throws InterruptedException {
         mDrawAxes = !forward;
         if (forward)
-            mActualCamera.transformTo(mVirtualCamera);
+            mActualCamera.transformTo(mVirtualCamera, mAnimationDuration);
         else
-            mActualCamera.transformTo(mSceneCamera);
+            mActualCamera.transformTo(mSceneCamera, mAnimationDuration);
     }
 
     private void animateMultisampling(boolean forward) throws InterruptedException {
@@ -470,26 +496,59 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     private void animateFaceCulling(boolean forward) throws InterruptedException {
+
+        mAnimatingCulling = true;
+        mAnimationForward = forward;
+
+        int interval = (int) ((double) mAnimationDuration / mElements.size());
+        animate(interval);
+
+        mAnimatingCulling = false;
         mGLCullingEnabled = forward;
     }
 
     private void animateFragmentShading(boolean forward) throws InterruptedException {
-        for (float i = 1; i >= 0; i -= 0.01) {
-            mLighting.setGlobalLightLevel(i);
-            Thread.sleep(5);
+        int steps = mAnimationDuration / 20;
+        for (int step = 0; step <= steps; step++) {
+            mLighting.setGlobalLightLevel(1 - ((float) step / steps));
+            Thread.sleep(10);
         }
         mLighting = (forward) ? LightingModel.getLightingModel(Model.PHONG) : LightingModel.getLightingModel(Model.LAMBERTIAN);
-        for (float i = 0; i <= 1; i += 0.01) {
-            mLighting.setGlobalLightLevel(i);
-            Thread.sleep(5);
+        for (int step = 0; step <= steps; step++) {
+            mLighting.setGlobalLightLevel((float) step / steps);
+            Thread.sleep(10);
         }
     }
 
+    private void animate(int interval) throws InterruptedException {
+        while (mAnimatedElements < mElements.size()) {
+            mAnimatedElements++;
+            Thread.sleep(interval);
+        }
+        mAnimatedElements = 0;
+    }
+
     private void animateDepthBuffer(boolean forward) throws InterruptedException {
+
+        mAnimatingDepthBuffer = true;
+        mAnimationForward = forward;
+
+        int interval = (int) ((double) mAnimationDuration / mElements.size());
+        animate(interval);
+
+        mAnimatingDepthBuffer = false;
         mGLDepthBufferEnabled = forward;
     }
 
     private void animateBlending(boolean forward) throws InterruptedException {
+
+        mAnimatingBlending = true;
+        mAnimationForward = forward;
+
+        int interval = (int) ((double) mAnimationDuration / mElements.size());
+        animate(interval);
+
+        mAnimatingBlending = false;
         mGLBlendEnabled = forward;
         mDrawCamera = !forward;
         mDrawFrustum = !forward;
@@ -500,8 +559,6 @@ public class PipelineRenderer implements Renderer, Serializable {
 
             new TransitionAnimator(mPipelineState, true).start();
             mPipelineState++;
-            Log.d(TAG, "Step " + mPipelineState);
-
         }
     }
 
@@ -510,11 +567,9 @@ public class PipelineRenderer implements Renderer, Serializable {
 
             new TransitionAnimator(mPipelineState, false).start();
             mPipelineState--;
-            Log.d(TAG, "Step " + mPipelineState);
-
         }
     }
-    
+
     public int getCurrentState() {
         return mPipelineState;
     }
