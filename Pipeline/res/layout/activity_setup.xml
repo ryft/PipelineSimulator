@@ -50,7 +50,15 @@
                     layout="@layout/component_setup_step" />
 
                 <include
+                    android:id="@+id/step_light_position"
+                    layout="@layout/component_setup_step" />
+
+                <include
                     android:id="@+id/step_lighting_model"
+                    layout="@layout/component_setup_step" />
+
+                <include
+                    android:id="@+id/step_animation_duration"
                     layout="@layout/component_setup_step" />
             </LinearLayout>
 

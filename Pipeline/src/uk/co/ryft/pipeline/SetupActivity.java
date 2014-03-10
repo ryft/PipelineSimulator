@@ -22,11 +22,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.opengl.GLES20;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.ScrollView;
@@ -51,8 +54,12 @@ public class SetupActivity extends Activity {
     protected ArrayList<Element> mSceneElements = new ArrayList<Element>();
     // Camera parameters
     protected Camera mCamera = new Camera(new Float3(-4, 1, 0), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 3, 5);
+    // Light source position
+    protected Float3 mLightPosition = new Float3(-2, 2, -3);
     // Lighting model
     protected LightingModel mPreviewLightingModel = LightingModel.getLightingModel(Model.PHONG);
+    // Transition animation duration
+    protected int mAnimationDuration = 2000;
     // Multisampling
     protected int mMinSamples = 2;
     // Face culling
@@ -82,7 +89,9 @@ public class SetupActivity extends Activity {
 
         View stepSceneComposition;
         View stepCameraParameters;
+        View stepLightPosition;
         View stepLightingModel;
+        View stepAnimationDuration;
         View stepVertexAssembly;
         View stepVertexShading;
         View stepClipping;
@@ -141,7 +150,9 @@ public class SetupActivity extends Activity {
 
         steps.stepSceneComposition = findViewById(R.id.step_scene_composition);
         steps.stepCameraParameters = findViewById(R.id.step_camera_parameters);
+        steps.stepLightPosition = findViewById(R.id.step_light_position);
         steps.stepLightingModel = findViewById(R.id.step_lighting_model);
+        steps.stepAnimationDuration = findViewById(R.id.step_animation_duration);
         steps.stepVertexAssembly = findViewById(R.id.step_vertex_assembly);
         steps.stepVertexShading = findViewById(R.id.step_vertex_shading);
         steps.stepClipping = findViewById(R.id.step_clipping);
@@ -183,7 +194,9 @@ public class SetupActivity extends Activity {
 
         setText(steps.stepSceneComposition, android.R.id.title, R.string.button_scene_composition);
         setText(steps.stepCameraParameters, android.R.id.title, R.string.button_camera_parameters);
+        setText(steps.stepLightPosition, android.R.id.title, R.string.button_light_position);
         setText(steps.stepLightingModel, android.R.id.title, R.string.button_lighting_model);
+        setText(steps.stepAnimationDuration, android.R.id.title, R.string.button_animation_duration);
         setText(steps.stepVertexAssembly, android.R.id.title, R.string.button_vertex_assembly);
         setText(steps.stepVertexShading, android.R.id.title, R.string.button_vertex_shading);
         setText(steps.stepClipping, android.R.id.title, R.string.button_clipping);
@@ -215,6 +228,46 @@ public class SetupActivity extends Activity {
             }
         });
 
+        steps.stepLightPosition.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Instantiate and display a float picker dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                builder.setTitle(R.string.dialogue_title_light_position);
+
+                LayoutInflater inflater = SetupActivity.this.getLayoutInflater();
+                View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
+
+                final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
+                final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
+                final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
+
+                builder.setView(dialogueView);
+                builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        float x = Float.valueOf(editX.getText().toString());
+                        float y = Float.valueOf(editY.getText().toString());
+                        float z = Float.valueOf(editZ.getText().toString());
+                        mLightPosition = new Float3(x, y, z);
+                        updateViews();
+                    }
+                });
+                builder.setNegativeButton(R.string.dialogue_button_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                // Get the AlertDialog, initialise values and show it.
+                AlertDialog dialogue = builder.create();
+
+                editX.setText(String.valueOf(mLightPosition.getX()));
+                editY.setText(String.valueOf(mLightPosition.getY()));
+                editZ.setText(String.valueOf(mLightPosition.getZ()));
+                dialogue.show();
+            }
+        });
+
         steps.stepLightingModel.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -233,6 +286,37 @@ public class SetupActivity extends Activity {
                     }
                 });
                 AlertDialog dialogue = builder.create();
+                dialogue.show();
+            }
+        });
+
+        steps.stepAnimationDuration.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Instantiate and display a float picker dialogue
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                builder.setTitle(R.string.dialogue_title_animation_duration);
+
+                final EditText durationTextView = new EditText(SetupActivity.this);
+                durationTextView.setText(String.valueOf(mAnimationDuration));
+                durationTextView.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+
+                builder.setView(durationTextView);
+                builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        mAnimationDuration = Integer.valueOf(durationTextView.getText().toString());
+                        updateViews();
+                    }
+                });
+                builder.setNegativeButton(R.string.dialogue_button_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                // Get the AlertDialog, initialise values and show it.
+                AlertDialog dialogue = builder.create();
+
                 dialogue.show();
             }
         });
@@ -373,9 +457,10 @@ public class SetupActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SetupActivity.this, PipelineActivity.class);
-                intent.putExtra("animation_duration", 2000); // TODO configuration for this
                 intent.putExtra("elements", mSceneElements);
                 intent.putExtra("camera", mCamera);
+                intent.putExtra("light_position", mLightPosition);
+                intent.putExtra("animation_duration", mAnimationDuration);
                 intent.putExtra("min_samples", mMinSamples);
                 intent.putExtra("culling_clockwise", mCullingClockwise);
                 intent.putExtra("depth_func", mDepthFunc);
@@ -422,6 +507,9 @@ public class SetupActivity extends Activity {
             vertexAssemblySummary += " vertex)";
         else
             vertexAssemblySummary += " vertices)";
+        
+        // Generate light source position summary
+        String lightPositionSummary = "Point source at " + mLightPosition.toString();
 
         // Generate vertex shading summary
         String vertexShadingSummary = "Undefined vertex shader";
@@ -439,6 +527,9 @@ public class SetupActivity extends Activity {
                 vertexShadingSummary = "Project vertices into eye space and fix a preset size";
                 break;
         }
+        
+        // Generate animation duration summary
+        String animationDurationSummary = "Transitions animate for " + mAnimationDuration + "ms";
 
         // Generate multisampling summary
         String multisamplingSummary = mMinSamples + " samples minimum in multisample buffers (" + mMinSamples + "x MSAA)";
@@ -475,7 +566,9 @@ public class SetupActivity extends Activity {
 
         setText(steps.stepSceneComposition, android.R.id.summary, sceneCompositionSummary);
         setText(steps.stepCameraParameters, android.R.id.summary, cameraParametersSummary);
+        setText(steps.stepLightPosition, android.R.id.summary, lightPositionSummary);
         setText(steps.stepLightingModel, android.R.id.summary, lightingModelSummary);
+        setText(steps.stepAnimationDuration, android.R.id.summary, animationDurationSummary);
         setText(steps.stepVertexAssembly, android.R.id.summary, vertexAssemblySummary);
         setText(steps.stepVertexShading, android.R.id.summary, vertexShadingSummary);
         setText(steps.stepClipping, android.R.id.summary, R.string.desc_clipping);

@@ -37,6 +37,7 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
 
     private LightingModel mLighting;
+    private LightingModel mAccessoryLighting;
     private LightingModel mPointLighting;
 
     private final Camera mSceneCamera;
@@ -82,10 +83,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     protected int mAnimationDuration = 2000;
 
     // Light position, for implementing lighting models
-    public static Float3 sLightPosition = new Float3(-2, 2, -3);
-    private static Primitive sLightPoint = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition),
-            Colour.WHITE);
-    private Drawable sLightDrawable;
+    public static Float3 sLightPosition;
+    private Primitive mLightElement;
+    private Drawable mLightDrawable;
 
     public float getRotation() {
         return mActualCamera.getRotation();
@@ -129,9 +129,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final Element mFrustumElement;
     private Drawable mFrustumDrawable;
 
-    // Axes should never change between instances so they can be declared statically
-    private static Composite sAxes;
-    private static Drawable sAxesDrawable;
+    private Composite sAxes;
+    private Drawable sAxesDrawable;
 
     public PipelineRenderer(Bundle params) {
 
@@ -152,7 +151,12 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Initialise lighting models
         mLighting = LightingModel.getLightingModel(Model.UNIFORM);
+        mAccessoryLighting = LightingModel.getLightingModel(Model.UNIFORM);
         mPointLighting = LightingModel.getLightingModel(Model.POINT_SOURCE);
+
+        sLightPosition = (Float3) params.getSerializable("light_position");
+        mLightElement = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE);
+        mLightDrawable = mLightElement.getDrawable();
 
         mGLCullingEnabled = false;
         mGLCullingClockwise = params.getBoolean("culling_clockwise", false);
@@ -188,11 +192,12 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Force re-initialisation of static scene objects in this new render thread context
         sAxesDrawable = null;
-        sLightDrawable = null;
+        mLightDrawable = null;
         mCameraDrawable = null;
         mFrustumDrawable = null;
 
         mLighting.reset();
+        mAccessoryLighting.reset();
         mPointLighting.reset();
     }
 
@@ -316,11 +321,11 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Draw axes and virtual camera
         if (mDrawAxes)
-            sAxesDrawable.draw(mLighting, mMVMatrix, mMVPMatrix);
+            sAxesDrawable.draw(mAccessoryLighting, mMVMatrix, mMVPMatrix);
         if (mDrawCamera)
-            mCameraDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+            mCameraDrawable.draw(mAccessoryLighting, mCVMatrix, mCVPMatrix);
         if (mDrawFrustum)
-            mFrustumDrawable.draw(mLighting, mCVMatrix, mCVPMatrix);
+            mFrustumDrawable.draw(mAccessoryLighting, mCVMatrix, mCVPMatrix);
 
         int drawn = 0;
 
@@ -340,9 +345,9 @@ public class PipelineRenderer implements Renderer, Serializable {
                 System.out.println("Ruh-roh, null drawable!");
         }
 
-        if (sLightDrawable == null)
-            sLightDrawable = sLightPoint.getDrawable();
-        sLightDrawable.draw(mPointLighting, mLVMatrix, mLVPMatrix);
+        if (mLightDrawable == null)
+            mLightDrawable = mLightElement.getDrawable();
+        mLightDrawable.draw(mPointLighting, mLVMatrix, mLVPMatrix);
 
     }
 
