@@ -5,10 +5,10 @@
     <corners android:radius="@dimen/navigator_block_corner_radius" />
 
     <padding
-        android:bottom="@dimen/navigator_block_innermargin"
-        android:left="@dimen/navigator_block_innermargin"
-        android:right="@dimen/navigator_block_innermargin"
-        android:top="@dimen/navigator_block_innermargin" />
+        android:bottom="@dimen/navigator_block_inner_margin"
+        android:left="@dimen/navigator_block_inner_margin"
+        android:right="@dimen/navigator_block_inner_margin"
+        android:top="@dimen/navigator_block_inner_margin" />
 
     <solid android:color="@color/navigator_bg_yellow" />
 

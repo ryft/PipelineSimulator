@@ -40,6 +40,7 @@ import com.espian.showcaseview.ShowcaseView;
 import com.espian.showcaseview.ShowcaseView.ConfigOptions;
 import com.espian.showcaseview.SimpleShowcaseEventListener;
 import com.espian.showcaseview.targets.ActionItemTarget;
+import com.espian.showcaseview.targets.Target;
 import com.espian.showcaseview.targets.ViewTarget;
 
 public class SetupActivity extends Activity {
@@ -177,14 +178,22 @@ public class SetupActivity extends Activity {
         prefs = getSharedPreferences("uk.co.ryft.pipeline", MODE_PRIVATE);
     }
 
+    private boolean mHelpActivated = true;
+
     @Override
     protected void onResume() {
         super.onResume();
 
         // Show First Run help message if necessary
         if (prefs.getBoolean("firstrun", true)) {
-            ShowcaseView.insertShowcaseView(new ActionItemTarget(this, R.id.action_setup_help), this,
-                    R.string.help_firstrun_title, R.string.help_firstrun_desc);
+            mHelpActivated = false;
+            insertShowcaseView(new ActionItemTarget(this, R.id.action_setup_help), R.string.help_firstrun_title,
+                    R.string.help_firstrun_desc, 1, null, new SimpleShowcaseEventListener() {
+                        @Override
+                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                            mHelpActivated = true;
+                        }
+                    });
             prefs.edit().putBoolean("firstrun", false).commit();
         }
     }
@@ -507,7 +516,7 @@ public class SetupActivity extends Activity {
             vertexAssemblySummary += " vertex)";
         else
             vertexAssemblySummary += " vertices)";
-        
+
         // Generate light source position summary
         String lightPositionSummary = "Point source at " + mLightPosition.toString();
 
@@ -527,7 +536,7 @@ public class SetupActivity extends Activity {
                 vertexShadingSummary = "Project vertices into eye space and fix a preset size";
                 break;
         }
-        
+
         // Generate animation duration summary
         String animationDurationSummary = "Transitions animate for " + mAnimationDuration + "ms";
 
@@ -582,7 +591,12 @@ public class SetupActivity extends Activity {
 
     protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
             OnShowcaseEventListener listener) {
-        ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options);
+        return insertShowcaseView(new ViewTarget(target), title, description, scale, options, listener);
+    }
+
+    protected ShowcaseView insertShowcaseView(Target target, int title, int description, float scale, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        ShowcaseView sv = ShowcaseView.insertShowcaseView(target, this, title, description, options);
         sv.setOnShowcaseEventListener(listener);
         sv.setScaleMultiplier(scale);
         return sv;
@@ -592,6 +606,9 @@ public class SetupActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_setup_help:
+                if (!mHelpActivated)
+                    break;
+                
                 final ScrollView scroll = mScrollView;
 
                 final OnShowcaseEventListener tutorialSimulate = new SimpleShowcaseEventListener() {
@@ -612,9 +629,9 @@ public class SetupActivity extends Activity {
 
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                        scroll.smoothScrollTo(0, (int) steps.stepBlending.getY());
-                        insertShowcaseView(steps.stepClipping.findViewById(android.R.id.title), R.string.help_disabled_title,
-                                R.string.help_disabled_desc, 1.8f, null, tutorialSimulate);
+                        scroll.smoothScrollTo(0, (int) steps.stepVertexAssembly.getY());
+                        insertShowcaseView(steps.stepVertexAssembly.findViewById(android.R.id.title),
+                                R.string.help_disabled_title, R.string.help_disabled_desc, 1.5f, null, tutorialSimulate);
                     }
                 };
 
@@ -639,7 +656,7 @@ public class SetupActivity extends Activity {
                 };
 
                 scroll.smoothScrollTo(0, 0);
-                insertShowcaseView(steps.stepSceneComposition.findViewById(android.R.id.title),
+                insertShowcaseView(steps.stepCameraParameters.findViewById(android.R.id.title),
                         R.string.help_scene_definition_title, R.string.help_scene_definition_desc, 1.5f, null,
                         tutorialColourCoding);
 

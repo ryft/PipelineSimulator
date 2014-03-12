@@ -30,27 +30,31 @@
 
             <TextView
                 android:id="@+id/block_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/navigator_block_innermargin"
+                android:layout_width="@dimen/navigator_block_inner_width"
+                android:layout_height="@dimen/navigator_block_inner_height"
+                android:layout_marginRight="@dimen/navigator_block_inner_margin"
                 android:background="@drawable/navigator_box_inner_light"
+                android:gravity="center"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/block_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/navigator_block_inner_width"
+                android:layout_height="@dimen/navigator_block_inner_height"
                 android:background="@drawable/navigator_box_inner_light"
+                android:gravity="center"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/navigator_details"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="@dimen/navigator_block_inner_margin"
+            android:layout_marginRight="@dimen/navigator_block_inner_margin"
             android:orientation="horizontal" />
     </LinearLayout>
 

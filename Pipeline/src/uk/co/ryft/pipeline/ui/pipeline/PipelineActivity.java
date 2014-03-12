@@ -23,9 +23,11 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -369,23 +371,25 @@ public class PipelineActivity extends Activity {
         mNavigator.groupPixelProcessing.removeView(mNavigator.groupPixelProcessing.findViewById(R.id.map_connector));
 
         LinearLayout detailsLayout;
+        LayoutParams layoutParams = new LayoutParams((int) getResources().getDimension(R.dimen.navigator_block_inner_width), LayoutParams.WRAP_CONTENT);
+        
         detailsLayout = (LinearLayout) mNavigator.groupVertexProcessing.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_vertex_assembly, null));
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_shading, null));
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_vertex_assembly, null), layoutParams);
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_shading, null), layoutParams);
 
         detailsLayout = (LinearLayout) mNavigator.groupPrimitiveProcessing.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_clipping, null));
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_clipping, null), layoutParams);
 
         detailsLayout = (LinearLayout) mNavigator.groupRasterisation.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_multisampling, null));
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_face_culling, null));
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_multisampling, null), layoutParams);
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_face_culling, null), layoutParams);
 
         detailsLayout = (LinearLayout) mNavigator.groupFragmentProcessing.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_shading, null));
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_depth_buffer_test, null));
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_shading, null), layoutParams);
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_depth_buffer_test, null), layoutParams);
 
         detailsLayout = (LinearLayout) mNavigator.groupPixelProcessing.findViewById(R.id.navigator_details);
-        detailsLayout.addView(getLayoutInflater().inflate(R.layout.navigator_blending, null));
+        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_blending, null), layoutParams);
 
         mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
 
@@ -396,6 +400,11 @@ public class PipelineActivity extends Activity {
         });
 
         updatePipelineNavigator(true);
+    }
+    
+    private void addView(ViewGroup layout, View view, LayoutParams params) {
+        layout.addView(view);
+        view.setLayoutParams(params);
     }
 
     protected void updatePipelineIndicator(boolean right, boolean thresholdExceeded) {
