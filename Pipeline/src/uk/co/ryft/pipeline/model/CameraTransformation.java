@@ -36,7 +36,9 @@ public class CameraTransformation extends Transformation<Camera> {
     private final float mFarBase;
     private final float mFarDiff;
 
-    public CameraTransformation(Camera origin, Camera destination) {
+    public CameraTransformation(Camera origin, Camera destination, int duration) {
+        super(duration);
+        
         mOrigin = (Camera) origin.clone();
         mDestination = (Camera) destination.clone();
         

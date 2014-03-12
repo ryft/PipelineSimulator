@@ -12,17 +12,6 @@ import android.widget.Button;
 public class SetupBlendingActivity extends Activity {
 
     // Store references to view elements
-//    protected TextView mTextEye;
-//    protected TextView mTextFocus;
-//    protected TextView mTextUp;
-//
-//    protected EditText mTextLeft;
-//    protected EditText mTextRight;
-//    protected EditText mTextBottom;
-//    protected EditText mTextTop;
-//    protected EditText mTextNear;
-//    protected EditText mTextFar;
-
     protected GLConfigSpinner mSpinnerBlendFuncSrc;
     protected GLConfigSpinner mSpinnerBlendFuncDst;
     protected GLConfigSpinner mSpinnerBlendEquation;

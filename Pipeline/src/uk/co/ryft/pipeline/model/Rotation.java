@@ -11,8 +11,9 @@ public class Rotation extends Transformation<float[]> {
     private float[] mCurrentState = new float[16];
 
     // XXX Angle in degrees
-    public Rotation(int angle, Float3 axis) {
-        mAxis = (Float3) axis.clone();
+    public Rotation(int angle, Float3 axis, int duration) {
+        super(duration);
+        mAxis = axis;
         mAngle = angle;
     }
 

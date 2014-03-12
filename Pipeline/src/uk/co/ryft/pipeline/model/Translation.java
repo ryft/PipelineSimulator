@@ -10,8 +10,9 @@ public class Translation extends Transformation<float[]> {
 
     private float[] mCurrentState = new float[16];
 
-    public Translation(Float3 translation) {
-        mTranslation = (Float3) translation.clone();
+    public Translation(Float3 translation, int duration) {
+        super(duration);
+        mTranslation = translation;
     }
 
     @Override

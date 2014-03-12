@@ -45,4 +45,28 @@
         <item name="android:shadowRadius">0</item>
     </style>
 
+    <style name="Hairline">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/hairline_height</item>
+        <item name="android:background">@color/list_item_hairline</item>
+    </style>
+
+    <style name="SetupGroupTitleContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">3dip</item>
+        <item name="android:layout_marginLeft">8dip</item>
+        <item name="android:layout_marginRight">8dip</item>
+        <item name="android:layout_marginTop">8dip</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="SetupGroupTitle">
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
 </resources>

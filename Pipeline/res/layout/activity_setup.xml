@@ -25,9 +25,21 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:text="@string/heading_group_scene_definition" />
+                <LinearLayout
+                    style="@style/SetupGroupTitleContainer"
+                    android:layout_marginTop="3dip" >
+
+                    <TextView
+                        style="@style/SetupGroupTitle"
+                        android:text="@string/heading_group_scene_definition" />
+
+                    <View
+                        android:layout_width="14dip"
+                        android:layout_height="14dip"
+                        android:background="@drawable/swatch_border" />
+                </LinearLayout>
+
+                <View style="@style/Hairline" />
 
                 <include
                     android:id="@+id/step_scene_composition"
@@ -38,7 +50,15 @@
                     layout="@layout/component_setup_step" />
 
                 <include
+                    android:id="@+id/step_light_position"
+                    layout="@layout/component_setup_step" />
+
+                <include
                     android:id="@+id/step_lighting_model"
+                    layout="@layout/component_setup_step" />
+
+                <include
+                    android:id="@+id/step_animation_duration"
                     layout="@layout/component_setup_step" />
             </LinearLayout>
 
@@ -48,9 +68,20 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:text="@string/heading_group_vertex_processing" />
+                <LinearLayout style="@style/SetupGroupTitleContainer" >
+
+                    <TextView
+                        style="@style/SetupGroupTitle"
+                        android:text="@string/heading_group_vertex_processing" />
+
+                    <View
+                        android:id="@+id/swatch_vertex_processing"
+                        android:layout_width="14dip"
+                        android:layout_height="14dip"
+                        android:background="@color/navigator_bg_purple" />
+                </LinearLayout>
+
+                <View style="@style/Hairline" />
 
                 <include
                     android:id="@+id/step_vertex_assembly"
@@ -67,9 +98,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:text="@string/heading_group_primitive_processing" />
+                <LinearLayout style="@style/SetupGroupTitleContainer" >
+
+                    <TextView
+                        style="@style/SetupGroupTitle"
+                        android:text="@string/heading_group_primitive_processing" />
+
+                    <View
+                        android:layout_width="14dip"
+                        android:layout_height="14dip"
+                        android:background="@color/navigator_bg_green" />
+                </LinearLayout>
+
+                <View style="@style/Hairline" />
 
                 <include
                     android:id="@+id/step_clipping"
@@ -82,9 +123,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:text="@string/heading_group_rasterisation" />
+                <LinearLayout style="@style/SetupGroupTitleContainer" >
+
+                    <TextView
+                        style="@style/SetupGroupTitle"
+                        android:text="@string/heading_group_rasterisation" />
+
+                    <View
+                        android:layout_width="14dip"
+                        android:layout_height="14dip"
+                        android:background="@color/navigator_bg_yellow" />
+                </LinearLayout>
+
+                <View style="@style/Hairline" />
 
                 <include
                     android:id="@+id/step_multisampling"
@@ -101,9 +152,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:text="@string/heading_group_fragment_processing" />
+                <LinearLayout style="@style/SetupGroupTitleContainer" >
+
+                    <TextView
+                        style="@style/SetupGroupTitle"
+                        android:text="@string/heading_group_fragment_processing" />
+
+                    <View
+                        android:layout_width="14dip"
+                        android:layout_height="14dip"
+                        android:background="@color/navigator_bg_red" />
+                </LinearLayout>
+
+                <View style="@style/Hairline" />
 
                 <include
                     android:id="@+id/step_fragment_shading"
@@ -120,9 +181,19 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
-                    style="?android:listSeparatorTextViewStyle"
-                    android:text="@string/heading_group_pixel_processing" />
+                <LinearLayout style="@style/SetupGroupTitleContainer" >
+
+                    <TextView
+                        style="@style/SetupGroupTitle"
+                        android:text="@string/heading_group_pixel_processing" />
+
+                    <View
+                        android:layout_width="14dip"
+                        android:layout_height="14dip"
+                        android:background="@color/navigator_bg_blue" />
+                </LinearLayout>
+
+                <View style="@style/Hairline" />
 
                 <include
                     android:id="@+id/step_blending"
@@ -130,12 +201,6 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
-
-    <View
-        android:id="@+id/hairline"
-        android:layout_width="match_parent"
-        android:layout_height="1dip"
-        android:background="@color/list_item_hairline" />
 
     <include layout="@layout/component_buttonrow" />
 
