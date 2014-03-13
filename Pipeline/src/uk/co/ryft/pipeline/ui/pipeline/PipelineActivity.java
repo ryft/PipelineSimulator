@@ -274,12 +274,12 @@ public class PipelineActivity extends Activity {
             // Interval is fixed length (10ms)
             int steps = mAnimationDuration / 20;
 
-            viewDst.post(showDst);
             viewSrc.post(raiseSrc);
             for (int step = 0; step <= steps; step++) {
-                viewSrc.setAlpha(1 - ((float) step / steps));
+                viewSrc.setAlpha(1.0f - ((float) step / steps));
                 threadSleep(10);
             }
+            viewDst.post(showDst);
             viewSrc.post(hideSrc);
             for (int step = 0; step <= steps; step++) {
                 viewDst.setAlpha((float) step / steps);
