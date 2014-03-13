@@ -520,7 +520,9 @@ public class PipelineActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (mSurfaceNOAA.isEditMode()) {
+        if (mPipelineNavigator.isOpened()) {
+            mPipelineNavigator.closeLayer(true);
+        } else if (mSurfaceNOAA.isEditMode()) {
             mSurfaceNOAA.toggleEditMode();
             mSurfaceMSAA.toggleEditMode();
         } else

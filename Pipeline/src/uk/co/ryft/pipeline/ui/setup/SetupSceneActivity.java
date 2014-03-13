@@ -2,10 +2,13 @@ package uk.co.ryft.pipeline.ui.setup;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
+import uk.co.ryft.pipeline.model.shapes.Composite.Type;
 import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.ui.setup.builders.BuildPrimitiveActivity;
@@ -25,6 +28,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -46,6 +52,10 @@ public class SetupSceneActivity extends ListActivity {
     // If we pass the worked-on element back and forth, it gets serialised and
     // we lose the reference.
     protected Primitive mThisElement;
+
+    protected Button mSaveButton;
+    protected boolean mSelectionMode = false;
+    protected final HashSet<Integer> mSelectedIDs = new HashSet<Integer>();
 
     @SuppressWarnings("unchecked")
     @Override
@@ -75,7 +85,7 @@ public class SetupSceneActivity extends ListActivity {
                 new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
-                        return true;
+                        return !mSelectionMode;
                     }
 
                     @Override
@@ -92,21 +102,29 @@ public class SetupSceneActivity extends ListActivity {
         listView.setOnScrollListener(touchListener.makeScrollListener());
 
         // Set up save / delete button listeners
-        Button saveButton = (Button) findViewById(R.id.button_row_positive);
+        mSaveButton = (Button) findViewById(R.id.button_row_positive);
         Button deleteButton = (Button) findViewById(R.id.button_row_negative);
         deleteButton.setText(R.string.action_button_cancel);
 
-        saveButton.setOnClickListener(new OnClickListener() {
+        mSaveButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveAndQuit();
+                if (mSelectionMode)
+                    saveSelectedComposite();
+                else
+                    saveAndQuit();
             }
         });
 
         deleteButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                discardAndQuit();
+                if (mSelectionMode) {
+                    mSelectionMode = false;
+                    mSaveButton.setText("Save");
+                    mAdapter.notifyDataSetChanged();
+                } else
+                    discardAndQuit();
             }
         });
     }
@@ -114,6 +132,27 @@ public class SetupSceneActivity extends ListActivity {
     @Override
     public void onBackPressed() {
         saveAndQuit();
+    }
+
+    protected void saveSelectedComposite() {
+
+        if (mSelectedIDs.size() > 1) {
+            LinkedList<Element> components = new LinkedList<Element>();
+            for (int position : mSelectedIDs) {
+                components.add((Element) mAdapter.getItem(position));
+            }
+
+            mAdapter.removeAll(components);
+            mAdapter.add(new Composite(Type.CUSTOM, components));
+
+            Toast.makeText(SetupSceneActivity.this, "Created composite element of size " + mSelectedIDs.size(),
+                    Toast.LENGTH_SHORT).show();
+            mSelectedIDs.clear();
+        }
+
+        mSelectionMode = false;
+        mSaveButton.setText("Save");
+        mAdapter.notifyDataSetChanged();
     }
 
     protected void saveAndQuit() {
@@ -140,19 +179,22 @@ public class SetupSceneActivity extends ListActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (mSelectionMode)
+            return super.onOptionsItemSelected(item);
+
         switch (item.getItemId()) {
             case R.id.action_primitive_new:
                 addPrimitive();
-                break;
+                return true;
 
             case R.id.action_composite_new:
                 addComposite();
-                break;
+                return true;
 
             case R.id.action_elements_discard:
                 mAdapter.clear();
                 Toast.makeText(this, R.string.message_scene_clear, Toast.LENGTH_SHORT).show();
-                break;
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -186,7 +228,14 @@ public class SetupSceneActivity extends ListActivity {
         builder.setItems(typeNames, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 ElementType type = types[which];
-                if (type != Composite.Type.CUSTOM)
+
+                if (type == Composite.Type.CUSTOM) {
+                    mSelectedIDs.clear();
+                    mSelectionMode = true;
+                    mAdapter.notifyDataSetChanged();
+                    mSaveButton.setText("Finish");
+
+                } else
                     startActivityForResult(new Intent(SetupSceneActivity.this, type.getEditorActivity()), REQUEST_COMPOSITE_ADD);
             }
         });
@@ -311,6 +360,7 @@ public class SetupSceneActivity extends ListActivity {
         TextView typeTextView;
         ImageButton editButton;
         TextView summaryTextView;
+        CheckBox selectionCheckBox;
     }
 
     class ElementAdapter extends BaseAdapter {
@@ -376,6 +426,7 @@ public class SetupSceneActivity extends ListActivity {
                 viewHolder.typeTextView = (TextView) convertView.findViewById(R.id.element_type);
                 viewHolder.editButton = (ImageButton) convertView.findViewById(R.id.button_element_edit);
                 viewHolder.summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+                viewHolder.selectionCheckBox = (CheckBox) convertView.findViewById(R.id.element_checkbox);
                 convertView.setTag(viewHolder);
 
             } else {
@@ -386,6 +437,7 @@ public class SetupSceneActivity extends ListActivity {
             TextView typeTextView = viewHolder.typeTextView;
             ImageButton editButton = viewHolder.editButton;
             TextView summaryTextView = viewHolder.summaryTextView;
+            CheckBox selectionCheckBox = viewHolder.selectionCheckBox;
 
             Element elem = mElems.get(position);
 
@@ -399,15 +451,36 @@ public class SetupSceneActivity extends ListActivity {
 
                 typeTextView.setClickable(false);
 
-                if (isPrimitive)
-                    editButton.setImageResource(R.drawable.ic_action_edit);
-                else
-                    editButton.setImageResource(R.drawable.ic_action_expand);
+                if (mSelectionMode) {
+                    editButton.setVisibility(View.INVISIBLE);
+                    selectionCheckBox.setVisibility(View.VISIBLE);
+
+                    selectionCheckBox.setChecked(mSelectedIDs.contains(position));
+                    selectionCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked)
+                                mSelectedIDs.add(position);
+                            else
+                                mSelectedIDs.remove(position);
+                        }
+                    });
+
+                } else {
+                    editButton.setVisibility(View.VISIBLE);
+                    selectionCheckBox.setVisibility(View.INVISIBLE);
+
+                    if (isPrimitive)
+                        editButton.setImageResource(R.drawable.ic_action_edit);
+                    else
+                        editButton.setImageResource(R.drawable.ic_action_expand);
+                }
 
                 editButton.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
+
                         Element elem = (Element) getItem(position);
                         if (isPrimitive)
                             // XXX safe cast due to previous check.
