@@ -163,7 +163,7 @@ public class SetupActivity extends Activity {
         steps.stepDepthBufferTest = findViewById(R.id.step_depth_buffer_test);
         steps.stepBlending = findViewById(R.id.step_blending);
 
-        // Put some interesting things in the scene for testing purposes
+        // Put some interesting things in the scene
         Random r = new Random();
         for (int i = 0; i < 48; i++) {
             Element e = ShapeFactory.buildCuboid(new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 3 - 1.5f,
@@ -508,14 +508,14 @@ public class SetupActivity extends Activity {
         for (Element e : mSceneElements)
             vertexCount += e.getVertexCount();
 
-        vertexAssemblySummary = primitiveCount + " primitive";
+        vertexAssemblySummary = String.valueOf(vertexCount);
+        if (vertexCount == 1)
+            vertexAssemblySummary += " vertex assembled from ";
+        else
+            vertexAssemblySummary += " vertices assembled from ";
+        vertexAssemblySummary += primitiveCount + " primitive";
         if (primitiveCount != 1)
             vertexAssemblySummary += "s";
-        vertexAssemblySummary += " (" + vertexCount;
-        if (vertexCount == 1)
-            vertexAssemblySummary += " vertex)";
-        else
-            vertexAssemblySummary += " vertices)";
 
         // Generate light source position summary
         String lightPositionSummary = "Point source at " + mLightPosition.toString();
@@ -622,6 +622,9 @@ public class SetupActivity extends Activity {
                         options.buttonLayoutParams = lps;
                         insertShowcaseView(findViewById(R.id.button_row_positive), R.string.help_simulate_title,
                                 R.string.help_simulate_desc, 0.9f, options, OnShowcaseEventListener.NONE);
+
+                        // After the final tutrial screen, re-enable help button
+                        mHelpActivated = true;
                     }
                 };
 
@@ -655,6 +658,7 @@ public class SetupActivity extends Activity {
                     }
                 };
 
+                mHelpActivated = false;
                 scroll.smoothScrollTo(0, 0);
                 insertShowcaseView(steps.stepCameraParameters.findViewById(android.R.id.title),
                         R.string.help_scene_definition_title, R.string.help_scene_definition_desc, 1.5f, null,

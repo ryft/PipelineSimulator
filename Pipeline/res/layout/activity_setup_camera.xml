@@ -17,7 +17,14 @@
             android:orientation="vertical" >
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="?android:attr/textAppearanceMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/desc_margin_bottom"
+                android:text="@string/desc_camera" />
+
+            <TextView
+                style="@style/GroupTitle"
                 android:text="@string/heading_camera_view" />
 
             <LinearLayout
@@ -69,7 +76,7 @@
             </LinearLayout>
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_camera_projection" />
 
             <LinearLayout

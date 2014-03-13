@@ -20,10 +20,11 @@
                 style="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/desc_margin_bottom"
                 android:text="@string/desc_blending" />
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_blending_function" />
 
             <LinearLayout
@@ -78,7 +79,7 @@
             </LinearLayout>
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_blending_equation" />
 
             <!-- glBlendEquation spinner -->

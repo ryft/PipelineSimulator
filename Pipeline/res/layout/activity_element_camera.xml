@@ -17,7 +17,7 @@
             android:orientation="vertical" >
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_element_location" />
 
             <LinearLayout
@@ -35,7 +35,7 @@
             </LinearLayout>
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_element_colours" />
 
             <LinearLayout
@@ -149,7 +149,7 @@
             </LinearLayout>
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_element_proportions" />
 
             <LinearLayout

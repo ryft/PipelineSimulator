@@ -89,12 +89,12 @@
     <string name="heading_blending_function">Pixel Arithmetic Functions</string>
     <string name="heading_blending_equation">Blending Equation</string>
     
-    <string name="heading_group_scene_definition">SCENE PARAMETERS</string>
-    <string name="heading_group_vertex_processing">VERTEX PROCESSING</string>
-    <string name="heading_group_primitive_processing">PRIMITIVE PROCESSING</string>
-    <string name="heading_group_rasterisation">RASTERISATION</string>
-    <string name="heading_group_fragment_processing">FRAGMENT PROCESSING</string>
-    <string name="heading_group_pixel_processing">PIXEL PROCESSING</string>
+    <string name="heading_group_scene_definition">Scene Parameters</string>
+    <string name="heading_group_vertex_processing">Vertex Processing</string>
+    <string name="heading_group_primitive_processing">Primitive Processing</string>
+    <string name="heading_group_rasterisation">Rasterisation</string>
+    <string name="heading_group_fragment_processing">Fragment Processing</string>
+    <string name="heading_group_pixel_processing">Pixel Processing</string>
     
     <string name="desc_element_icon">Element icon</string>
     <string name="desc_element_edit">Edit element</string>
@@ -141,7 +141,18 @@
     
     <string name="desc_clipping">Viewport and clip planes defined by camera parameters</string>
     <string name="desc_hand">Indicator</string>
-    <string name="desc_blending">TODO</string>
+    
+    <string name="desc_camera">Set up the virtual camera from which the scene will be viewed. The view parameters define the view matrix, and the frustum parameters define the projection matrix.\n\nThese are then combined with the model parameters to create the MVP matrix, which is used to draw the scene.</string>
+    <string name="desc_blending">The following parameters define how each calculated pixel is blended with the previous contents of the frame buffer.\n\nThe source and destination functions specify how the RGBA blending factors are computed, and the blending equation specifies how these are combined.</string>
+    
+    <string name="tutorial_vertex_assembly">Vertex array data is prepared by constructing OpenGL Vertex Buffer Objects (VBOs). 3D positions, normal directions and colour values are calculated and inserted into VBOs.\n\nThe vertex shader takes as input the stream of vertices from the resulting buffers.</string>
+    <string name="tutorial_vertex_shading">The vertex shader operates on single vertices taken from its input stream. Using the received vertex attributes and global uniform values, it calculates a position and colour for the output vertex.\n\nCommon uses for vertex shading are perspective projection, texturing and Lambertian lighting.</string>
+    <string name="tutorial_clipping">The view volume is defined by the virtual camera clip planes. Each vertex position is firstly tested to determine if it\'s out of range.\n\nVertices then undergo viewport mapping, converting from normalised device coords to window (screen) coordinates.</string>
+    <string name="tutorial_multisampling">Multisampling is a method for achieving antialiasing to remove jagged diagonal edges from a scene. For each sample pass, a small offset is applied to all screen coordinates.\n\nBy averaging all these samples, the result is a smoother transition of the colours at the edges.</string>
+    <string name="tutorial_face_culling">The user-specified winding direction and order of the vertices in each primitive define the facing of each triangle, as well as their order on screen.\n\nThe process of face culling discards all faces which are facing away from the virtual camera, as these should be invisible.</string>
+    <string name="tutorial_fragment_shading">The fragment shader takes fragments from the rasterisation process and outputs a depth value, and zero or more colour values to be written to the frame buffer.\n\nFragment shaders are often used for per-pixel normal interpolation for Phong lighting, colour interpolation, and texture application.</string>
+    <string name="tutorial_depth_buffer_test">If the depth buffer test is enabled, it will compare each fragment depth with the depth of the sample being written to in the depth buffer (aka Z-buffer). If the comparison fails, the fragment is discarded.\n\nBy default, the depth comparison is GL_LESS; fragments behind the current sample are discarded.</string>
+    <string name="tutorial_blending">When blending is enabled, pixels are drawn using a function that blends the incoming (source) RGBA values with the RGBA values that are already in the frame buffer (destination).\n\nThe blending functions generate blending factors from the source and destination values, and the blending equation calculates the resulting colour for the framebuffer.</string>
     
     <string name="navigator_element_array">Element Array Buffer</string>
     <string name="navigator_vertex">Vertex</string>
@@ -211,6 +222,6 @@
     <string name="help_scene_viewer_desc">This is where your custom scene is shown at different steps of the graphics pipeline.\n\nSwipe left to advance along the pipeline, or right to move backwards. The next or previous step will be shown on the indicator bar at the bottom of the screen as you swipe.\n\nDouble-tap the scene to toggle \'Move mode\' where you can move and scale the scene using touch gestures.</string>
     
     <string name="help_navigator_title">Pipeline navigator</string>
-    <string name="help_navigator_desc">The bottom indicator bar will show you the next or previous pipeline step when you swipe left or right.\n\nSwipe up from the bottom bar to display the pipeline navigator, which shows the next step of the graphics pipeline.</string>
+    <string name="help_navigator_desc">The bottom indicator bar will show you the next or previous pipeline step when you swipe left or right.\n\nSwipe up from the bottom bar to display the pipeline navigator, which shows the steps of the graphics pipeline. Tap any pipeline step to show a summary of its action.</string>
 
 </resources>

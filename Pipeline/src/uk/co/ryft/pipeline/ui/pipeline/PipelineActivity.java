@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -32,6 +33,8 @@ import com.espian.showcaseview.ShowcaseView;
 import com.espian.showcaseview.ShowcaseView.ConfigOptions;
 import com.espian.showcaseview.SimpleShowcaseEventListener;
 import com.espian.showcaseview.targets.ViewTarget;
+import com.slidinglayer.SlidingLayer;
+import com.slidinglayer.SlidingLayer.OnInteractListener;
 
 public class PipelineActivity extends Activity {
 
@@ -41,6 +44,7 @@ public class PipelineActivity extends Activity {
     protected PipelineSurface mSurfaceNOAA;
     protected PipelineSurface mSurfaceMSAA;
     protected TextView mPipelineIndicator;
+    protected SlidingLayer mPipelineNavigator;
 
     protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
@@ -51,7 +55,8 @@ public class PipelineActivity extends Activity {
     protected boolean mIndicatorCleared = true;
     protected boolean mIsScrolling = false;
     protected boolean mIsScrollingRight = false;
-    protected float mScrollOrigin = 0;
+    protected float mScrollOriginX = 0;
+    protected float mScrollOriginY = 0;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +65,7 @@ public class PipelineActivity extends Activity {
         setContentView(R.layout.activity_pipeline);
         FrameLayout pipelineFrame = (FrameLayout) findViewById(R.id.simulator_frame);
         mPipelineIndicator = (TextView) findViewById(R.id.pipeline_indicator);
+        mPipelineNavigator = (SlidingLayer) findViewById(R.id.pipeline_navigator_layer);
 
         // Pipeline surface needs to be constructed here with specific parameters from activity intent
         mPipelineParams = getIntent().getExtras();
@@ -78,13 +84,18 @@ public class PipelineActivity extends Activity {
         final GestureDetector gestureDetector = new GestureDetector(this, new SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                mSurfaceNOAA.toggleEditMode();
-                mSurfaceMSAA.toggleEditMode();
+                if (mSurfaceNOAA.getRenderer().getCurrentState() < PipelineRenderer.STEP_CLIPPING) {
+                    mSurfaceNOAA.toggleEditMode();
+                    mSurfaceMSAA.toggleEditMode();
 
-                if (mSurfaceNOAA.isEditMode())
-                    updatePipelineIndicator("Move mode");
-                else
-                    updatePipelineIndicator("Simulator mode");
+                    if (mSurfaceNOAA.isEditMode())
+                        updatePipelineIndicator("Move mode");
+                    else
+                        updatePipelineIndicator("Simulator mode");
+
+                } else
+                    updatePipelineIndicator("Move mode unavailable after viewport mapping");
+
                 return true;
             }
 
@@ -99,6 +110,9 @@ public class PipelineActivity extends Activity {
                 if (!mSurfaceNOAA.isEditMode()) {
                     mIsScrolling = true;
 
+                    // Store y-coordinate for simple vertical swipe detection
+                    mScrollOriginY = e1.getY();
+
                     // Detect direction of scroll
                     boolean scrollingRight = mIsScrollingRight;
                     if (distanceX > 0)
@@ -107,15 +121,15 @@ public class PipelineActivity extends Activity {
                         scrollingRight = false;
 
                     updatePipelineIndicator(!scrollingRight,
-                            mScrollOrigin - e2.getX() >= mSurfaceNOAA.getWidth() / 3
-                                    || e2.getX() - mScrollOrigin >= mSurfaceNOAA.getWidth() / 3);
+                            mScrollOriginX - e2.getX() >= mSurfaceNOAA.getWidth() / 3
+                                    || e2.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 3);
 
                     // Update the indicator if we've changed direction or it's been cleared
                     if (scrollingRight != mIsScrollingRight || mIndicatorCleared) {
 
                         // Set a new scroll origin if we've changed direction
                         if (scrollingRight != mIsScrollingRight) {
-                            mScrollOrigin = e2.getX();
+                            mScrollOriginX = e2.getX();
                             mIsScrollingRight = scrollingRight;
                         }
                     }
@@ -146,7 +160,7 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
 
-                    if (mScrollOrigin - event.getX() >= mSurfaceNOAA.getWidth() / 4) {
+                    if (mScrollOriginX - event.getX() >= mSurfaceNOAA.getWidth() / 5) {
                         // Scrolled left
                         mSurfaceNOAA.getRenderer().next();
                         mSurfaceMSAA.getRenderer().next();
@@ -154,13 +168,21 @@ public class PipelineActivity extends Activity {
                             new Thread(crossFader).start();
                         updatePipelineNavigator(true);
 
-                    } else if (event.getX() - mScrollOrigin >= mSurfaceNOAA.getWidth() / 4) {
+                    } else if (event.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 5) {
                         // Scrolled right
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
                         mSurfaceNOAA.getRenderer().previous();
                         mSurfaceMSAA.getRenderer().previous();
                         updatePipelineNavigator(false);
+
+                    } else if (mScrollOriginY - event.getY() >= mSurfaceNOAA.getHeight() / 5) {
+                        if (!mPipelineNavigator.isOpened())
+                            mPipelineNavigator.openLayer(true);
+
+                    } else if (event.getY() - mScrollOriginY >= mSurfaceNOAA.getHeight() / 5) {
+                        if (mPipelineNavigator.isOpened())
+                            mPipelineNavigator.closeLayer(true);
                     }
 
                     if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -169,7 +191,8 @@ public class PipelineActivity extends Activity {
                             @Override
                             public void run() {
                                 threadSleep(mAnimationDuration);
-                                updatePipelineIndicator("Swipe up to show navigator");
+                                if (!mPipelineNavigator.isOpened())
+                                    updatePipelineIndicator("Swipe up to show navigator");
                             }
                         }).start();
                     }
@@ -190,6 +213,28 @@ public class PipelineActivity extends Activity {
 
         mSurfaceNOAA.setOnTouchListener(touchListener);
         mSurfaceMSAA.setOnTouchListener(touchListener);
+
+        mPipelineNavigator.setOnInteractListener(new OnInteractListener() {
+
+            @Override
+            public void onOpen() {
+                updatePipelineIndicator("");
+            }
+
+            @Override
+            public void onClose() {
+            }
+
+            @Override
+            public void onOpened() {
+            }
+
+            @Override
+            public void onClosed() {
+                updatePipelineIndicator("Swipe up to show navigator");
+            }
+
+        });
 
         updatePipelineIndicator("Swipe up to show navigator");
     }
@@ -262,12 +307,6 @@ public class PipelineActivity extends Activity {
         LinearLayout groupFragmentProcessing;
         LinearLayout groupPixelProcessing;
 
-        // TextView headingVertexProcessing;
-        // TextView headingPrimitiveProcessing;
-        // TextView headingRasterisation;
-        // TextView headingFragmentProcessing;
-        // TextView headingPixelProcessing;
-
         TextView blockVertexAssembly;
         TextView blockVertexShading;
         TextView blockClipping;
@@ -318,15 +357,35 @@ public class PipelineActivity extends Activity {
         mNavigator.blockDepthBufferTest = (TextView) findViewById(R.id.navigator_depth_buffer_test);
         mNavigator.blockBlending = (TextView) findViewById(R.id.navigator_blending);
 
-        // mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
-        //
-        // @Override
-        // public void onClick(View v) {
-        // Toast.makeText(getApplicationContext(), "debug", Toast.LENGTH_SHORT).show();
-        // }
-        // });
+        setupTutorial(mNavigator.blockVertexAssembly, R.string.label_vertex_assembly, R.string.tutorial_vertex_assembly);
+        setupTutorial(mNavigator.blockVertexShading, R.string.label_vertex_shading, R.string.tutorial_vertex_shading);
+        setupTutorial(mNavigator.blockClipping, R.string.label_clipping, R.string.tutorial_clipping);
+        setupTutorial(mNavigator.blockMultisampling, R.string.label_multisampling, R.string.tutorial_multisampling);
+        setupTutorial(mNavigator.blockFaceCulling, R.string.label_face_culling, R.string.tutorial_face_culling);
+        setupTutorial(mNavigator.blockFragmentShading, R.string.label_fragment_shading, R.string.tutorial_fragment_shading);
+        setupTutorial(mNavigator.blockDepthBufferTest, R.string.label_depth_buffer_test, R.string.tutorial_depth_buffer_test);
+        setupTutorial(mNavigator.blockBlending, R.string.label_blending, R.string.tutorial_blending);
 
         updatePipelineNavigator(true);
+    }
+
+    private boolean mShowcaseShown = false;
+
+    private void setupTutorial(final View view, final int title, final int description) {
+        view.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mShowcaseShown) {
+                    mShowcaseShown = true;
+                    insertShowcaseView(view, title, description, 0, null, new SimpleShowcaseEventListener() {
+                        @Override
+                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                            mShowcaseShown = false;
+                        }
+                    });
+                }
+            }
+        });
     }
 
     protected void updatePipelineIndicator(boolean right, boolean thresholdExceeded) {
@@ -497,9 +556,13 @@ public class PipelineActivity extends Activity {
                     @Override
                     public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
                         insertShowcaseView(mPipelineIndicator, R.string.help_navigator_title, R.string.help_navigator_desc,
-                                1.5f, null, null);
+                                1.2f, null, null);
                     }
                 };
+
+                // Close navigator if necessary
+                if (mPipelineNavigator.isOpened())
+                    mPipelineNavigator.closeLayer(true);
 
                 insertShowcaseView(mSurfaceNOAA, R.string.help_scene_viewer_title, R.string.help_scene_viewer_desc, 0, null,
                         tutorialNavigator);
