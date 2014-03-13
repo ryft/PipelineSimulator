@@ -21,15 +21,11 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.espian.showcaseview.OnShowcaseEventListener;
 import com.espian.showcaseview.ShowcaseView;
@@ -266,11 +262,11 @@ public class PipelineActivity extends Activity {
         LinearLayout groupFragmentProcessing;
         LinearLayout groupPixelProcessing;
 
-        TextView headingVertexProcessing;
-        TextView headingPrimitiveProcessing;
-        TextView headingRasterisation;
-        TextView headingFragmentProcessing;
-        TextView headingPixelProcessing;
+        // TextView headingVertexProcessing;
+        // TextView headingPrimitiveProcessing;
+        // TextView headingRasterisation;
+        // TextView headingFragmentProcessing;
+        // TextView headingPixelProcessing;
 
         TextView blockVertexAssembly;
         TextView blockVertexShading;
@@ -313,98 +309,24 @@ public class PipelineActivity extends Activity {
         mNavigator.groupFragmentProcessing = (LinearLayout) findViewById(R.id.group_fragment_processing);
         mNavigator.groupPixelProcessing = (LinearLayout) findViewById(R.id.group_pixel_processing);
 
-        mNavigator.headingVertexProcessing = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.group_heading);
-        mNavigator.headingPrimitiveProcessing = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.group_heading);
-        mNavigator.headingRasterisation = (TextView) mNavigator.groupRasterisation.findViewById(R.id.group_heading);
-        mNavigator.headingFragmentProcessing = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.group_heading);
-        mNavigator.headingPixelProcessing = (TextView) mNavigator.groupPixelProcessing.findViewById(R.id.group_heading);
+        mNavigator.blockVertexAssembly = (TextView) findViewById(R.id.navigator_title_vertex_assembly);
+        mNavigator.blockVertexShading = (TextView) findViewById(R.id.navigator_title_vertex_shading);
+        mNavigator.blockClipping = (TextView) findViewById(R.id.navigator_title_clipping);
+        mNavigator.blockMultisampling = (TextView) findViewById(R.id.navigator_multisampling);
+        mNavigator.blockFaceCulling = (TextView) findViewById(R.id.navigator_face_culling);
+        mNavigator.blockFragmentShading = (TextView) findViewById(R.id.navigator_fragment_shading);
+        mNavigator.blockDepthBufferTest = (TextView) findViewById(R.id.navigator_depth_buffer_test);
+        mNavigator.blockBlending = (TextView) findViewById(R.id.navigator_blending);
 
-        mNavigator.headingVertexProcessing.setText(R.string.heading_group_vertex_processing);
-        mNavigator.headingPrimitiveProcessing.setText(R.string.heading_group_primitive_processing);
-        mNavigator.headingRasterisation.setText(R.string.heading_group_rasterisation);
-        mNavigator.headingFragmentProcessing.setText(R.string.heading_group_fragment_processing);
-        mNavigator.headingPixelProcessing.setText(R.string.heading_group_pixel_processing);
-
-        mNavigator.blockVertexAssembly = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.block_1);
-        mNavigator.blockVertexShading = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.block_2);
-        mNavigator.blockClipping = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.block);
-        mNavigator.blockMultisampling = (TextView) mNavigator.groupRasterisation.findViewById(R.id.block_1);
-        mNavigator.blockFaceCulling = (TextView) mNavigator.groupRasterisation.findViewById(R.id.block_2);
-        mNavigator.blockFragmentShading = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.block_1);
-        mNavigator.blockDepthBufferTest = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.block_2);
-        mNavigator.blockBlending = (TextView) mNavigator.groupPixelProcessing.findViewById(R.id.block);
-
-        Resources r = getResources();
-        setBackgroundDrawable(mNavigator.groupVertexProcessing.findViewById(R.id.map_block_wrapper),
-                r.getDrawable(R.drawable.navigator_box_outer_1));
-        setBackgroundDrawable(mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_block_wrapper),
-                r.getDrawable(R.drawable.navigator_box_outer_2));
-        setBackgroundDrawable(mNavigator.groupRasterisation.findViewById(R.id.map_block_wrapper),
-                r.getDrawable(R.drawable.navigator_box_outer_3));
-        setBackgroundDrawable(mNavigator.groupFragmentProcessing.findViewById(R.id.map_block_wrapper),
-                r.getDrawable(R.drawable.navigator_box_outer_4));
-        setBackgroundDrawable(mNavigator.groupPixelProcessing.findViewById(R.id.map_block_wrapper),
-                r.getDrawable(R.drawable.navigator_box_outer_5));
-
-        mNavigator.blockVertexAssembly.setText(R.string.label_vertex_assembly);
-        mNavigator.blockVertexShading.setText(R.string.label_vertex_shading);
-        mNavigator.blockClipping.setText(R.string.label_clipping);
-        mNavigator.blockMultisampling.setText(R.string.label_multisampling);
-        mNavigator.blockFaceCulling.setText(R.string.label_face_culling);
-        mNavigator.blockFragmentShading.setText(R.string.label_fragment_shading);
-        mNavigator.blockDepthBufferTest.setText(R.string.label_depth_buffer_test);
-        mNavigator.blockBlending.setText(R.string.label_blending);
-
-        TextView connectorTitle;
-        connectorTitle = (TextView) mNavigator.groupVertexProcessing.findViewById(R.id.map_connector).findViewById(
-                R.id.map_connector_title);
-        connectorTitle.setText("vertices >");
-        connectorTitle = (TextView) mNavigator.groupPrimitiveProcessing.findViewById(R.id.map_connector).findViewById(
-                R.id.map_connector_title);
-        connectorTitle.setText("primitives >");
-        connectorTitle = (TextView) mNavigator.groupRasterisation.findViewById(R.id.map_connector).findViewById(
-                R.id.map_connector_title);
-        connectorTitle.setText("fragments >");
-        connectorTitle = (TextView) mNavigator.groupFragmentProcessing.findViewById(R.id.map_connector).findViewById(
-                R.id.map_connector_title);
-        connectorTitle.setText("pixels >");
-        mNavigator.groupPixelProcessing.removeView(mNavigator.groupPixelProcessing.findViewById(R.id.map_connector));
-
-        LinearLayout detailsLayout;
-        LayoutParams layoutParams = new LayoutParams((int) getResources().getDimension(R.dimen.navigator_block_inner_width), LayoutParams.WRAP_CONTENT);
-        
-        detailsLayout = (LinearLayout) mNavigator.groupVertexProcessing.findViewById(R.id.navigator_details);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_vertex_assembly, null), layoutParams);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_shading, null), layoutParams);
-
-        detailsLayout = (LinearLayout) mNavigator.groupPrimitiveProcessing.findViewById(R.id.navigator_details);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_clipping, null), layoutParams);
-
-        detailsLayout = (LinearLayout) mNavigator.groupRasterisation.findViewById(R.id.navigator_details);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_multisampling, null), layoutParams);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_face_culling, null), layoutParams);
-
-        detailsLayout = (LinearLayout) mNavigator.groupFragmentProcessing.findViewById(R.id.navigator_details);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_shading, null), layoutParams);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_depth_buffer_test, null), layoutParams);
-
-        detailsLayout = (LinearLayout) mNavigator.groupPixelProcessing.findViewById(R.id.navigator_details);
-        addView(detailsLayout, getLayoutInflater().inflate(R.layout.navigator_blending, null), layoutParams);
-
-        mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "debug", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // mNavigator.groupFragmentProcessing.setOnClickListener(new OnClickListener() {
+        //
+        // @Override
+        // public void onClick(View v) {
+        // Toast.makeText(getApplicationContext(), "debug", Toast.LENGTH_SHORT).show();
+        // }
+        // });
 
         updatePipelineNavigator(true);
-    }
-    
-    private void addView(ViewGroup layout, View view, LayoutParams params) {
-        layout.addView(view);
-        view.setLayoutParams(params);
     }
 
     protected void updatePipelineIndicator(boolean right, boolean thresholdExceeded) {
@@ -443,28 +365,41 @@ public class PipelineActivity extends Activity {
 
     public void updatePipelineNavigator(boolean forward) {
 
-        // Scroll to the location of the current state's corresponding block
+        // Fetch the current state of the pipeline from the renderer
         int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
-        LinearLayout currentGroup = mNavigator.getStepGroup(currentState);
-
-        // Calculate scroll location required to centre the current group
-        int groupWidth = (int) (currentGroup.getWidth() - getResources().getDimension(R.dimen.navigator_block_connector_length));
-        int margin = (mNavigator.scrollView.getWidth() - groupWidth) / 2;
-        int location = currentGroup.getLeft() - margin;
-        mNavigator.scrollView.smoothScrollTo(location, 0);
 
         // Step defines the block which is to be modified
         // If we've moving backwards, the block following the current state needs to be un-shaded
         int step = (forward) ? currentState - 1 : currentState;
-        View block = mNavigator.getStepBlock(step);
+        View currentBlock = mNavigator.getStepBlock(step);
 
-        if (block == null)
-            return;
+        if (currentBlock != null) {
+            Resources r = getResources();
+            int resource = (forward) ? R.drawable.navigator_box_inner_dark : R.drawable.navigator_box_inner_light;
+            android.graphics.drawable.Drawable background = r.getDrawable(resource);
+            setBackgroundDrawable(currentBlock, background);
+        }
 
-        Resources r = getResources();
-        int resource = (forward) ? R.drawable.navigator_box_inner_dark : R.drawable.navigator_box_inner_light;
-        android.graphics.drawable.Drawable background = r.getDrawable(resource);
-        setBackgroundDrawable(block, background);
+        // Scroll to the location of the current state's corresponding block
+        View currentGroup = mNavigator.getStepGroup(currentState);
+
+        // Calculate scroll location required to centre the current group
+        int groupWidth = (int) (currentGroup.getWidth() - getResources().getDimension(R.dimen.navigator_block_connector_length));
+        int margin = (mNavigator.scrollView.getWidth() - groupWidth) / 2;
+        final int location = currentGroup.getLeft() - margin;
+
+        // Pause before scrolling onwards so the user can see that the previous step is complete
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(mAnimationDuration / 2);
+                } catch (InterruptedException e) {
+                } finally {
+                    mNavigator.scrollView.smoothScrollTo(location, 0);
+                }
+            }
+        }).start();
     }
 
     private void setBackgroundDrawable(View view, android.graphics.drawable.Drawable background) {

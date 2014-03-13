@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/navigator_block_inner_width"
     android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/navigator_block_inner_margin"
     android:gravity="center_horizontal"
     android:orientation="horizontal" >
 
@@ -21,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
-            android:text="Z-buffer"
+            android:text="@string/navigator_z_buffer"
             android:textColor="@android:color/white" />
     </LinearLayout>
 
@@ -43,7 +44,7 @@
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
             android:gravity="center_horizontal"
-            android:text="Depth comparison\nfunction"
+            android:text="@string/navigator_depth_func"
             android:textColor="@android:color/white" />
     </LinearLayout>
 

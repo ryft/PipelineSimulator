@@ -14,7 +14,7 @@
     <dimen name="navigator_block_connector_margintop">50dip</dimen>
     <dimen name="navigator_detail_text_margin">5dip</dimen>
     
-    <dimen name="slider_layer_width">300dip</dimen>
+    <dimen name="slider_layer_width">320dip</dimen>
     <!-- Invariant: slider_offset_height - indicator_text_height = hairline_height -->
     <dimen name="slider_offset_height">26dip</dimen>
     <dimen name="indicator_text_height">24dip</dimen>

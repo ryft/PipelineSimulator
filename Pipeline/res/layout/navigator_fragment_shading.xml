@@ -10,9 +10,10 @@
         android:background="@android:color/background_light" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/navigator_block_inner_width"
         android:layout_height="wrap_content"
-        android:text="@string/navigator_sample_size"
+        android:gravity="center_horizontal"
+        android:text="@string/navigator_glsl"
         android:textColor="@android:color/white" />
 
 </LinearLayout>

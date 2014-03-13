@@ -11,7 +11,7 @@ import uk.co.ryft.pipeline.gl.Float3Wrapper;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
 import uk.co.ryft.pipeline.model.shapes.Primitive.Type;
 import uk.co.ryft.pipeline.ui.components.EditColourHandler;
-import uk.co.ryft.pipeline.ui.components.OnColourChangedListener;
+import uk.co.ryft.pipeline.ui.components.EditColourHandler.OnColourChangedListener;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -39,7 +39,7 @@ public class BuildPrimitiveActivity extends ListActivity {
 
     // XXX Build an adapter of Float3Wrappers because they are mutable
     protected ArrayAdapter<Float3Wrapper> mAdapter;
-//    protected Primitive mElement;
+    // protected Primitive mElement;
     protected Type mElementType;
     protected List<Float3> mElementVertices;
     protected Colour mElementColour;

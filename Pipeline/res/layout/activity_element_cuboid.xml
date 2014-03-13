@@ -54,7 +54,7 @@
                     android:layout_weight="1"
                     android:text="@string/label_element_frontcolour" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -62,20 +62,21 @@
 
                     <View
                         android:id="@+id/element_frontcolour_swatch"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+                        android:layout_gravity="center_vertical" />
 
                     <ImageButton
                         android:id="@+id/button_element_frontcolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
+                        android:layout_alignParentRight="true"
                         android:layout_gravity="center_vertical"
                         android:background="@color/action_bar"
                         android:contentDescription="@string/desc_colour_edit"
                         android:src="@drawable/ic_action_edit" />
-                </LinearLayout>
+
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -91,7 +92,7 @@
                     android:layout_weight="1"
                     android:text="@string/label_element_sidecolour" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -99,20 +100,20 @@
 
                     <View
                         android:id="@+id/element_sidecolour_swatch"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+                        android:layout_gravity="center_vertical" />
 
                     <ImageButton
                         android:id="@+id/button_element_sidecolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
+                        android:layout_alignParentRight="true"
                         android:layout_gravity="center_vertical"
                         android:background="@color/action_bar"
                         android:contentDescription="@string/desc_colour_edit"
                         android:src="@drawable/ic_action_edit" />
-                </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
             <TextView

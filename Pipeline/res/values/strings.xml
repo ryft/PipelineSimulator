@@ -3,10 +3,6 @@
 
     <string name="app_name">Pipeline Simulator</string>
     
-    <string name="action_scene">Edit scene</string>
-    <string name="action_draw_axes">Draw objects</string>
-    <string name="action_change_perspective">Next lighting model</string>
-    
     <string name="action_primitive_new">New primitive</string>
     <string name="action_composite_new">New composite</string>
     <string name="action_elements_discard">Clear scene</string>
@@ -69,6 +65,15 @@
     <string name="label_camera_projection_near">Near clip plane</string>
     <string name="label_camera_projection_far">Far clip plane</string>
     
+    <string name="label_source">Source</string>
+    <string name="label_destination">Destination</string>
+    <string name="label_dest">Dest</string>
+    
+    <string name="label_connector_vertices">vertices ></string>
+    <string name="label_connector_primitives">primitives ></string>
+    <string name="label_connector_fragments">fragments ></string>
+    <string name="label_connector_pixels">pixels ></string>
+    
     <string name="heading_camera_view">View parameters</string>
     <string name="heading_camera_projection">Projection (Frustum definition)</string>
     
@@ -81,6 +86,9 @@
     <string name="heading_element_proportions">Size and proportions</string>
     <string name="heading_element_parameters">Other parameters</string>
     
+    <string name="heading_blending_function">Pixel Arithmetic Functions</string>
+    <string name="heading_blending_equation">Blending Equation</string>
+    
     <string name="heading_group_scene_definition">SCENE PARAMETERS</string>
     <string name="heading_group_vertex_processing">VERTEX PROCESSING</string>
     <string name="heading_group_primitive_processing">PRIMITIVE PROCESSING</string>
@@ -88,8 +96,8 @@
     <string name="heading_group_fragment_processing">FRAGMENT PROCESSING</string>
     <string name="heading_group_pixel_processing">PIXEL PROCESSING</string>
     
-    <string name="desc_element_icon">Element Icon</string>
-    <string name="desc_element_edit">Edit Element</string>
+    <string name="desc_element_icon">Element icon</string>
+    <string name="desc_element_edit">Edit element</string>
     <string name="desc_colour_edit">Edit colour</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
@@ -103,7 +111,6 @@
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
     <string name="dialogue_title_depth_buffer_test">Depth Buffer Comparison</string>
-    <string name="dialogue_title_blending">Fragment Shader Code</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
@@ -133,6 +140,23 @@
     <string name="label_blending">Blending</string>
     
     <string name="desc_clipping">Viewport and clip planes defined by camera parameters</string>
+    <string name="desc_hand">Indicator</string>
+    <string name="desc_blending">TODO</string>
+    
+    <string name="navigator_element_array">Element Array Buffer</string>
+    <string name="navigator_vertex">Vertex</string>
+    <string name="navigator_colour">Colour</string>
+    <string name="navigator_normal">Normal</string>
+    <string name="navigator_glsl">Compiled GLSL\nshader code</string>
+    <string name="navigator_camera_params">Camera\nparameters</string>
+    <string name="navigator_projection_params">Projection\nparameters</string>
+    <string name="navigator_sample_size">Sample size</string>
+    <string name="navigator_winding_direction">Winding\ndirection</string>
+    <string name="navigator_culling_mode">Culling\nmode</string>
+    <string name="navigator_z_buffer">Z-buffer</string>
+    <string name="navigator_depth_func">Depth\ncomparison\nfunction</string>
+    <string name="navigator_blend_func">Blending\nfunctions</string>
+    <string name="navigator_blend_equation">Blending\nequation</string>
     
 	<!-- Depth buffer test comparison functions -->
     <string name="gl_depth_never">Depth comparison never passes</string>
@@ -164,8 +188,6 @@
     <string name="gl_blend_add">Source and destination colours are added together</string>
     <string name="gl_blend_sub">Destination colour is subtracted from source colour</string>
     <string name="gl_blend_rev_sub">Source colour is subtracted from destination colour</string>
-    
-    <string name="button_simulate">Simulate</string>
     
     <string name="help_firstrun_title">First run</string>
     <string name="help_firstrun_desc">Welcome to the Graphics Pipeline Simulator. Tap the help icon at any time for a guided tour of the app.</string>

@@ -22,7 +22,7 @@
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
             android:gravity="center_horizontal"
-            android:text="Camera\nparameters"
+            android:text="@string/navigator_camera_params"
             android:textColor="@android:color/white" />
     </LinearLayout>
 
@@ -44,7 +44,7 @@
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
             android:gravity="center_horizontal"
-            android:text="Projection\nparameters"
+            android:text="@string/navigator_projection_params"
             android:textColor="@android:color/white" />
     </LinearLayout>
 

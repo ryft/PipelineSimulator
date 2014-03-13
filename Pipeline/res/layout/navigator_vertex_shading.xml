@@ -1,6 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/navigator_block_inner_width"
     android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/navigator_block_inner_margin"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
@@ -13,7 +14,7 @@
         android:layout_width="@dimen/navigator_block_inner_width"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Compiled GLSL\nshader code"
+        android:text="@string/navigator_glsl"
         android:textColor="@android:color/white" />
 
 </LinearLayout>

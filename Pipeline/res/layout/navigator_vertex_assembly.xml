@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Element Array Buffer"
+        android:text="@string/navigator_element_array"
         android:textColor="@android:color/white" />
 
     <LinearLayout
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/navigator_detail_text_margin"
                 android:layout_marginRight="@dimen/navigator_detail_text_margin"
-                android:text="Vertex"
+                android:text="@string/navigator_vertex"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/navigator_detail_text_margin"
                 android:layout_marginRight="@dimen/navigator_detail_text_margin"
-                android:text="Colour"
+                android:text="@string/navigator_colour"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/navigator_detail_text_margin"
                 android:layout_marginRight="@dimen/navigator_detail_text_margin"
-                android:text="Normal"
+                android:text="@string/navigator_normal"
                 android:textColor="@android:color/white" />
         </LinearLayout>
     </LinearLayout>

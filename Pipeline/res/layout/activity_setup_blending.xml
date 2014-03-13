@@ -20,11 +20,11 @@
                 style="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Description" />
+                android:text="@string/desc_blending" />
 
             <TextView
                 style="?android:listSeparatorTextViewStyle"
-                android:text="Pixel Arithmetic Functions" />
+                android:text="@string/heading_blending_function" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -45,14 +45,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/setup_row_height"
                         android:gravity="center_vertical"
-                        android:text="Source" />
+                        android:text="@string/label_source" />
 
                     <TextView
                         style="?android:attr/textAppearanceMedium"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/setup_row_height"
                         android:gravity="center_vertical"
-                        android:text="Destination" />
+                        android:text="@string/label_destination" />
                 </LinearLayout>
 
                 <!-- Column 2 -->
@@ -79,7 +79,7 @@
 
             <TextView
                 style="?android:listSeparatorTextViewStyle"
-                android:text="Blending Equation" />
+                android:text="@string/heading_blending_equation" />
 
             <!-- glBlendEquation spinner -->
 
