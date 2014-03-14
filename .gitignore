@@ -19,8 +19,5 @@ local.properties
 .classpath
 .project
 
-# image resources
-drawable-*/
-
 # misc.
 *.log

@@ -2,8 +2,10 @@ package uk.co.ryft.pipeline.ui.setup;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Float3;
@@ -28,7 +30,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -42,6 +43,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.espian.showcaseview.OnShowcaseEventListener;
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.ShowcaseView.ConfigOptions;
+import com.espian.showcaseview.targets.Target;
+import com.espian.showcaseview.targets.ViewTarget;
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class SetupSceneActivity extends ListActivity {
@@ -60,7 +66,7 @@ public class SetupSceneActivity extends ListActivity {
 
     protected Button mSaveButton;
     protected boolean mSelectionMode = false;
-    protected final HashSet<Integer> mSelectedIDs = new HashSet<Integer>();
+    protected final Set<Integer> mSelectedIDs = Collections.synchronizedSet(new HashSet<Integer>());
 
     @SuppressWarnings("unchecked")
     @Override
@@ -152,7 +158,6 @@ public class SetupSceneActivity extends ListActivity {
 
             Toast.makeText(SetupSceneActivity.this, "Created composite element of size " + mSelectedIDs.size(),
                     Toast.LENGTH_SHORT).show();
-            mSelectedIDs.clear();
         }
 
         mSelectionMode = false;
@@ -188,6 +193,12 @@ public class SetupSceneActivity extends ListActivity {
             return super.onOptionsItemSelected(item);
 
         switch (item.getItemId()) {
+            case R.id.action_primitive_help:
+                ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(mSaveButton), this, R.string.help_scene_title,
+                        R.string.help_scene_desc, null);
+                sv.setScaleMultiplier(0);
+                break;
+
             case R.id.action_primitive_new:
                 addPrimitive();
                 return true;
@@ -202,6 +213,19 @@ public class SetupSceneActivity extends ListActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        return insertShowcaseView(new ViewTarget(target), title, description, scale, options, listener);
+    }
+
+    protected ShowcaseView insertShowcaseView(Target target, int title, int description, float scale, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        ShowcaseView sv = ShowcaseView.insertShowcaseView(target, this, title, description, options);
+        sv.setOnShowcaseEventListener(listener);
+        sv.setScaleMultiplier(scale);
+        return sv;
     }
 
     protected void addPrimitive() {
@@ -363,6 +387,7 @@ public class SetupSceneActivity extends ListActivity {
     static class ElementViewHolder {
         ImageView elemIcon;
         TextView typeTextView;
+        ImageButton transformButton;
         ImageButton editButton;
         TextView summaryTextView;
         CheckBox selectionCheckBox;
@@ -429,6 +454,7 @@ public class SetupSceneActivity extends ListActivity {
                 viewHolder = new ElementViewHolder();
                 viewHolder.elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
                 viewHolder.typeTextView = (TextView) convertView.findViewById(R.id.element_type);
+                viewHolder.transformButton = (ImageButton) convertView.findViewById(R.id.button_element_transform);
                 viewHolder.editButton = (ImageButton) convertView.findViewById(R.id.button_element_edit);
                 viewHolder.summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
                 viewHolder.selectionCheckBox = (CheckBox) convertView.findViewById(R.id.element_checkbox);
@@ -440,6 +466,7 @@ public class SetupSceneActivity extends ListActivity {
 
             ImageView elemIcon = viewHolder.elemIcon;
             TextView typeTextView = viewHolder.typeTextView;
+            ImageButton transformButton = viewHolder.transformButton;
             ImageButton editButton = viewHolder.editButton;
             TextView summaryTextView = viewHolder.summaryTextView;
             CheckBox selectionCheckBox = viewHolder.selectionCheckBox;
@@ -456,9 +483,12 @@ public class SetupSceneActivity extends ListActivity {
                 typeTextView.setClickable(false);
 
                 if (mSelectionMode) {
+                    transformButton.setVisibility(View.INVISIBLE);
                     editButton.setVisibility(View.INVISIBLE);
                     selectionCheckBox.setVisibility(View.VISIBLE);
 
+                    // Remove previous listener so we don't accidentally change state
+                    selectionCheckBox.setOnCheckedChangeListener(null);
                     selectionCheckBox.setChecked(mSelectedIDs.contains(position));
                     selectionCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                         @Override
@@ -467,10 +497,12 @@ public class SetupSceneActivity extends ListActivity {
                                 mSelectedIDs.add(position);
                             else
                                 mSelectedIDs.remove(position);
+                            notifyDataSetChanged();
                         }
                     });
 
                 } else {
+                    transformButton.setVisibility(View.VISIBLE);
                     editButton.setVisibility(View.VISIBLE);
                     selectionCheckBox.setVisibility(View.INVISIBLE);
 
@@ -514,9 +546,10 @@ public class SetupSceneActivity extends ListActivity {
                         });
 
                 final View thisView = convertView;
-                thisView.setOnLongClickListener(new OnLongClickListener() {
+                transformButton.setOnClickListener(new OnClickListener() {
+
                     @Override
-                    public boolean onLongClick(View v) {
+                    public void onClick(View v) {
 
                         // Instantiate and display a configuration dialogue
                         AlertDialog.Builder builder = new AlertDialog.Builder(SetupSceneActivity.this);
@@ -572,11 +605,8 @@ public class SetupSceneActivity extends ListActivity {
                                 });
                         AlertDialog dialogue = builder.create();
                         dialogue.show();
-
-                        return true;
                     }
                 });
-                ;
             }
 
             return convertView;

@@ -233,5 +233,8 @@
     
     <string name="help_navigator_title">Pipeline navigator</string>
     <string name="help_navigator_desc">The bottom indicator bar will show you the next or previous pipeline step when you swipe left or right.\n\nSwipe up from the bottom bar to display the pipeline navigator, which shows the steps of the graphics pipeline. Tap any pipeline step to show a summary of its action.</string>
+    
+    <string name="help_scene_title">Scene editor</string>
+    <string name="help_scene_desc">This window displays a list of elements in the current scene.\n\nUse the menu icons to add primitives, composite elements, or discard the scene.\nSwipe individual elements left or right to delete them.\n\nClick the rotate icon to apply a transformation to an element, the pencil icon to manually edit primitive elements, or the arrow icon to expand composite elements into their components.</string>
 
 </resources>

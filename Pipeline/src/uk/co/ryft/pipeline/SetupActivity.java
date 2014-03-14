@@ -218,7 +218,6 @@ public class SetupActivity extends Activity {
         steps.stepSceneComposition.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO Do this for all items
                 // Change to startActivityForResult with suitable intent and request code
                 // Handle callback on activity result
                 Intent intent = new Intent(SetupActivity.this, SetupSceneActivity.class);

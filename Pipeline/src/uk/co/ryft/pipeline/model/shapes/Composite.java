@@ -96,7 +96,6 @@ public class Composite implements Element {
 
     @Override
     public CharSequence getTitle() {
-        // TODO Auto-generated method stub
         return mType.getDescription();
     }
 
