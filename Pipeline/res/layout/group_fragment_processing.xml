@@ -1,0 +1,87 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:ellipsize="none"
+            android:gravity="center"
+            android:text="@string/heading_group_fragment_processing"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:typeface="monospace" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/navigator_box_outer_4"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/navigator_fragment_shading"
+                android:layout_width="@dimen/navigator_block_inner_width"
+                android:layout_height="@dimen/navigator_block_inner_height"
+                android:layout_marginRight="@dimen/navigator_block_inner_margin"
+                android:background="@drawable/navigator_box_inner_light"
+                android:gravity="center"
+                android:text="@string/label_fragment_shading"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/navigator_depth_buffer_test"
+                android:layout_width="@dimen/navigator_block_inner_width"
+                android:layout_height="@dimen/navigator_block_inner_height"
+                android:background="@drawable/navigator_box_inner_light"
+                android:gravity="center"
+                android:text="@string/label_depth_buffer_test"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="@dimen/navigator_block_inner_margin"
+            android:layout_marginRight="@dimen/navigator_block_inner_margin"
+            android:orientation="horizontal" >
+
+            <include layout="@layout/navigator_fragment_shading" />
+
+            <include layout="@layout/navigator_depth_buffer_test" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/navigator_block_connector_margintop"
+            android:ellipsize="none"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
+            android:text="@string/label_connector_pixels"
+            android:textColor="@android:color/white" />
+
+        <View
+            android:layout_width="@dimen/navigator_block_connector_length"
+            android:layout_height="@dimen/navigator_block_connector_thickness"
+            android:background="@android:color/background_light" />
+    </LinearLayout>
+
+</LinearLayout>

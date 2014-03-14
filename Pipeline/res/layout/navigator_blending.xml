@@ -1,19 +1,96 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="@dimen/navigator_block_inner_width"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
     android:gravity="center_horizontal"
-    android:orientation="vertical" >
+    android:orientation="horizontal" >
 
-    <View
-        android:layout_width="@dimen/navigator_detail_connector_thickness"
-        android:layout_height="@dimen/navigator_detail_connector_length"
-        android:background="@android:color/background_light" />
-
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Blending function"
-        android:textColor="@android:color/white" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <View
+            android:layout_width="@dimen/navigator_detail_connector_thickness"
+            android:layout_height="@dimen/navigator_detail_connector_length"
+            android:layout_marginLeft="@dimen/navigator_block_inner_margin"
+            android:background="@android:color/background_light"
+            android:rotation="20" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/navigator_blend_func"
+            android:textColor="@android:color/white" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical" >
+
+                <View
+                    android:layout_width="@dimen/navigator_detail_connector_thickness"
+                    android:layout_height="@dimen/navigator_detail_connector_length"
+                    android:background="@android:color/background_light"
+                    android:rotation="10" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="2dip"
+                    android:text="@string/label_source"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical" >
+
+                <View
+                    android:layout_width="@dimen/navigator_detail_connector_thickness"
+                    android:layout_height="@dimen/navigator_detail_connector_length"
+                    android:background="@android:color/background_light"
+                    android:rotation="-10" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dip"
+                    android:text="@string/label_dest"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <View
+            android:layout_width="@dimen/navigator_detail_connector_thickness"
+            android:layout_height="@dimen/navigator_detail_connector_length"
+            android:layout_marginRight="@dimen/navigator_block_inner_margin"
+            android:background="@android:color/background_light"
+            android:rotation="-20" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/navigator_blend_equation"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
 
 </LinearLayout>

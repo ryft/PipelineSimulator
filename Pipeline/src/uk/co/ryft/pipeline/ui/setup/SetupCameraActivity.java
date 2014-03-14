@@ -4,7 +4,7 @@ import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.ui.components.EditPointHandler;
-import uk.co.ryft.pipeline.ui.components.OnPointChangedListener;
+import uk.co.ryft.pipeline.ui.components.EditPointHandler.OnPointChangedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

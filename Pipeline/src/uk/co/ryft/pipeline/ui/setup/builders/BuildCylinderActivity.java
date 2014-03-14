@@ -5,9 +5,9 @@ import uk.co.ryft.pipeline.gl.Colour;
 import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
 import uk.co.ryft.pipeline.ui.components.EditColourHandler;
+import uk.co.ryft.pipeline.ui.components.EditColourHandler.OnColourChangedListener;
 import uk.co.ryft.pipeline.ui.components.EditPointHandler;
-import uk.co.ryft.pipeline.ui.components.OnColourChangedListener;
-import uk.co.ryft.pipeline.ui.components.OnPointChangedListener;
+import uk.co.ryft.pipeline.ui.components.EditPointHandler.OnPointChangedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -134,7 +134,8 @@ public class BuildCylinderActivity extends Activity {
         float height = Float.valueOf(mTextHeight.getText().toString());
         float radius = Float.valueOf(mTextRadius.getText().toString());
         float rotation = Float.valueOf(mTextRotation.getText().toString());
-        result.putExtra("element", ShapeFactory.buildCylinder(stepCount, mPointCentre, height, radius, rotation, mColourBody, mColourCap));
+        result.putExtra("element",
+                ShapeFactory.buildCylinder(stepCount, mPointCentre, height, radius, rotation, mColourBody, mColourCap));
         setResult(Activity.RESULT_OK, result);
         finish();
     }

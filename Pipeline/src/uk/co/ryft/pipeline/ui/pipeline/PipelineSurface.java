@@ -14,9 +14,8 @@ public class PipelineSurface extends GLSurfaceView {
 
     private final PipelineRenderer mRenderer;
 
-    // XXX This is very unsafe but required for saving and restoring state.
-    // Can we do better by implementing it in onPause() etc here?
     public PipelineRenderer getRenderer() {
+        // This is not really unsafe as mRenderer is a final member
         return mRenderer;
     }
 
@@ -45,7 +44,6 @@ public class PipelineSurface extends GLSurfaceView {
         setRenderer(mRenderer);
 
         // Render the view continuously so we can support transition effects.
-        // FIXME Disabled for now, along with transitions
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
     }

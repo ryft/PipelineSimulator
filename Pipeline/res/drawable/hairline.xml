@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- This is the line -->
+    <item
+        android:left="@dimen/hairline_height_inverted"
+        android:right="@dimen/hairline_height_inverted"
+        android:top="@dimen/hairline_height_inverted">
+        <shape>
+            <padding
+                android:bottom="@dimen/heading_padding_bottom"
+                android:left="@dimen/heading_padding_left"
+                android:top="@dimen/heading_padding_top" />
+
+            <solid android:color="@android:color/transparent" />
+
+            <stroke
+                android:width="@dimen/hairline_height"
+                android:color="@color/list_item_hairline" />
+        </shape>
+    </item>
+
+</layer-list>

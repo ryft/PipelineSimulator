@@ -17,7 +17,7 @@
             android:orientation="vertical" >
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_element_location" />
 
             <LinearLayout
@@ -31,12 +31,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/label_element_eye" />
 
-                <include
-                    layout="@layout/listitem_point" />
+                <include layout="@layout/listitem_point" />
             </LinearLayout>
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_element_colours" />
 
             <LinearLayout
@@ -52,7 +51,7 @@
                     android:layout_weight="1"
                     android:text="@string/label_element_bodycolour" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -60,20 +59,20 @@
 
                     <View
                         android:id="@+id/element_bodycolour_swatch"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+                        android:layout_gravity="center_vertical" />
 
                     <ImageButton
                         android:id="@+id/button_element_bodycolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
+                        android:layout_alignParentRight="true"
                         android:layout_gravity="center_vertical"
                         android:background="@color/action_bar"
                         android:contentDescription="@string/desc_colour_edit"
                         android:src="@drawable/ic_action_edit" />
-                </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -89,28 +88,27 @@
                     android:layout_weight="1"
                     android:text="@string/label_element_lenscolour" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="horizontal" >
+                    android:layout_weight="1" >
 
                     <View
                         android:id="@+id/element_lenscolour_swatch"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+                        android:layout_gravity="center_vertical" />
 
                     <ImageButton
                         android:id="@+id/button_element_lenscolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
+                        android:layout_alignParentRight="true"
                         android:layout_gravity="center_vertical"
                         android:background="@color/action_bar"
                         android:contentDescription="@string/desc_colour_edit"
                         android:src="@drawable/ic_action_edit" />
-                </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -126,7 +124,7 @@
                     android:layout_weight="1"
                     android:text="@string/label_element_shuttercolour" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -134,24 +132,24 @@
 
                     <View
                         android:id="@+id/element_shuttercolour_swatch"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+                        android:layout_gravity="center_vertical" />
 
                     <ImageButton
                         android:id="@+id/button_element_shuttercolour"
                         android:layout_width="40dip"
                         android:layout_height="40dip"
+                        android:layout_alignParentRight="true"
                         android:layout_gravity="center_vertical"
                         android:background="@color/action_bar"
                         android:contentDescription="@string/desc_colour_edit"
                         android:src="@drawable/ic_action_edit" />
-                </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
 
             <TextView
-                style="?android:listSeparatorTextViewStyle"
+                style="@style/GroupTitle"
                 android:text="@string/heading_element_proportions" />
 
             <LinearLayout

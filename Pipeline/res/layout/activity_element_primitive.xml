@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin" >
 
     <TextView
-        style="?android:listSeparatorTextViewStyle"
+        style="@style/GroupTitle"
         android:text="@string/heading_primitive_type" />
 
     <uk.co.ryft.pipeline.ui.setup.builders.TypeSpinner
@@ -20,7 +20,7 @@
         android:layout_margin="4dp" />
 
     <TextView
-        style="?android:listSeparatorTextViewStyle"
+        style="@style/GroupTitle"
         android:text="@string/heading_primitive_colour" />
 
     <LinearLayout
@@ -46,7 +46,7 @@
     </LinearLayout>
 
     <TextView
-        style="?android:listSeparatorTextViewStyle"
+        style="@style/GroupTitle"
         android:text="@string/heading_points" />
 
     <ListView

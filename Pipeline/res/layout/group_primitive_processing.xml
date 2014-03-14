@@ -4,51 +4,66 @@
     android:orientation="horizontal" >
 
     <LinearLayout
-        android:id="@+id/group_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/group_heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:ellipsize="none"
             android:gravity="center"
+            android:text="@string/heading_group_primitive_processing"
             android:textAllCaps="true"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             android:typeface="monospace" />
 
         <LinearLayout
-            android:id="@+id/map_block_wrapper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/navigator_box_outer_5"
+            android:background="@drawable/navigator_box_outer_2"
             android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/block"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/navigator_title_clipping"
+                android:layout_width="@dimen/navigator_block_inner_width"
+                android:layout_height="@dimen/navigator_block_inner_height"
                 android:background="@drawable/navigator_box_inner_light"
+                android:gravity="center"
+                android:text="@string/label_clipping"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/navigator_details"
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            layout="@layout/navigator_clipping" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:orientation="horizontal" />
-    </LinearLayout>
+            android:layout_marginTop="@dimen/navigator_block_connector_margintop"
+            android:ellipsize="none"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
+            android:text="@string/label_connector_primitives"
+            android:textColor="@android:color/white" />
 
-    <include
-        android:id="@+id/map_connector"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        layout="@layout/navigator_connector" />
+        <View
+            android:layout_width="@dimen/navigator_block_connector_length"
+            android:layout_height="@dimen/navigator_block_connector_thickness"
+            android:background="@android:color/background_light" />
+    </LinearLayout>
 
 </LinearLayout>

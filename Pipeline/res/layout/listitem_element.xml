@@ -2,8 +2,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:paddingTop="8dip"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:paddingTop="8dip" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,14 +36,34 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/primary_text_dark" />
 
-        <ImageButton
-            android:id="@+id/button_element_edit"
+            <ImageButton
+                android:id="@+id/button_element_transform"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/desc_element_edit"
+                android:src="@drawable/ic_action_rotate_right" />
+
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/desc_element_edit"
-            android:src="@drawable/ic_action_edit" />
+            android:layout_height="wrap_content" >
+
+            <CheckBox
+                android:id="@+id/element_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+
+            <ImageButton
+                android:id="@+id/button_element_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/desc_element_edit"
+                android:src="@drawable/ic_action_edit" />
+        </RelativeLayout>
     </LinearLayout>
 
     <View

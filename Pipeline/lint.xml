@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore the Overdraw issue in the component_setup_step -->
+    <issue id="Overdraw">
+        <ignore path="res/layout/component_setup_step.xml" />
+    </issue>
+
+    <!-- Change the severity of hardcoded strings to "error" -->
+    <issue id="HardcodedText" severity="error" />
+</lint>

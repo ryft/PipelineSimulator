@@ -1,7 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="@dimen/navigator_block_inner_width"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
+    android:layout_marginLeft="@dimen/navigator_block_inner_margin"
     android:gravity="center_horizontal"
     android:orientation="horizontal" >
 
@@ -22,7 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
-            android:text="Winding direction"
+            android:gravity="center_horizontal"
+            android:text="@string/navigator_winding_direction"
             android:textColor="@android:color/white" />
     </LinearLayout>
 
@@ -43,7 +44,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
-            android:text="Culling mode"
+            android:gravity="center_horizontal"
+            android:text="@string/navigator_culling_mode"
             android:textColor="@android:color/white" />
     </LinearLayout>
 

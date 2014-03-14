@@ -11,30 +11,29 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 public class EditPointHandler implements OnClickListener {
-    
-    protected Activity mParent;
+
+    protected final Activity mParent;
     protected Float3 mPoint;
-    protected OnPointChangedListener mListener;
-    
-    // TODO this relies on the mutability of Float3s.
-    // This is becoming a serious issue which needs to be resolved soon, if ever.
+    protected final int mTitle;
+    protected final OnPointChangedListener mListener;
+
     public EditPointHandler(Activity parent, Float3 point, OnPointChangedListener listener) {
+        this(parent, point, R.string.dialogue_title_point, listener);
+    }
+
+    public EditPointHandler(Activity parent, Float3 point, int title, OnPointChangedListener listener) {
         mParent = parent;
         mPoint = point;
+        mTitle = title;
         mListener = listener;
-    }
-    
-    // Package visibility for ListPointHandler
-    void setPoint(Float3 point) {
-        mPoint = point;
     }
 
     @Override
     public void onClick(View v) {
-        
+
         // Instantiate and display a float picker dialogue
         AlertDialog.Builder builder = new AlertDialog.Builder(mParent);
-        builder.setTitle(R.string.dialogue_title_point);
+        builder.setTitle(mTitle);
 
         LayoutInflater inflater = mParent.getLayoutInflater();
         View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);
@@ -44,16 +43,15 @@ public class EditPointHandler implements OnClickListener {
         final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
 
         builder.setView(dialogueView);
-        builder.setPositiveButton(R.string.dialogue_button_save,
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        float x = Float.valueOf(editX.getText().toString());
-                        float y = Float.valueOf(editY.getText().toString());
-                        float z = Float.valueOf(editZ.getText().toString());
-                        mPoint = new Float3(x, y, z);
-                        mListener.notifyPointChanged(mPoint);
-                    }
-                });
+        builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                float x = Float.valueOf(editX.getText().toString());
+                float y = Float.valueOf(editY.getText().toString());
+                float z = Float.valueOf(editZ.getText().toString());
+                mPoint = new Float3(x, y, z);
+                mListener.notifyPointChanged(mPoint);
+            }
+        });
         builder.setNegativeButton(R.string.dialogue_button_cancel, null);
 
         // Get the AlertDialog, initialise values and show it.
@@ -63,5 +61,11 @@ public class EditPointHandler implements OnClickListener {
         editY.setText(String.valueOf(mPoint.getY()));
         editZ.setText(String.valueOf(mPoint.getZ()));
         dialogue.show();
+    }
+
+    public interface OnPointChangedListener {
+
+        public void notifyPointChanged(Float3 point);
+
     }
 }

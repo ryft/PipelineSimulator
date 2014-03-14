@@ -3,10 +3,6 @@
 
     <string name="app_name">Pipeline Simulator</string>
     
-    <string name="action_scene">Edit scene</string>
-    <string name="action_draw_axes">Draw objects</string>
-    <string name="action_change_perspective">Next lighting model</string>
-    
     <string name="action_primitive_new">New primitive</string>
     <string name="action_composite_new">New composite</string>
     <string name="action_elements_discard">Clear scene</string>
@@ -59,6 +55,13 @@
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
     
+    <string name="label_point_x">X:</string>
+    <string name="label_point_y">, Y:</string>
+    <string name="label_point_z">, Z:</string>
+    
+    <string name="label_rotation_degree">Angle in degrees:</string>
+    <string name="label_rotation_axis">Axis to rotate about:</string>
+    
     <string name="label_camera_view_eye">Eye point</string>
     <string name="label_camera_view_focus">Focus point</string>
     <string name="label_camera_view_up">Up direction</string>
@@ -68,6 +71,15 @@
     <string name="label_camera_projection_top">Top clip plane</string>
     <string name="label_camera_projection_near">Near clip plane</string>
     <string name="label_camera_projection_far">Far clip plane</string>
+    
+    <string name="label_source">Source</string>
+    <string name="label_destination">Destination</string>
+    <string name="label_dest">Dest</string>
+    
+    <string name="label_connector_vertices">vertices ></string>
+    <string name="label_connector_primitives">primitives ></string>
+    <string name="label_connector_fragments">fragments ></string>
+    <string name="label_connector_pixels">pixels ></string>
     
     <string name="heading_camera_view">View parameters</string>
     <string name="heading_camera_projection">Projection (Frustum definition)</string>
@@ -81,15 +93,18 @@
     <string name="heading_element_proportions">Size and proportions</string>
     <string name="heading_element_parameters">Other parameters</string>
     
-    <string name="heading_group_scene_definition">SCENE PARAMETERS</string>
-    <string name="heading_group_vertex_processing">VERTEX PROCESSING</string>
-    <string name="heading_group_primitive_processing">PRIMITIVE PROCESSING</string>
-    <string name="heading_group_rasterisation">RASTERISATION</string>
-    <string name="heading_group_fragment_processing">FRAGMENT PROCESSING</string>
-    <string name="heading_group_pixel_processing">PIXEL PROCESSING</string>
+    <string name="heading_blending_function">Pixel Arithmetic Functions</string>
+    <string name="heading_blending_equation">Blending Equation</string>
     
-    <string name="desc_element_icon">Element Icon</string>
-    <string name="desc_element_edit">Edit Element</string>
+    <string name="heading_group_scene_definition">Scene Parameters</string>
+    <string name="heading_group_vertex_processing">Vertex Processing</string>
+    <string name="heading_group_primitive_processing">Primitive Processing</string>
+    <string name="heading_group_rasterisation">Rasterisation</string>
+    <string name="heading_group_fragment_processing">Fragment Processing</string>
+    <string name="heading_group_pixel_processing">Pixel Processing</string>
+    
+    <string name="desc_element_icon">Element icon</string>
+    <string name="desc_element_edit">Edit element</string>
     <string name="desc_colour_edit">Edit colour</string>
     
     <string name="dialogue_title_point">Edit Vertex</string>
@@ -103,7 +118,9 @@
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
     <string name="dialogue_title_depth_buffer_test">Depth Buffer Comparison</string>
-    <string name="dialogue_title_blending">Fragment Shader Code</string>
+    <string name="dialogue_title_select_transformation">Select Element Transformation</string>
+    <string name="dialogue_title_elem_translation">Translation Vector</string>
+    <string name="dialogue_title_elem_rotation">Rotation Parameters</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
@@ -133,6 +150,34 @@
     <string name="label_blending">Blending</string>
     
     <string name="desc_clipping">Viewport and clip planes defined by camera parameters</string>
+    <string name="desc_hand">Indicator</string>
+    
+    <string name="desc_camera">Set up the virtual camera from which the scene will be viewed. The view parameters define the view matrix, and the frustum parameters define the projection matrix.\n\nThese are then combined with the model parameters to create the MVP matrix, which is used to draw the scene.</string>
+    <string name="desc_blending">The following parameters define how each calculated pixel is blended with the previous contents of the frame buffer.\n\nThe source and destination functions specify how the RGBA blending factors are computed, and the blending equation specifies how these are combined.</string>
+    
+    <string name="tutorial_vertex_assembly">Vertex array data is prepared by constructing OpenGL Vertex Buffer Objects (VBOs). 3D positions, normal directions and colour values are calculated and inserted into VBOs.\n\nThe vertex shader takes as input the stream of vertices from the resulting buffers.</string>
+    <string name="tutorial_vertex_shading">The vertex shader operates on single vertices taken from its input stream. Using the received vertex attributes and global uniform values, it calculates a position and colour for the output vertex.\n\nCommon uses for vertex shading are perspective projection, texturing and Lambertian lighting.</string>
+    <string name="tutorial_clipping">The view volume is defined by the virtual camera clip planes. Each vertex position is firstly tested to determine if it\'s out of range.\n\nVertices then undergo viewport mapping, converting from normalised device coords to window (screen) coordinates.</string>
+    <string name="tutorial_multisampling">Multisampling is a method for achieving antialiasing to remove jagged diagonal edges from a scene. For each sample pass, a small offset is applied to all screen coordinates.\n\nBy averaging all these samples, the result is a smoother transition of the colours at the edges.</string>
+    <string name="tutorial_face_culling">The user-specified winding direction and order of the vertices in each primitive define the facing of each triangle, as well as their order on screen.\n\nThe process of face culling discards all faces which are facing away from the virtual camera, as these should be invisible.</string>
+    <string name="tutorial_fragment_shading">The fragment shader takes fragments from the rasterisation process and outputs a depth value, and zero or more colour values to be written to the frame buffer.\n\nFragment shaders are often used for per-pixel normal interpolation for Phong lighting, colour interpolation, and texture application.</string>
+    <string name="tutorial_depth_buffer_test">If the depth buffer test is enabled, it will compare each fragment depth with the depth of the sample being written to in the depth buffer (aka Z-buffer). If the comparison fails, the fragment is discarded.\n\nBy default, the depth comparison is GL_LESS; fragments behind the current sample are discarded.</string>
+    <string name="tutorial_blending">When blending is enabled, pixels are drawn using a function that blends the incoming (source) RGBA values with the RGBA values that are already in the frame buffer (destination).\n\nThe blending functions generate blending factors from the source and destination values, and the blending equation calculates the resulting colour for the framebuffer.</string>
+    
+    <string name="navigator_element_array">Element Array Buffer</string>
+    <string name="navigator_vertex">Vertex</string>
+    <string name="navigator_colour">Colour</string>
+    <string name="navigator_normal">Normal</string>
+    <string name="navigator_glsl">Compiled GLSL\nshader code</string>
+    <string name="navigator_camera_params">Camera\nparameters</string>
+    <string name="navigator_projection_params">Projection\nparameters</string>
+    <string name="navigator_sample_size">Sample size</string>
+    <string name="navigator_winding_direction">Winding\ndirection</string>
+    <string name="navigator_culling_mode">Culling\nmode</string>
+    <string name="navigator_z_buffer">Z-buffer</string>
+    <string name="navigator_depth_func">Depth\ncomparison\nfunction</string>
+    <string name="navigator_blend_func">Blending\nfunctions</string>
+    <string name="navigator_blend_equation">Blending\nequation</string>
     
 	<!-- Depth buffer test comparison functions -->
     <string name="gl_depth_never">Depth comparison never passes</string>
@@ -144,7 +189,7 @@
     <string name="gl_depth_gequal">Passes if the incoming depth is greater than or equal to the stored depth</string>
     <string name="gl_depth_always">Depth comparison always passes</string>
     
-	<!-- Blending functions -->
+	<!-- Blending functions - these descriptions are never used-->
     <string name="gl_blend_zero"></string>
     <string name="gl_blend_one"></string>
     <string name="gl_blend_src_color"></string>
@@ -165,30 +210,31 @@
     <string name="gl_blend_sub">Destination colour is subtracted from source colour</string>
     <string name="gl_blend_rev_sub">Source colour is subtracted from destination colour</string>
     
-    <string name="button_simulate">Simulate</string>
-    
     <string name="help_firstrun_title">First run</string>
     <string name="help_firstrun_desc">Welcome to the Graphics Pipeline Simulator. Tap the help icon at any time for a guided tour of the app.</string>
     
     <string name="help_scene_definition_title">Scene parameters</string>
-    <string name="help_scene_definition_desc">Use these options to define the scene which will be simulated, as well as the virtual camera location and parameters.\n\nSensible defaults have been set up for you.</string>
+    <string name="help_scene_definition_desc">Use these options to define the scene which will be simulated, as well as the virtual camera location and parameters. Sensible defaults have been set up for you.</string>
     
-    <string name="help_colour_coding_title">Colour coding</string>
-    <string name="help_colour_coding_desc">The coloured squares denote different groups of pipeline steps. They match up with steps on the pipeline navigator after you press \'Simulate\'.</string>
+    <string name="help_colour_coding_title">Pipeline steps</string>
+    <string name="help_colour_coding_desc">The coloured squares denote different groups of pipeline steps which will be simulated. They correspond with steps on the pipeline navigator after you press \'Simulate\'.\n\nMost of these can be configured by tapping them, and will show a summary of their purpose.</string>
     
     <string name="help_lighting_preview_title">Lighting previews</string>
     <string name="help_lighting_preview_desc">Change the lighting preview mode to examine different shaders using the \'Vertex Shading\' and \'Fragment Shading\' options below.</string>
     
     <string name="help_disabled_title">Disabled options</string>
-    <string name="help_disabled_desc">Options which are greyed out cannot be modified but will provide a summary of their action.</string>
+    <string name="help_disabled_desc">Greyed out options cannot be changed but will provide a summary of their action.</string>
     
     <string name="help_simulate_title">When you\'re ready…</string>
-    <string name="help_simulate_desc">Tap the Simulate button to build the scene and start the simulation.</string>
+    <string name="help_simulate_desc">Tap the Simulate button to build the scene you\'ve configured and start the simulation.</string>
     
     <string name="help_scene_viewer_title">Scene viewer</string>
-    <string name="help_scene_viewer_desc">This is where your custom scene is shown at different steps of the graphics pipeline.\n\nSwipe left to advance along the pipeline, or right to move backwards.\n\nDouble-tap the scene to move / scale the scene using touch gestures.</string>
+    <string name="help_scene_viewer_desc">This is where your custom scene is shown at different steps of the graphics pipeline.\n\nSwipe left to advance along the pipeline, or right to move backwards. The next or previous step will be shown on the indicator bar at the bottom of the screen as you swipe.\n\nDouble-tap the scene to toggle \'Move mode\' where you can move and scale the scene using touch gestures.</string>
     
     <string name="help_navigator_title">Pipeline navigator</string>
-    <string name="help_navigator_desc">The bottom bar will show you the next or previous pipeline step when you swipe left or right.\n\nSwipe up from the bottom bar to display the current location of the scene in the graphics pipeline.</string>
+    <string name="help_navigator_desc">The bottom indicator bar will show you the next or previous pipeline step when you swipe left or right.\n\nSwipe up from the bottom bar to display the pipeline navigator, which shows the steps of the graphics pipeline. Tap any pipeline step to show a summary of its action.</string>
+    
+    <string name="help_scene_title">Scene editor</string>
+    <string name="help_scene_desc">This window displays a list of elements in the current scene.\n\nUse the menu icons to add primitives, composite elements, or discard the scene.\nSwipe individual elements left or right to delete them.\n\nClick the rotate icon to apply a transformation to an element, the pencil icon to manually edit primitive elements, or the arrow icon to expand composite elements into their components.</string>
 
 </resources>

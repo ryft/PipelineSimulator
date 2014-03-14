@@ -1,7 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="@dimen/navigator_block_inner_width"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
     android:gravity="center_horizontal"
     android:orientation="horizontal" >
 
@@ -23,7 +22,7 @@
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
             android:gravity="center_horizontal"
-            android:text="Camera\nparameters"
+            android:text="@string/navigator_camera_params"
             android:textColor="@android:color/white" />
     </LinearLayout>
 
@@ -45,7 +44,7 @@
             android:layout_marginLeft="@dimen/navigator_detail_text_margin"
             android:layout_marginRight="@dimen/navigator_detail_text_margin"
             android:gravity="center_horizontal"
-            android:text="Projection\nparameters"
+            android:text="@string/navigator_projection_params"
             android:textColor="@android:color/white" />
     </LinearLayout>
 

@@ -2,12 +2,20 @@ package uk.co.ryft.pipeline.ui.setup;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
+import uk.co.ryft.pipeline.model.shapes.Composite.Type;
 import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.ui.components.EditPointHandler;
+import uk.co.ryft.pipeline.ui.components.EditPointHandler.OnPointChangedListener;
 import uk.co.ryft.pipeline.ui.setup.builders.BuildPrimitiveActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,12 +33,21 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.espian.showcaseview.OnShowcaseEventListener;
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.ShowcaseView.ConfigOptions;
+import com.espian.showcaseview.targets.Target;
+import com.espian.showcaseview.targets.ViewTarget;
 import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class SetupSceneActivity extends ListActivity {
@@ -46,6 +63,10 @@ public class SetupSceneActivity extends ListActivity {
     // If we pass the worked-on element back and forth, it gets serialised and
     // we lose the reference.
     protected Primitive mThisElement;
+
+    protected Button mSaveButton;
+    protected boolean mSelectionMode = false;
+    protected final Set<Integer> mSelectedIDs = Collections.synchronizedSet(new HashSet<Integer>());
 
     @SuppressWarnings("unchecked")
     @Override
@@ -75,7 +96,7 @@ public class SetupSceneActivity extends ListActivity {
                 new SwipeDismissListViewTouchListener.DismissCallbacks() {
                     @Override
                     public boolean canDismiss(int position) {
-                        return true;
+                        return !mSelectionMode;
                     }
 
                     @Override
@@ -92,21 +113,29 @@ public class SetupSceneActivity extends ListActivity {
         listView.setOnScrollListener(touchListener.makeScrollListener());
 
         // Set up save / delete button listeners
-        Button saveButton = (Button) findViewById(R.id.button_row_positive);
+        mSaveButton = (Button) findViewById(R.id.button_row_positive);
         Button deleteButton = (Button) findViewById(R.id.button_row_negative);
         deleteButton.setText(R.string.action_button_cancel);
 
-        saveButton.setOnClickListener(new OnClickListener() {
+        mSaveButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveAndQuit();
+                if (mSelectionMode)
+                    saveSelectedComposite();
+                else
+                    saveAndQuit();
             }
         });
 
         deleteButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                discardAndQuit();
+                if (mSelectionMode) {
+                    mSelectionMode = false;
+                    mSaveButton.setText("Save");
+                    mAdapter.notifyDataSetChanged();
+                } else
+                    discardAndQuit();
             }
         });
     }
@@ -114,6 +143,26 @@ public class SetupSceneActivity extends ListActivity {
     @Override
     public void onBackPressed() {
         saveAndQuit();
+    }
+
+    protected void saveSelectedComposite() {
+
+        if (mSelectedIDs.size() > 1) {
+            LinkedList<Element> components = new LinkedList<Element>();
+            for (int position : mSelectedIDs) {
+                components.add((Element) mAdapter.getItem(position));
+            }
+
+            mAdapter.removeAll(components);
+            mAdapter.add(new Composite(Type.CUSTOM, components));
+
+            Toast.makeText(SetupSceneActivity.this, "Created composite element of size " + mSelectedIDs.size(),
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        mSelectionMode = false;
+        mSaveButton.setText("Save");
+        mAdapter.notifyDataSetChanged();
     }
 
     protected void saveAndQuit() {
@@ -140,21 +189,43 @@ public class SetupSceneActivity extends ListActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (mSelectionMode)
+            return super.onOptionsItemSelected(item);
+
         switch (item.getItemId()) {
+            case R.id.action_primitive_help:
+                ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(mSaveButton), this, R.string.help_scene_title,
+                        R.string.help_scene_desc, null);
+                sv.setScaleMultiplier(0);
+                break;
+
             case R.id.action_primitive_new:
                 addPrimitive();
-                break;
+                return true;
 
             case R.id.action_composite_new:
                 addComposite();
-                break;
+                return true;
 
             case R.id.action_elements_discard:
                 mAdapter.clear();
                 Toast.makeText(this, R.string.message_scene_clear, Toast.LENGTH_SHORT).show();
-                break;
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        return insertShowcaseView(new ViewTarget(target), title, description, scale, options, listener);
+    }
+
+    protected ShowcaseView insertShowcaseView(Target target, int title, int description, float scale, ConfigOptions options,
+            OnShowcaseEventListener listener) {
+        ShowcaseView sv = ShowcaseView.insertShowcaseView(target, this, title, description, options);
+        sv.setOnShowcaseEventListener(listener);
+        sv.setScaleMultiplier(scale);
+        return sv;
     }
 
     protected void addPrimitive() {
@@ -186,7 +257,14 @@ public class SetupSceneActivity extends ListActivity {
         builder.setItems(typeNames, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 ElementType type = types[which];
-                if (type != Composite.Type.CUSTOM)
+
+                if (type == Composite.Type.CUSTOM) {
+                    mSelectedIDs.clear();
+                    mSelectionMode = true;
+                    mAdapter.notifyDataSetChanged();
+                    mSaveButton.setText("Finish");
+
+                } else
                     startActivityForResult(new Intent(SetupSceneActivity.this, type.getEditorActivity()), REQUEST_COMPOSITE_ADD);
             }
         });
@@ -309,8 +387,10 @@ public class SetupSceneActivity extends ListActivity {
     static class ElementViewHolder {
         ImageView elemIcon;
         TextView typeTextView;
+        ImageButton transformButton;
         ImageButton editButton;
         TextView summaryTextView;
+        CheckBox selectionCheckBox;
     }
 
     class ElementAdapter extends BaseAdapter {
@@ -374,8 +454,10 @@ public class SetupSceneActivity extends ListActivity {
                 viewHolder = new ElementViewHolder();
                 viewHolder.elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
                 viewHolder.typeTextView = (TextView) convertView.findViewById(R.id.element_type);
+                viewHolder.transformButton = (ImageButton) convertView.findViewById(R.id.button_element_transform);
                 viewHolder.editButton = (ImageButton) convertView.findViewById(R.id.button_element_edit);
                 viewHolder.summaryTextView = (TextView) convertView.findViewById(R.id.element_summary);
+                viewHolder.selectionCheckBox = (CheckBox) convertView.findViewById(R.id.element_checkbox);
                 convertView.setTag(viewHolder);
 
             } else {
@@ -384,8 +466,10 @@ public class SetupSceneActivity extends ListActivity {
 
             ImageView elemIcon = viewHolder.elemIcon;
             TextView typeTextView = viewHolder.typeTextView;
+            ImageButton transformButton = viewHolder.transformButton;
             ImageButton editButton = viewHolder.editButton;
             TextView summaryTextView = viewHolder.summaryTextView;
+            CheckBox selectionCheckBox = viewHolder.selectionCheckBox;
 
             Element elem = mElems.get(position);
 
@@ -396,18 +480,43 @@ public class SetupSceneActivity extends ListActivity {
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
                 summaryTextView.setText(elem.getSummary());
-
                 typeTextView.setClickable(false);
 
-                if (isPrimitive)
-                    editButton.setImageResource(R.drawable.ic_action_edit);
-                else
-                    editButton.setImageResource(R.drawable.ic_action_expand);
+                if (mSelectionMode) {
+                    transformButton.setVisibility(View.INVISIBLE);
+                    editButton.setVisibility(View.INVISIBLE);
+                    selectionCheckBox.setVisibility(View.VISIBLE);
+
+                    // Remove previous listener so we don't accidentally change state
+                    selectionCheckBox.setOnCheckedChangeListener(null);
+                    selectionCheckBox.setChecked(mSelectedIDs.contains(position));
+                    selectionCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            if (isChecked)
+                                mSelectedIDs.add(position);
+                            else
+                                mSelectedIDs.remove(position);
+                            notifyDataSetChanged();
+                        }
+                    });
+
+                } else {
+                    transformButton.setVisibility(View.VISIBLE);
+                    editButton.setVisibility(View.VISIBLE);
+                    selectionCheckBox.setVisibility(View.INVISIBLE);
+
+                    if (isPrimitive)
+                        editButton.setImageResource(R.drawable.ic_action_edit);
+                    else
+                        editButton.setImageResource(R.drawable.ic_action_expand);
+                }
 
                 editButton.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
+
                         Element elem = (Element) getItem(position);
                         if (isPrimitive)
                             // XXX safe cast due to previous check.
@@ -422,6 +531,80 @@ public class SetupSceneActivity extends ListActivity {
                                 message += "s";
                             Toast.makeText(SetupSceneActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
+                    }
+                });
+
+                final EditPointHandler translationHandler = new EditPointHandler(SetupSceneActivity.this, new Float3(0, 0, 0),
+                        R.string.dialogue_title_elem_translation, new OnPointChangedListener() {
+                            @Override
+                            public void notifyPointChanged(Float3 point) {
+
+                                Element elem = (Element) getItem(position);
+                                remove(elem);
+                                add(elem.translate(point));
+                            }
+                        });
+
+                final View thisView = convertView;
+                transformButton.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+
+                        // Instantiate and display a configuration dialogue
+                        AlertDialog.Builder builder = new AlertDialog.Builder(SetupSceneActivity.this);
+                        builder.setTitle(R.string.dialogue_title_select_transformation);
+                        builder.setItems(new CharSequence[] { "Apply translation", "Apply rotation" },
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (which == 0)
+                                            translationHandler.onClick(thisView);
+
+                                        else if (which == 1) {
+
+                                            // Instantiate and display a rotation configuration dialogue
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(SetupSceneActivity.this);
+                                            builder.setTitle(R.string.dialogue_title_elem_rotation);
+
+                                            LayoutInflater inflater = SetupSceneActivity.this.getLayoutInflater();
+                                            View dialogueView = inflater.inflate(R.layout.dialogue_rotation, null);
+
+                                            final EditText editAngle = (EditText) dialogueView.findViewById(R.id.edit_angle);
+                                            final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
+                                            final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
+                                            final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
+
+                                            builder.setView(dialogueView);
+                                            builder.setPositiveButton(R.string.dialogue_button_save,
+                                                    new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            float x = Float.valueOf(editX.getText().toString());
+                                                            float y = Float.valueOf(editY.getText().toString());
+                                                            float z = Float.valueOf(editZ.getText().toString());
+
+                                                            Element elem = (Element) getItem(position);
+                                                            Float angle = Float.valueOf(editAngle.getText().toString());
+                                                            remove(elem);
+                                                            add(elem.rotate(angle, x, y, z));
+                                                        }
+                                                    });
+                                            builder.setNegativeButton(R.string.dialogue_button_cancel, null);
+
+                                            // Get the AlertDialog, initialise values and show it.
+                                            AlertDialog dialogue = builder.create();
+
+                                            Float3 initialPoint = new Float3(0, 0, 0);
+                                            editX.setText(String.valueOf(initialPoint.getX()));
+                                            editY.setText(String.valueOf(initialPoint.getY()));
+                                            editZ.setText(String.valueOf(initialPoint.getZ()));
+                                            dialogue.show();
+                                        }
+                                        notifyDataSetChanged();
+                                    }
+                                });
+                        AlertDialog dialogue = builder.create();
+                        dialogue.show();
                     }
                 });
             }

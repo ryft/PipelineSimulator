@@ -3,8 +3,9 @@
     
     <dimen name="activity_horizontal_margin">8dip</dimen>
     <dimen name="activity_vertical_margin">8dip</dimen>
-    <dimen name="navigator_block_innermargin">10dip</dimen>
-    <dimen name="navigator_block_innermargin_large">20dip</dimen>
+    <dimen name="navigator_block_inner_width">160dip</dimen>
+    <dimen name="navigator_block_inner_height">70dip</dimen>
+    <dimen name="navigator_block_inner_margin">10dip</dimen>
     <dimen name="navigator_block_connector_length">100dip</dimen>
     <dimen name="navigator_block_connector_thickness">2dip</dimen>
     <dimen name="navigator_detail_connector_length">50dip</dimen>
@@ -19,6 +20,11 @@
     <dimen name="indicator_text_height">24dip</dimen>
     
     <dimen name="hairline_height">2dip</dimen>
+    <dimen name="hairline_height_inverted">-2dip</dimen>
+    <dimen name="heading_padding_bottom">5dip</dimen>
+    <dimen name="heading_padding_left">6dip</dimen>
+    <dimen name="heading_padding_top">6dip</dimen>
+    <dimen name="desc_margin_bottom">10dip</dimen>
     <dimen name="setup_row_height">40dip</dimen>
 
 </resources>
