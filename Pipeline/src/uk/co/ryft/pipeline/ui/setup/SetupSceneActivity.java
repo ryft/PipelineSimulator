@@ -6,11 +6,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.gl.Float3;
 import uk.co.ryft.pipeline.model.Element;
 import uk.co.ryft.pipeline.model.shapes.Composite;
 import uk.co.ryft.pipeline.model.shapes.Composite.Type;
 import uk.co.ryft.pipeline.model.shapes.ElementType;
 import uk.co.ryft.pipeline.model.shapes.Primitive;
+import uk.co.ryft.pipeline.ui.components.EditPointHandler;
+import uk.co.ryft.pipeline.ui.components.EditPointHandler.OnPointChangedListener;
 import uk.co.ryft.pipeline.ui.setup.builders.BuildPrimitiveActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,12 +28,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -448,7 +453,6 @@ public class SetupSceneActivity extends ListActivity {
                 elemIcon.setImageResource(elem.getIconRef());
                 typeTextView.setText(elem.getTitle());
                 summaryTextView.setText(elem.getSummary());
-
                 typeTextView.setClickable(false);
 
                 if (mSelectionMode) {
@@ -497,6 +501,82 @@ public class SetupSceneActivity extends ListActivity {
                         }
                     }
                 });
+
+                final EditPointHandler translationHandler = new EditPointHandler(SetupSceneActivity.this, new Float3(0, 0, 0),
+                        R.string.dialogue_title_elem_translation, new OnPointChangedListener() {
+                            @Override
+                            public void notifyPointChanged(Float3 point) {
+
+                                Element elem = (Element) getItem(position);
+                                remove(elem);
+                                add(elem.translate(point));
+                            }
+                        });
+
+                final View thisView = convertView;
+                thisView.setOnLongClickListener(new OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+
+                        // Instantiate and display a configuration dialogue
+                        AlertDialog.Builder builder = new AlertDialog.Builder(SetupSceneActivity.this);
+                        builder.setTitle(R.string.dialogue_title_select_transformation);
+                        builder.setItems(new CharSequence[] { "Apply translation", "Apply rotation" },
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (which == 0)
+                                            translationHandler.onClick(thisView);
+
+                                        else if (which == 1) {
+
+                                            // Instantiate and display a rotation configuration dialogue
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(SetupSceneActivity.this);
+                                            builder.setTitle(R.string.dialogue_title_elem_rotation);
+
+                                            LayoutInflater inflater = SetupSceneActivity.this.getLayoutInflater();
+                                            View dialogueView = inflater.inflate(R.layout.dialogue_rotation, null);
+
+                                            final EditText editAngle = (EditText) dialogueView.findViewById(R.id.edit_angle);
+                                            final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
+                                            final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
+                                            final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
+
+                                            builder.setView(dialogueView);
+                                            builder.setPositiveButton(R.string.dialogue_button_save,
+                                                    new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            float x = Float.valueOf(editX.getText().toString());
+                                                            float y = Float.valueOf(editY.getText().toString());
+                                                            float z = Float.valueOf(editZ.getText().toString());
+
+                                                            Element elem = (Element) getItem(position);
+                                                            Float angle = Float.valueOf(editAngle.getText().toString());
+                                                            remove(elem);
+                                                            add(elem.rotate(angle, x, y, z));
+                                                        }
+                                                    });
+                                            builder.setNegativeButton(R.string.dialogue_button_cancel, null);
+
+                                            // Get the AlertDialog, initialise values and show it.
+                                            AlertDialog dialogue = builder.create();
+
+                                            Float3 initialPoint = new Float3(0, 0, 0);
+                                            editX.setText(String.valueOf(initialPoint.getX()));
+                                            editY.setText(String.valueOf(initialPoint.getY()));
+                                            editZ.setText(String.valueOf(initialPoint.getZ()));
+                                            dialogue.show();
+                                        }
+                                        notifyDataSetChanged();
+                                    }
+                                });
+                        AlertDialog dialogue = builder.create();
+                        dialogue.show();
+
+                        return true;
+                    }
+                });
+                ;
             }
 
             return convertView;

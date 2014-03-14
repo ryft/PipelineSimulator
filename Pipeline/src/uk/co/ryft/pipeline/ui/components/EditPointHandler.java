@@ -12,21 +12,20 @@ import android.widget.EditText;
 
 public class EditPointHandler implements OnClickListener {
 
-    protected Activity mParent;
+    protected final Activity mParent;
     protected Float3 mPoint;
-    protected OnPointChangedListener mListener;
+    protected final int mTitle;
+    protected final OnPointChangedListener mListener;
 
-    // TODO this relies on the mutability of Float3s.
-    // This is becoming a serious issue which needs to be resolved soon, if ever.
     public EditPointHandler(Activity parent, Float3 point, OnPointChangedListener listener) {
-        mParent = parent;
-        mPoint = point;
-        mListener = listener;
+        this(parent, point, R.string.dialogue_title_point, listener);
     }
 
-    // Package visibility for ListPointHandler
-    void setPoint(Float3 point) {
+    public EditPointHandler(Activity parent, Float3 point, int title, OnPointChangedListener listener) {
+        mParent = parent;
         mPoint = point;
+        mTitle = title;
+        mListener = listener;
     }
 
     @Override
@@ -34,7 +33,7 @@ public class EditPointHandler implements OnClickListener {
 
         // Instantiate and display a float picker dialogue
         AlertDialog.Builder builder = new AlertDialog.Builder(mParent);
-        builder.setTitle(R.string.dialogue_title_point);
+        builder.setTitle(mTitle);
 
         LayoutInflater inflater = mParent.getLayoutInflater();
         View dialogueView = inflater.inflate(R.layout.dialogue_point_edit, null);

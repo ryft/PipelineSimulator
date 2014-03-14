@@ -55,6 +55,13 @@
     <string name="label_point_3">, Z:</string>
     <string name="label_point_4"> )</string>
     
+    <string name="label_point_x">X:</string>
+    <string name="label_point_y">, Y:</string>
+    <string name="label_point_z">, Z:</string>
+    
+    <string name="label_rotation_degree">Angle in degrees:</string>
+    <string name="label_rotation_axis">Axis to rotate about:</string>
+    
     <string name="label_camera_view_eye">Eye point</string>
     <string name="label_camera_view_focus">Focus point</string>
     <string name="label_camera_view_up">Up direction</string>
@@ -111,6 +118,9 @@
     <string name="dialogue_title_face_culling">Select Winding Direction</string>
     <string name="dialogue_title_fragment_shading">Fragment Shader Code</string>
     <string name="dialogue_title_depth_buffer_test">Depth Buffer Comparison</string>
+    <string name="dialogue_title_select_transformation">Select Element Transformation</string>
+    <string name="dialogue_title_elem_translation">Translation Vector</string>
+    <string name="dialogue_title_elem_rotation">Rotation Parameters</string>
     
     <string name="dialogue_button_save">Save</string>
     <string name="dialogue_button_cancel">Cancel</string>
