@@ -130,10 +130,10 @@ public class BuildCylinderActivity extends Activity {
     protected void saveAndQuit() {
         Intent result = new Intent();
         // Build element from view components
-        int stepCount = Integer.valueOf(mTextStepCount.getText().toString());
-        float height = Float.valueOf(mTextHeight.getText().toString());
-        float radius = Float.valueOf(mTextRadius.getText().toString());
-        float rotation = Float.valueOf(mTextRotation.getText().toString());
+        int stepCount = (mTextStepCount.getText().toString().length() == 0) ? 0 : Integer.valueOf(mTextStepCount.getText().toString());
+        float height = (mTextHeight.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextHeight.getText().toString());
+        float radius = (mTextRadius.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextRadius.getText().toString());
+        float rotation = (mTextRotation.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextRotation.getText().toString());
         result.putExtra("element",
                 ShapeFactory.buildCylinder(stepCount, mPointCentre, height, radius, rotation, mColourBody, mColourCap));
         setResult(Activity.RESULT_OK, result);

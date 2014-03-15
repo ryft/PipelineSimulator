@@ -137,7 +137,7 @@ public class BuildCameraActivity extends Activity {
     protected void saveAndQuit() {
         Intent result = new Intent();
         // Build element from view components
-        float scale = Float.valueOf(mTextScale.getText().toString());
+        float scale = (mTextScale.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextScale.getText().toString());
         result.putExtra("element", ShapeFactory.buildCamera(scale, mColourBody, mColourLens, mColourShutter).translate(mPointEye));
         setResult(Activity.RESULT_OK, result);
         finish();

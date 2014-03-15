@@ -579,12 +579,12 @@ public class SetupSceneActivity extends ListActivity {
                                             builder.setPositiveButton(R.string.dialogue_button_save,
                                                     new DialogInterface.OnClickListener() {
                                                         public void onClick(DialogInterface dialog, int id) {
-                                                            float x = Float.valueOf(editX.getText().toString());
-                                                            float y = Float.valueOf(editY.getText().toString());
-                                                            float z = Float.valueOf(editZ.getText().toString());
+                                                            float x = (editX.getText().toString().length() == 0) ? 0 : Float.valueOf(editX.getText().toString());
+                                                            float y = (editY.getText().toString().length() == 0) ? 0 : Float.valueOf(editY.getText().toString());
+                                                            float z = (editZ.getText().toString().length() == 0) ? 0 : Float.valueOf(editZ.getText().toString());
 
                                                             Element elem = (Element) getItem(position);
-                                                            Float angle = Float.valueOf(editAngle.getText().toString());
+                                                            Float angle = (editAngle.getText().toString().length() == 0) ? 0 : Float.valueOf(editAngle.getText().toString());
                                                             remove(elem);
                                                             add(elem.rotate(angle, x, y, z));
                                                         }
@@ -594,10 +594,10 @@ public class SetupSceneActivity extends ListActivity {
                                             // Get the AlertDialog, initialise values and show it.
                                             AlertDialog dialogue = builder.create();
 
-                                            Float3 initialPoint = new Float3(0, 0, 0);
-                                            editX.setText(String.valueOf(initialPoint.getX()));
-                                            editY.setText(String.valueOf(initialPoint.getY()));
-                                            editZ.setText(String.valueOf(initialPoint.getZ()));
+                                            editX.setText("0");
+                                            editY.setText("0");
+                                            editZ.setText("0");
+                                            editAngle.setText("0");
                                             dialogue.show();
                                         }
                                         notifyDataSetChanged();

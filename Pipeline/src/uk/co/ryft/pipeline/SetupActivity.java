@@ -253,9 +253,9 @@ public class SetupActivity extends Activity {
                 builder.setView(dialogueView);
                 builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        float x = Float.valueOf(editX.getText().toString());
-                        float y = Float.valueOf(editY.getText().toString());
-                        float z = Float.valueOf(editZ.getText().toString());
+                        float x = (editX.getText().toString().length() == 0) ? 0 : Float.valueOf(editX.getText().toString());
+                        float y = (editY.getText().toString().length() == 0) ? 0 : Float.valueOf(editY.getText().toString());
+                        float z = (editZ.getText().toString().length() == 0) ? 0 : Float.valueOf(editZ.getText().toString());
                         mLightPosition = new Float3(x, y, z);
                         updateViews();
                     }
@@ -312,8 +312,10 @@ public class SetupActivity extends Activity {
                 builder.setView(durationTextView);
                 builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mAnimationDuration = Integer.valueOf(durationTextView.getText().toString());
-                        updateViews();
+                        if (durationTextView.getText().toString().length() > 0) {
+                            mAnimationDuration = Integer.valueOf(durationTextView.getText().toString());
+                            updateViews();
+                        }
                     }
                 });
                 builder.setNegativeButton(R.string.dialogue_button_cancel, new DialogInterface.OnClickListener() {

@@ -143,12 +143,12 @@ public class SetupCameraActivity extends Activity {
         Intent result = new Intent();
         
         // Build camera object from view components
-        float left = Float.valueOf(mTextLeft.getText().toString());
-        float right = Float.valueOf(mTextRight.getText().toString());
-        float bottom = Float.valueOf(mTextBottom.getText().toString());
-        float top = Float.valueOf(mTextTop.getText().toString());
-        float near = Float.valueOf(mTextNear.getText().toString());
-        float far = Float.valueOf(mTextFar.getText().toString());
+        float left = (mTextLeft.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextLeft.getText().toString());
+        float right = (mTextRight.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextRight.getText().toString());
+        float bottom = (mTextBottom.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextBottom.getText().toString());
+        float top = (mTextTop.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextTop.getText().toString());
+        float near = (mTextNear.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextNear.getText().toString());
+        float far = (mTextFar.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextFar.getText().toString());
         
         result.putExtra("camera", new Camera(mPointEye, mPointFocus, mPointUp, left, right, bottom, top, near, far));
         setResult(Activity.RESULT_OK, result);

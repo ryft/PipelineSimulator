@@ -127,9 +127,9 @@ public class BuildCuboidActivity extends Activity {
     protected void saveAndQuit() {
         Intent result = new Intent();
         // Build element from view components
-        float width = Float.valueOf(mTextWidth.getText().toString());
-        float height = Float.valueOf(mTextHeight.getText().toString());
-        float depth = Float.valueOf(mTextDepth.getText().toString());
+        float width = (mTextWidth.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextWidth.getText().toString());
+        float height = (mTextHeight.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextHeight.getText().toString());
+        float depth = (mTextDepth.getText().toString().length() == 0) ? 0 : Float.valueOf(mTextDepth.getText().toString());
         result.putExtra("element", ShapeFactory.buildCuboid(mPointCentre, width, height, depth, mColourFront, mColourSide));
         setResult(Activity.RESULT_OK, result);
         finish();
