@@ -3,9 +3,9 @@ package uk.co.ryft.pipeline.ui.pipeline;
 import java.util.ArrayList;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
-import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.model.Element;
+import uk.co.ryft.pipeline.model.Colour;
+import uk.co.ryft.pipeline.model.PipelineRenderer;
+import uk.co.ryft.pipeline.model.element.Element;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;

@@ -8,15 +8,15 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Float3;
-import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.Composite;
-import uk.co.ryft.pipeline.model.shapes.Composite.Type;
-import uk.co.ryft.pipeline.model.shapes.ElementType;
-import uk.co.ryft.pipeline.model.shapes.Primitive;
-import uk.co.ryft.pipeline.ui.components.EditPointHandler;
-import uk.co.ryft.pipeline.ui.components.EditPointHandler.OnPointChangedListener;
-import uk.co.ryft.pipeline.ui.setup.builders.BuildPrimitiveActivity;
+import uk.co.ryft.pipeline.model.Float3;
+import uk.co.ryft.pipeline.model.element.Composite;
+import uk.co.ryft.pipeline.model.element.Composite.Type;
+import uk.co.ryft.pipeline.model.element.Element;
+import uk.co.ryft.pipeline.model.element.Element.ElementType;
+import uk.co.ryft.pipeline.model.element.Primitive;
+import uk.co.ryft.pipeline.ui.component.EditPointHandler;
+import uk.co.ryft.pipeline.ui.component.EditPointHandler.OnPointChangedListener;
+import uk.co.ryft.pipeline.ui.setup.builder.BuildPrimitiveActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -579,12 +579,16 @@ public class SetupSceneActivity extends ListActivity {
                                             builder.setPositiveButton(R.string.dialogue_button_save,
                                                     new DialogInterface.OnClickListener() {
                                                         public void onClick(DialogInterface dialog, int id) {
-                                                            float x = (editX.getText().toString().length() == 0) ? 0 : Float.valueOf(editX.getText().toString());
-                                                            float y = (editY.getText().toString().length() == 0) ? 0 : Float.valueOf(editY.getText().toString());
-                                                            float z = (editZ.getText().toString().length() == 0) ? 0 : Float.valueOf(editZ.getText().toString());
+                                                            float x = (editX.getText().toString().length() == 0) ? 0 : Float
+                                                                    .valueOf(editX.getText().toString());
+                                                            float y = (editY.getText().toString().length() == 0) ? 0 : Float
+                                                                    .valueOf(editY.getText().toString());
+                                                            float z = (editZ.getText().toString().length() == 0) ? 0 : Float
+                                                                    .valueOf(editZ.getText().toString());
 
                                                             Element elem = (Element) getItem(position);
-                                                            Float angle = (editAngle.getText().toString().length() == 0) ? 0 : Float.valueOf(editAngle.getText().toString());
+                                                            Float angle = (editAngle.getText().toString().length() == 0) ? 0
+                                                                    : Float.valueOf(editAngle.getText().toString());
                                                             remove(elem);
                                                             add(elem.rotate(angle, x, y, z));
                                                         }

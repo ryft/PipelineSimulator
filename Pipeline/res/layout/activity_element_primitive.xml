@@ -13,7 +13,7 @@
         style="@style/GroupTitle"
         android:text="@string/heading_primitive_type" />
 
-    <uk.co.ryft.pipeline.ui.setup.builders.TypeSpinner
+    <uk.co.ryft.pipeline.ui.setup.builder.TypeSpinner
         android:id="@+id/element_type_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
