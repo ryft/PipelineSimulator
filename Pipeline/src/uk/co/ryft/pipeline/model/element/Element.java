@@ -3,8 +3,8 @@ package uk.co.ryft.pipeline.model.element;
 import java.io.Serializable;
 
 import android.app.Activity;
-import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Float3;
+import uk.co.ryft.pipeline.model.element.drawable.Drawable;
 
 public interface Element extends Serializable, Cloneable {
 

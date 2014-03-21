@@ -3,8 +3,6 @@ package uk.co.ryft.pipeline.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,13 +15,13 @@ import uk.co.ryft.pipeline.model.element.Composite;
 import uk.co.ryft.pipeline.model.element.Element;
 import uk.co.ryft.pipeline.model.element.Primitive;
 import uk.co.ryft.pipeline.model.element.ShapeFactory;
+import uk.co.ryft.pipeline.model.element.drawable.Drawable;
 import uk.co.ryft.pipeline.model.lighting.LightingModel;
 import uk.co.ryft.pipeline.model.lighting.LightingModel.Model;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 
 public class PipelineRenderer implements Renderer, Serializable {
@@ -31,17 +29,25 @@ public class PipelineRenderer implements Renderer, Serializable {
     private static final long serialVersionUID = -5651858198215667027L;
     private static final String TAG = "PipelineRenderer";
 
+    // Language- and library-specific constants
+    // Number of coordinates per item in the provided array
+    public static final int COORDS_PER_VERTEX = 3;
+    public static final int COORDS_PER_COLOUR = 4;
+    public static final int BYTES_PER_FLOAT = 4;
+    // Bytes between consecutive vertices
+    public static final int vertexStride = COORDS_PER_VERTEX * 4;
+
     // Renderer helper objects passed from the parent
     private final ArrayList<Element> mElements = new ArrayList<Element>();
     private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
 
-    private LightingModel mLighting;
-    private LightingModel mAccessoryLighting;
-    private LightingModel mPointLighting;
+    private LightingModel mLightingScene;
+    private LightingModel mLightingAccessory;
+    private LightingModel mLightingPoint;
 
-    private final Camera mSceneCamera;
-    private final Camera mActualCamera;
-    private final Camera mVirtualCamera;
+    private final Camera mCameraScene;
+    private final Camera mCameraActual;
+    private final Camera mCameraVirtual;
 
     private boolean mGLCullingEnabled = false;
     private boolean mGLCullingClockwise;
@@ -75,52 +81,12 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final float[] mCVPMatrix = new float[16];
     private final float[] mLVPMatrix = new float[16];
 
-    // List of model transformations
-    // FIXME remove all accesses from outside the render thread
-    private final List<Transformation<float[]>> mModelTransformations = new LinkedList<Transformation<float[]>>();
-
-    protected int mAnimationDuration = 2000;
+    private int mAnimationDuration = 2000;
 
     // Light position, for implementing lighting models
     public static Float3 sLightPosition;
     private Primitive mLightElement;
     private Drawable mLightDrawable;
-
-    public float getRotation() {
-        return mActualCamera.getRotation();
-    }
-
-    public void setRotation(float angle) {
-        if (mPipelineState < STEP_CLIPPING)
-            mActualCamera.setRotation(angle);
-    }
-
-    public float getScaleFactor() {
-        return mActualCamera.getScaleFactor();
-    }
-
-    public void setScaleFactor(float scaleFactor) {
-        mActualCamera.setScaleFactor(scaleFactor);
-        // Force update to projection matrix
-        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
-    }
-
-    public void updateScaleFactor(float scaleFactor) {
-        if (mPipelineState < STEP_CLIPPING) {
-            mActualCamera.updateScaleFactor(scaleFactor);
-            // Force update to projection matrix
-            mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
-        }
-    }
-
-    public void setGlobalLightLevel(float alpha) {
-        mLighting.setGlobalLightLevel(alpha);
-    }
-
-    public void interact() {
-        // mActualCamera.transformTo(mVirtualCamera);
-        Log.d(TAG, mActualCamera.toString());
-    }
 
     // Drawables aren't initialised, and are constructed at render time if necessary
     private final Element mCameraElement;
@@ -128,12 +94,12 @@ public class PipelineRenderer implements Renderer, Serializable {
     private final Element mFrustumElement;
     private Drawable mFrustumDrawable;
 
-    private Composite sAxes;
-    private Drawable sAxesDrawable;
+    private Composite mAxesElement;
+    private Drawable mAxesDrawable;
 
     public PipelineRenderer(Bundle params) {
 
-        sAxes = ShapeFactory.buildAxes();
+        mAxesElement = ShapeFactory.buildAxes();
 
         // Get list of elements from the parameters bundle
         @SuppressWarnings("unchecked")
@@ -141,17 +107,17 @@ public class PipelineRenderer implements Renderer, Serializable {
         mElements.addAll(elements);
 
         // Initialise cameras
-        mSceneCamera = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
-        mActualCamera = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
-        mVirtualCamera = (Camera) params.getSerializable("camera");
+        mCameraScene = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
+        mCameraActual = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
+        mCameraVirtual = (Camera) params.getSerializable("camera");
 
         mCameraElement = ShapeFactory.buildCamera(0.25f);
-        mFrustumElement = ShapeFactory.buildFrustum(mVirtualCamera);
+        mFrustumElement = ShapeFactory.buildFrustum(mCameraVirtual);
 
         // Initialise lighting models
-        mLighting = LightingModel.getLightingModel(Model.UNIFORM);
-        mAccessoryLighting = LightingModel.getLightingModel(Model.UNIFORM);
-        mPointLighting = LightingModel.getLightingModel(Model.POINT_SOURCE);
+        mLightingScene = LightingModel.getLightingModel(Model.UNIFORM);
+        mLightingAccessory = LightingModel.getLightingModel(Model.UNIFORM);
+        mLightingPoint = LightingModel.getLightingModel(Model.POINT_SOURCE);
 
         sLightPosition = (Float3) params.getSerializable("light_position");
         mLightElement = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE);
@@ -190,34 +156,33 @@ public class PipelineRenderer implements Renderer, Serializable {
         // TODO Reset state as per mPipelineStep on screen rotation etc
 
         // Force re-initialisation of static scene objects in this new render thread context
-        sAxesDrawable = null;
+        mAxesDrawable = null;
         mLightDrawable = null;
         mCameraDrawable = null;
         mFrustumDrawable = null;
 
-        mLighting.reset();
-        mAccessoryLighting.reset();
-        mPointLighting.reset();
+        mLightingScene.reset();
+        mLightingAccessory.reset();
+        mLightingPoint.reset();
     }
 
-    int mSurfaceWidth;
-    int mSurfaceHeight;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
 
+        // Cache view dimensions for calculating camera projection later
         mSurfaceWidth = width;
         mSurfaceHeight = height;
 
-        // Adjust the viewport based on geometry changes,
-        // such as screen rotation
+        // Adjust the viewport based on geometry changes, such as screen rotation
         GLES20.glViewport(0, 0, width, height);
 
-        mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, width, height);
+        // Set the new camera projection matrix
+        mCameraActual.setProjectionMatrix(mProjectionMatrix, 0, width, height);
 
     }
-
-    Element randomCube = ShapeFactory.buildCuboid(new Float3(0, 0, 0), 1, 1, 1, Colour.RANDOM, Colour.RANDOM);
 
     protected void setEmptyGLParameters() {
 
@@ -279,10 +244,10 @@ public class PipelineRenderer implements Renderer, Serializable {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // Get the current camera view matrices
-        mActualCamera.setViewMatrix(mViewMatrix, 0);
-        if (mActualCamera.isTransforming())
-            mActualCamera.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
-        mVirtualCamera.setViewMatrix(mCameraViewMatrix, 0);
+        mCameraActual.setViewMatrix(mViewMatrix, 0);
+        if (mCameraActual.isTransforming())
+            mCameraActual.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+        mCameraVirtual.setViewMatrix(mCameraViewMatrix, 0);
 
         // Set up the model (world transformation) matrix
         Matrix.setIdentityM(mModelMatrix, 0);
@@ -290,13 +255,6 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // The camera model matrix transforms the camera to its correct position and orientation in world space
         Matrix.invertM(mCameraModelMatrix, 0, mCameraViewMatrix, 0);
-
-        long time = SystemClock.uptimeMillis();
-
-        // Apply all ongoing transformations to the world, in order, in their current state
-        for (Transformation<float[]> t : mModelTransformations)
-            // TODO Find a way to remove completed transformations if necessary
-            Matrix.multiplyMM(mModelMatrix, 0, t.getTransformation(time), 0, mModelMatrix, 0);
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
@@ -309,8 +267,8 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Initialise axes and camera drawables if necessary
         // Avoid object construction as much as possible at render time
-        if (sAxesDrawable == null)
-            sAxesDrawable = sAxes.getDrawable();
+        if (mAxesDrawable == null)
+            mAxesDrawable = mAxesElement.getDrawable();
         if (mCameraDrawable == null)
             mCameraDrawable = mCameraElement.getDrawable();
         if (mFrustumDrawable == null)
@@ -320,37 +278,69 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Draw axes and virtual camera
         if (mDrawAxes)
-            sAxesDrawable.draw(mAccessoryLighting, mMVMatrix, mMVPMatrix);
+            mAxesDrawable.draw(mLightingAccessory, mMVMatrix, mMVPMatrix);
         if (mDrawCamera)
-            mCameraDrawable.draw(mAccessoryLighting, mCVMatrix, mCVPMatrix);
+            mCameraDrawable.draw(mLightingAccessory, mCVMatrix, mCVPMatrix);
         if (mDrawFrustum)
-            mFrustumDrawable.draw(mAccessoryLighting, mCVMatrix, mCVPMatrix);
+            mFrustumDrawable.draw(mLightingAccessory, mCVMatrix, mCVPMatrix);
 
         int drawn = 0;
 
         // Draw world objects in the scene
         for (Element e : mSceneElements.keySet()) {
-            if (mSceneElements.get(e) == null)
-                mSceneElements.put(e, e.getDrawable());
-            Drawable d = mSceneElements.get(e);
 
+            // Set the scene parameters for the current scene state
+            // This is essential for iterative transitions, e.g. face culling
             setGLParameters(drawn);
+
+            // Fetch the current element drawable, and draw it
+            Drawable d = mSceneElements.get(e);
             if (d != null) {
-                d.draw(mLighting, mMVMatrix, mMVPMatrix);
+                d.draw(mLightingScene, mMVMatrix, mMVPMatrix);
                 drawn++;
-            } else
-                // Occasionally happens when app is quitting
-                // TODO: Investigate turning off continuous rendering when quitting
-                System.out.println("Ruh-roh, null drawable!");
+            }
+
+            // Drawables may be null when app is quitting and they've been disposed
         }
 
         if (mLightDrawable == null)
             mLightDrawable = mLightElement.getDrawable();
-        mLightDrawable.draw(mPointLighting, mLVMatrix, mLVPMatrix);
+        mLightDrawable.draw(mLightingPoint, mLVMatrix, mLVPMatrix);
 
     }
 
-    // XXX Prints matrices in OpenGL-style column-major order.
+    public float getRotation() {
+        return mCameraActual.getRotation();
+    }
+
+    public void setRotation(float angle) {
+        if (mPipelineState < STEP_CLIPPING)
+            mCameraActual.setRotation(angle);
+    }
+
+    public float getScaleFactor() {
+        return mCameraActual.getScaleFactor();
+    }
+
+    public void setScaleFactor(float scaleFactor) {
+        mCameraActual.setScaleFactor(scaleFactor);
+        // Force update to projection matrix
+        mCameraActual.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+    }
+
+    public void updateScaleFactor(float scaleFactor) {
+        if (mPipelineState < STEP_CLIPPING) {
+            mCameraActual.updateScaleFactor(scaleFactor);
+            // Force update to projection matrix
+            mCameraActual.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
+        }
+    }
+
+    public void setGlobalLightLevel(float alpha) {
+        mLightingScene.setGlobalLightLevel(alpha);
+    }
+
+    // Prints matrices in OpenGL-style column-major order.
     public static void printMatrix(float[] m, int cols, int rows) {
         for (int i = 0; i < rows; i++) {
             if (i == 0)
@@ -370,14 +360,14 @@ public class PipelineRenderer implements Renderer, Serializable {
     // State is set to the previously-completed pipeline step transition.
     private int mPipelineState = STEP_INITIAL;
     public static final int STEP_INITIAL = 0;
-    public static final int STEP_VERTEX_ASSEMBLY = 1; // Add one element at a time
-    public static final int STEP_VERTEX_SHADING = 2; // Apply shader gradually?
-    public static final int STEP_CLIPPING = 3; // Zoom to virtual camera
-    public static final int STEP_MULTISAMPLING = 4; // XX
-    public static final int STEP_FACE_CULLING = 5; // ?
-    public static final int STEP_FRAGMENT_SHADING = 6; // ?
-    public static final int STEP_DEPTH_BUFFER = 7; // ?
-    public static final int STEP_BLENDING = 8; // XX
+    public static final int STEP_VERTEX_ASSEMBLY = 1;
+    public static final int STEP_VERTEX_SHADING = 2;
+    public static final int STEP_CLIPPING = 3;
+    public static final int STEP_MULTISAMPLING = 4;
+    public static final int STEP_FACE_CULLING = 5;
+    public static final int STEP_FRAGMENT_SHADING = 6;
+    public static final int STEP_DEPTH_BUFFER = 7;
+    public static final int STEP_BLENDING = 8;
     public static final int STEP_FINAL = STEP_BLENDING;
 
     class TransitionAnimator extends Thread {
@@ -438,9 +428,8 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     }
 
-    // TODO Decide if implementing a monitor for this is worthwhile
-    volatile boolean animationLock = false;
-    boolean tempAnimatingCulling = false;
+    // This is modified by animation threads so needs to be volatile to ensure a global access ordering.
+    private volatile boolean animationLock = false;
 
     private void animateVertexAssembly(boolean forward) throws InterruptedException {
 
@@ -476,13 +465,13 @@ public class PipelineRenderer implements Renderer, Serializable {
         int steps = mAnimationDuration / 20;
 
         for (int step = 0; step <= steps; step++) {
-            mLighting.setGlobalLightLevel(1 - ((float) step / steps));
+            mLightingScene.setGlobalLightLevel(1 - ((float) step / steps));
             Thread.sleep(10);
         }
-        mLighting = (forward) ? LightingModel.getLightingModel(Model.LAMBERTIAN) : LightingModel
+        mLightingScene = (forward) ? LightingModel.getLightingModel(Model.LAMBERTIAN) : LightingModel
                 .getLightingModel(Model.UNIFORM);
         for (int step = 0; step <= steps; step++) {
-            mLighting.setGlobalLightLevel((float) step / steps);
+            mLightingScene.setGlobalLightLevel((float) step / steps);
             Thread.sleep(10);
         }
     }
@@ -490,9 +479,9 @@ public class PipelineRenderer implements Renderer, Serializable {
     private void animateClipping(boolean forward) throws InterruptedException {
         mDrawAxes = !forward;
         if (forward)
-            mActualCamera.transformTo(mVirtualCamera, mAnimationDuration);
+            mCameraActual.transformTo(mCameraVirtual, mAnimationDuration);
         else
-            mActualCamera.transformTo(mSceneCamera, mAnimationDuration);
+            mCameraActual.transformTo(mCameraScene, mAnimationDuration);
     }
 
     private void animateMultisampling(boolean forward) throws InterruptedException {
@@ -514,12 +503,13 @@ public class PipelineRenderer implements Renderer, Serializable {
     private void animateFragmentShading(boolean forward) throws InterruptedException {
         int steps = mAnimationDuration / 20;
         for (int step = 0; step <= steps; step++) {
-            mLighting.setGlobalLightLevel(1 - ((float) step / steps));
+            mLightingScene.setGlobalLightLevel(1 - ((float) step / steps));
             Thread.sleep(10);
         }
-        mLighting = (forward) ? LightingModel.getLightingModel(Model.PHONG) : LightingModel.getLightingModel(Model.LAMBERTIAN);
+        mLightingScene = (forward) ? LightingModel.getLightingModel(Model.PHONG) : LightingModel
+                .getLightingModel(Model.LAMBERTIAN);
         for (int step = 0; step <= steps; step++) {
-            mLighting.setGlobalLightLevel((float) step / steps);
+            mLightingScene.setGlobalLightLevel((float) step / steps);
             Thread.sleep(10);
         }
     }
@@ -558,16 +548,16 @@ public class PipelineRenderer implements Renderer, Serializable {
         mDrawFrustum = !forward;
     }
 
-    public void next() {
-        if (mPipelineState < STEP_FINAL && !animationLock && !mActualCamera.isTransforming()) {
+    public void applyNextStep() {
+        if (mPipelineState < STEP_FINAL && !animationLock && !mCameraActual.isTransforming()) {
 
             new TransitionAnimator(mPipelineState, true).start();
             mPipelineState++;
         }
     }
 
-    public void previous() {
-        if (mPipelineState > STEP_INITIAL && !animationLock && !mActualCamera.isTransforming()) {
+    public void undoPreviousStep() {
+        if (mPipelineState > STEP_INITIAL && !animationLock && !mCameraActual.isTransforming()) {
 
             new TransitionAnimator(mPipelineState, false).start();
             mPipelineState--;

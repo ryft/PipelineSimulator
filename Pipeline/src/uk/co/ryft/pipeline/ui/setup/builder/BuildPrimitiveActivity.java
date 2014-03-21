@@ -37,7 +37,7 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class BuildPrimitiveActivity extends ListActivity {
 
-    // XXX Build an adapter of Float3Wrappers because they are mutable
+    // Build an adapter of Float3Wrappers because they are mutable
     protected ArrayAdapter<Float3Wrapper> mAdapter;
     // protected Primitive mElement;
     protected Type mElementType;
@@ -240,10 +240,6 @@ public class BuildPrimitiveActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // TODO: Consider using a BaseAdapter -- see
-    // http://www.piwai.info/android-adapter-good-practices/
-    // TODO: Consider using a ViewHolder -- see
-    // http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
     class PointAdapter extends ArrayAdapter<Float3Wrapper> {
 
         final Context mContext;
@@ -263,7 +259,8 @@ public class BuildPrimitiveActivity extends ListActivity {
             // Recycle view if possible
             if (convertView == null)
                 convertView = mInflater.inflate(R.layout.listitem_point, null);
-            // XXX All events are handled from the listview (parent) level.
+            
+            // All events are handled from the listview (parent) level.
             return convertView;
         }
 

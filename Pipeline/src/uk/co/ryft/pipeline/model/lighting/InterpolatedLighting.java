@@ -8,40 +8,41 @@ import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import android.opengl.GLES20;
 
 public abstract class InterpolatedLighting extends LightingModel {
-    
+
     private static final long serialVersionUID = -3397825035311793185L;
-    
-    List<Integer> types2D = Arrays.asList(new Integer[] {GLES20.GL_TRIANGLES, GLES20.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_STRIP});
-    
-    // XXX Allows Lambertian, Phong models to use distinct shaders for 1D and 2D primitives
+
+    List<Integer> types2D = Arrays
+            .asList(new Integer[] { GLES20.GL_TRIANGLES, GLES20.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_STRIP });
+
+    // This class allows Lambertian, Phong models to use distinct shaders for 1D and 2D primitives
     protected InterpolatedLighting(Model m) {
         super(m);
     }
-    
+
     private int mProgram2D;
     private int mProgram1D;
-    
+
     @Override
     // XXX Compile a separate program for drawing 1D and 2D primitives
     public int getGLProgram(int primitiveType) {
-        
+
         boolean is2DPrimitive = types2D.contains(primitiveType);
-        
+
         if (is2DPrimitive && mProgram2D == 0) {
             final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader(primitiveType));
             final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader(primitiveType));
-            
+
             String[] attributes = getVertexShaderAttributes();
             mProgram2D = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, attributes);
-            
+
         } else if (!is2DPrimitive && mProgram1D == 0) {
             final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER, getVertexShader(primitiveType));
             final int fragmentShaderHandle = compileShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShader(primitiveType));
-            
+
             String[] attributes = getVertexShaderAttributes();
             mProgram1D = createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, attributes);
         }
-        
+
         if (is2DPrimitive)
             return mProgram2D;
         else
@@ -50,7 +51,7 @@ public abstract class InterpolatedLighting extends LightingModel {
 
     @Override
     protected String[] getVertexShaderAttributes() {
-        return new String[] {"a_Position", "a_Color", "a_Normal"};
+        return new String[] { "a_Position", "a_Color", "a_Normal" };
     }
 
     @Override
@@ -80,19 +81,22 @@ public abstract class InterpolatedLighting extends LightingModel {
 
         // Pass in the position information
         primitive.mVertexBuffer.position(0);
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, primitive.mVertexBuffer);
+        GLES20.glVertexAttribPointer(mPositionHandle, PipelineRenderer.COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0,
+                primitive.mVertexBuffer);
 
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Pass in the colour information
         primitive.mColourBuffer.position(0);
-        GLES20.glVertexAttribPointer(mColourHandle, COORDS_PER_COLOUR, GLES20.GL_FLOAT, false, 0, primitive.mColourBuffer);
+        GLES20.glVertexAttribPointer(mColourHandle, PipelineRenderer.COORDS_PER_COLOUR, GLES20.GL_FLOAT, false, 0,
+                primitive.mColourBuffer);
 
         GLES20.glEnableVertexAttribArray(mColourHandle);
 
         // Pass in the normal information
         primitive.mNormalBuffer.position(0);
-        GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, primitive.mNormalBuffer);
+        GLES20.glVertexAttribPointer(mNormalHandle, PipelineRenderer.COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0,
+                primitive.mNormalBuffer);
 
         GLES20.glEnableVertexAttribArray(mNormalHandle);
 
@@ -103,23 +107,23 @@ public abstract class InterpolatedLighting extends LightingModel {
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
         // Pass in the light position in eye space
-        GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.sLightPosition.getX(),
-                PipelineRenderer.sLightPosition.getY(), PipelineRenderer.sLightPosition.getZ());
+        GLES20.glUniform3f(mLightPosHandle, PipelineRenderer.sLightPosition.getX(), PipelineRenderer.sLightPosition.getY(),
+                PipelineRenderer.sLightPosition.getZ());
 
         // Pass in the overall light level for transitions (fading in/out)
         GLES20.glUniform1f(mLightLevelHandle, mLightLevel);
 
         // Draw the primitive
         GLES20.glDrawArrays(primitive.mPrimitiveType, 0, primitive.mVertexCount);
-        
+
         // Disable the attribute arrays
         GLES20.glDisableVertexAttribArray(mPositionHandle);
         GLES20.glDisableVertexAttribArray(mColourHandle);
         GLES20.glDisableVertexAttribArray(mNormalHandle);
-        
+
         checkGlError();
     }
-    
+
     @Override
     public void reset() {
         super.reset();

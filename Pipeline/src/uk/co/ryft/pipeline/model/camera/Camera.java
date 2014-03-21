@@ -23,9 +23,9 @@ public class Camera implements Serializable, Cloneable {
     private Transformation<Camera> mTransformation;
     
     public Camera(Float3 eye, Float3 focus, Float3 up, float left, float right, float bottom, float top, float near, float far) {
-        mEye = (Float3) eye.clone();
-        mFocus = (Float3) focus.clone();
-        mUp = (Float3) up.clone();
+        mEye = eye;
+        mFocus = focus;
+        mUp = up;
         setProjection(left, right, bottom, top, near, far);
     }
 
@@ -33,12 +33,11 @@ public class Camera implements Serializable, Cloneable {
         mTransformation = new CameraTransformation(this, destination, duration);
     }
 
-    public Float3 getEye() { return (Float3) mEye.clone(); }
-    public Float3 getFocus() { return (Float3) mFocus.clone(); }
-    public Float3 getUp() { return (Float3) mUp.clone(); }
+    public Float3 getEye() { return mEye; }
+    public Float3 getFocus() { return mFocus; }
+    public Float3 getUp() { return mUp; }
 
     // For touch events
-    // TODO: Implement a monitor for this.
     private volatile float mRotation = 0f;
     
     public float getRotation() {
@@ -60,7 +59,7 @@ public class Camera implements Serializable, Cloneable {
     }
 
     public void updateScaleFactor(float scaleFactor) {
-        // XXX Zooming implemented as described here: http://www.opengl.org/archives/resources/faq/technical/viewing.htm#view0040
+        // Zooming implemented as described here: http://www.opengl.org/archives/resources/faq/technical/viewing.htm#view0040
         mScaleFactor /= scaleFactor;
     }
     
@@ -151,7 +150,7 @@ public class Camera implements Serializable, Cloneable {
     }
     
     @Override
-    public Object clone() {
+    public Camera clone() {
         Camera cloned = new Camera(getEye(), getFocus(), getUp(), getLeft(), getRight(), getBottom(), getTop(), getNear(), getFar());
         cloned.setRotation(getRotation());
         cloned.setScaleFactor(getScaleFactor());

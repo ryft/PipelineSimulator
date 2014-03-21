@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Float3;
+import uk.co.ryft.pipeline.model.element.drawable.Drawable;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Composite;
 import uk.co.ryft.pipeline.ui.setup.builder.BuildCameraActivity;
 import uk.co.ryft.pipeline.ui.setup.builder.BuildCuboidActivity;

@@ -318,10 +318,9 @@ public class SetupSceneActivity extends ListActivity {
                     Primitive newElement = (Primitive) data.getSerializableExtra("element");
                     mAdapter.add(newElement);
                     message = getString(R.string.message_element_updated);
-                }
-                // Else original element has been deleted as required
-                // A suitable message has already been displayed to the user
-                // FIXME Not necessarily, if user has pressed delete
+                } else
+                    // Else original element has been deleted as required
+                    message = getString(R.string.message_element_deleted);
 
             } else {
                 mThisElement = null;
@@ -384,6 +383,7 @@ public class SetupSceneActivity extends ListActivity {
     }
 
     // View holder stores references to the view components
+    // see http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
     static class ElementViewHolder {
         ImageView elemIcon;
         TextView typeTextView;
@@ -393,6 +393,7 @@ public class SetupSceneActivity extends ListActivity {
         CheckBox selectionCheckBox;
     }
 
+    // Uses a BaseAdapter - http://www.piwai.info/android-adapter-good-practices/
     class ElementAdapter extends BaseAdapter {
 
         final Context mContext;

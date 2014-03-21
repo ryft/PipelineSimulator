@@ -8,8 +8,8 @@ import java.util.Map;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Colour;
-import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Float3;
+import uk.co.ryft.pipeline.model.element.drawable.Drawable;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import uk.co.ryft.pipeline.ui.setup.builder.BuildPrimitiveActivity;
 import android.app.Activity;
@@ -206,7 +206,7 @@ public class Primitive implements Element {
     }
 
     @Override
-    public Object clone() {
+    public Primitive clone() {
         return new Primitive(getType(), getVertices(), getColour());
     }
 

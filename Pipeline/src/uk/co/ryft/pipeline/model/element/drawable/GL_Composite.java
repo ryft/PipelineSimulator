@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.lighting.LightingModel;
 
 public class GL_Composite implements Drawable {

@@ -12,18 +12,7 @@ import android.util.Log;
 public abstract class LightingModel implements Serializable {
 
     private static final long serialVersionUID = -8281004338010378525L;
-
     private static final String TAG = "LightingModel";
-
-    // XXX Language- and library-specific constants
-    // TODO put these somewhere nice, and only one place
-    // Number of coordinates per item in the provided array
-    protected static final int COORDS_PER_VERTEX = 3;
-    protected static final int COORDS_PER_COLOUR = 4;
-    // Bytes in a float
-    protected static final int BYTES_PER_FLOAT = 4;
-    // Bytes between consecutive vertices
-    protected static final int vertexStride = COORDS_PER_VERTEX * 4;
 
     public static enum Model {
         UNIFORM, LAMBERTIAN, PHONG, POINT_SOURCE;
@@ -97,7 +86,7 @@ public abstract class LightingModel implements Serializable {
 
     public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
 
-    // XXX Clears the GL program for use in a new render thread
+    // Clears the GL program for use in a new render thread
     public void reset() {
         mProgram = 0;
         setGlobalLightLevel(1);

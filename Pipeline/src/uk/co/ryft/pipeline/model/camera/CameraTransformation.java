@@ -3,7 +3,6 @@ package uk.co.ryft.pipeline.model.camera;
 import uk.co.ryft.pipeline.model.Float3;
 import uk.co.ryft.pipeline.model.Transformation;
 
-
 // XXX: Explain the rationale behind this being immutable
 public class CameraTransformation extends Transformation<Camera> {
 
@@ -41,8 +40,8 @@ public class CameraTransformation extends Transformation<Camera> {
     public CameraTransformation(Camera origin, Camera destination, int duration) {
         super(duration);
         
-        mOrigin = (Camera) origin.clone();
-        mDestination = (Camera) destination.clone();
+        mOrigin = origin.clone();
+        mDestination = destination.clone();
         
         mRotationBase = mOrigin.getRotation();
         mRotationDiff = mDestination.getRotation() - mRotationBase;
@@ -72,12 +71,12 @@ public class CameraTransformation extends Transformation<Camera> {
 
     @Override
     protected Camera getTransformationState(float progress) {
-        
-        // FIXME is this unsafe?
+
+        // We're required to clone here, or else the caller may alter our referenced objects
         if (progress <= 0)
-            return mOrigin;
+            return mOrigin.clone();
         else if (progress >= 1)
-            return mDestination;
+            return mDestination.clone();
 
         Float3 eye = mEyeBase.plus(mEyeDiff.scale(progress));
         Float3 focus = mFocusBase.plus(mFocusDiff.scale(progress));

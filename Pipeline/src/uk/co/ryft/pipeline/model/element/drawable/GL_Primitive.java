@@ -4,21 +4,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import uk.co.ryft.pipeline.model.Drawable;
 import uk.co.ryft.pipeline.model.Float3;
+import uk.co.ryft.pipeline.model.PipelineRenderer;
 import uk.co.ryft.pipeline.model.lighting.LightingModel;
 
 public class GL_Primitive implements Drawable {
-    
-    // XXX Language- and library-specific constants
-    // TODO put these somewhere nice, and only one place
-    // Number of coordinates per item in the provided array
-    protected static final int COORDS_PER_VERTEX = 3;
-    protected static final int COORDS_PER_COLOUR = 4;
-    // Bytes in a float
-    protected static final int BYTES_PER_FLOAT = 4;
-    // Bytes between consecutive vertices
-    protected static final int vertexStride = COORDS_PER_VERTEX * 4;
 
     protected float[] mPositions;
     public float[] mColour;
@@ -31,26 +21,26 @@ public class GL_Primitive implements Drawable {
     public FloatBuffer mNormalBuffer;
 
     public final int mVertexCount;
-    public final int mVertexStride = COORDS_PER_VERTEX * BYTES_PER_FLOAT;
+    public final int mVertexStride = PipelineRenderer.COORDS_PER_VERTEX * PipelineRenderer.BYTES_PER_FLOAT;
     public final int mPrimitiveType;
 
     public GL_Primitive(float[] coords, float[] colour, int primitiveType) {
 
-        mVertexCount = coords.length / COORDS_PER_VERTEX;
+        mVertexCount = coords.length / PipelineRenderer.COORDS_PER_VERTEX;
 
         mPositions = coords;
 
         mColour = colour;
-        mColours = new float[mVertexCount * COORDS_PER_COLOUR];
-        for (int i = 0; i < mVertexCount * COORDS_PER_COLOUR; i++)
-            mColours[i] = colour[i % COORDS_PER_COLOUR];
+        mColours = new float[mVertexCount * PipelineRenderer.COORDS_PER_COLOUR];
+        for (int i = 0; i < mVertexCount * PipelineRenderer.COORDS_PER_COLOUR; i++)
+            mColours[i] = colour[i % PipelineRenderer.COORDS_PER_COLOUR];
 
         calculateNormals();
 
         mPrimitiveType = primitiveType;
 
         // Initialise vertex byte buffer for shape coordinates
-        ByteBuffer vertexBuffer = ByteBuffer.allocateDirect(mPositions.length * BYTES_PER_FLOAT);
+        ByteBuffer vertexBuffer = ByteBuffer.allocateDirect(mPositions.length * PipelineRenderer.BYTES_PER_FLOAT);
         // use the device hardware's native byte order
         vertexBuffer.order(ByteOrder.nativeOrder());
 
@@ -63,13 +53,13 @@ public class GL_Primitive implements Drawable {
 
         // Colour and normal direction buffers used for Lambertian reflectance
 
-        ByteBuffer colourBuffer = ByteBuffer.allocateDirect(mColours.length * BYTES_PER_FLOAT);
+        ByteBuffer colourBuffer = ByteBuffer.allocateDirect(mColours.length * PipelineRenderer.BYTES_PER_FLOAT);
         colourBuffer.order(ByteOrder.nativeOrder());
         mColourBuffer = colourBuffer.asFloatBuffer();
         mColourBuffer.put(mColours);
         mColourBuffer.position(0);
 
-        ByteBuffer normalBuffer = ByteBuffer.allocateDirect(mNormals.length * BYTES_PER_FLOAT);
+        ByteBuffer normalBuffer = ByteBuffer.allocateDirect(mNormals.length * PipelineRenderer.BYTES_PER_FLOAT);
         normalBuffer.order(ByteOrder.nativeOrder());
         mNormalBuffer = normalBuffer.asFloatBuffer();
         mNormalBuffer.put(mNormals);
@@ -96,9 +86,9 @@ public class GL_Primitive implements Drawable {
             normal = u.cross(v).normalised().toArray();
         }
 
-        mNormals = new float[mVertexCount * COORDS_PER_VERTEX];
-        for (int i = 0; i < mVertexCount * COORDS_PER_VERTEX; i++)
-            mNormals[i] = normal[i % COORDS_PER_VERTEX];
+        mNormals = new float[mVertexCount * PipelineRenderer.COORDS_PER_VERTEX];
+        for (int i = 0; i < mVertexCount * PipelineRenderer.COORDS_PER_VERTEX; i++)
+            mNormals[i] = normal[i % PipelineRenderer.COORDS_PER_VERTEX];
 
     }
 

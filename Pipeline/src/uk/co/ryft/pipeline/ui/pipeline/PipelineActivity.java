@@ -71,6 +71,8 @@ public class PipelineActivity extends Activity {
         mPipelineParams = getIntent().getExtras();
         mSurfaceNOAA = new PipelineSurface(this, mPipelineParams, false);
         mSurfaceMSAA = new PipelineSurface(this, mPipelineParams, true);
+        mSurfaceNOAA.setPreserveEGLContextOnPause(true);
+        mSurfaceMSAA.setPreserveEGLContextOnPause(true);
         mSurfaceNOAA.setPadding(2, 2, 2, 2);
         mSurfaceMSAA.setPadding(2, 2, 2, 2);
         mSurfaceMSAA.setAlpha(0);
@@ -162,8 +164,8 @@ public class PipelineActivity extends Activity {
 
                     if (mScrollOriginX - event.getX() >= mSurfaceNOAA.getWidth() / 5) {
                         // Scrolled left
-                        mSurfaceNOAA.getRenderer().next();
-                        mSurfaceMSAA.getRenderer().next();
+                        mSurfaceNOAA.getRenderer().applyNextStep();
+                        mSurfaceMSAA.getRenderer().applyNextStep();
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
                         updatePipelineNavigator(true);
@@ -172,8 +174,8 @@ public class PipelineActivity extends Activity {
                         // Scrolled right
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
-                        mSurfaceNOAA.getRenderer().previous();
-                        mSurfaceMSAA.getRenderer().previous();
+                        mSurfaceNOAA.getRenderer().undoPreviousStep();
+                        mSurfaceMSAA.getRenderer().undoPreviousStep();
                         updatePipelineNavigator(false);
 
                     } else if (mScrollOriginY - event.getY() >= mSurfaceNOAA.getHeight() / 5) {
@@ -577,7 +579,6 @@ public class PipelineActivity extends Activity {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         PipelineRenderer renderer = mSurfaceNOAA.getRenderer();
-        // TODO check out GLSurfaceView.setPreserveEGLContextOnPause()
 
         savedInstanceState.putBoolean("edit_mode", mSurfaceNOAA.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());

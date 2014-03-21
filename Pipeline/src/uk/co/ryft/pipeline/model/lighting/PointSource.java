@@ -1,5 +1,6 @@
 package uk.co.ryft.pipeline.model.lighting;
 
+import uk.co.ryft.pipeline.model.PipelineRenderer;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import android.opengl.GLES20;
 
@@ -57,7 +58,7 @@ public class PointSource extends LightingModel {
         GLES20.glEnableVertexAttribArray(mPositionHandle);
 
         // Prepare coordinate data
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, primitive.mVertexStride,
+        GLES20.glVertexAttribPointer(mPositionHandle, PipelineRenderer.COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, primitive.mVertexStride,
                 primitive.mVertexBuffer);
 
         // Get handle to shape's transformation matrix
