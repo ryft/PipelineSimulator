@@ -6,7 +6,6 @@ public abstract class Transformation<E> {
 
     protected final long mStartTime;
     protected final long mDuration;
-    protected final E mFinalState;
 
     /**
      * An abstract implementation of a timed transformation, on an object of generic type. The transformation begins at the time
@@ -18,17 +17,12 @@ public abstract class Transformation<E> {
     public Transformation(int duration) {
         mStartTime = SystemClock.uptimeMillis();
         mDuration = duration;
-
-        // Cache final state to avoid excessive recomputation
-        mFinalState = getTransformationState(1);
     }
 
     protected abstract E getTransformationState(float progress);
 
     /**
-     * Compute the current state of the transformation at the current time. If the transformation is complete, no recomputation
-     * is performed and a cached object is returned. Care must be taken when the type parameter E is a mutable not to modify it
-     * on successive calls.
+     * Compute the current state of the transformation at the current time.
      * 
      * @return The current state of the transformation.
      */
@@ -37,9 +31,7 @@ public abstract class Transformation<E> {
     }
 
     /**
-     * Compute the current state of the transformation at the given time. If the transformation is complete, no recomputation is
-     * performed and a cached object is returned. Care must be taken when the type parameter E is a mutable not to modify it on
-     * successive calls.
+     * Compute the current state of the transformation at the given time.
      * 
      * @param time
      *            The system uptime, in milliseconds.
@@ -48,7 +40,7 @@ public abstract class Transformation<E> {
     public E getTransformation(long time) {
 
         if (isComplete(time))
-            return mFinalState;
+            return getTransformationState(1);
 
         else if (time < mStartTime)
             return getTransformationState(0);
