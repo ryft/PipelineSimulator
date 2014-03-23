@@ -1,7 +1,6 @@
-package uk.co.ryft.pipeline.model.element.transformation;
+package uk.co.ryft.pipeline.model.transformation;
 
 import uk.co.ryft.pipeline.model.Float3;
-import uk.co.ryft.pipeline.model.Transformation;
 import android.opengl.Matrix;
 
 public class Rotation extends Transformation<float[]> {

@@ -10,7 +10,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import uk.co.ryft.pipeline.SetupActivity;
-import uk.co.ryft.pipeline.model.camera.Camera;
 import uk.co.ryft.pipeline.model.element.Composite;
 import uk.co.ryft.pipeline.model.element.Element;
 import uk.co.ryft.pipeline.model.element.Primitive;

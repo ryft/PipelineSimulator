@@ -1,7 +1,7 @@
 package uk.co.ryft.pipeline.ui.setup;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.model.camera.Camera;
+import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Float3;
 import uk.co.ryft.pipeline.ui.component.EditPointHandler;
 import uk.co.ryft.pipeline.ui.component.EditPointHandler.OnPointChangedListener;

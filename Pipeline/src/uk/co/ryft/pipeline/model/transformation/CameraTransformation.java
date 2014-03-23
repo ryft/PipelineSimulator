@@ -1,7 +1,7 @@
-package uk.co.ryft.pipeline.model.camera;
+package uk.co.ryft.pipeline.model.transformation;
 
+import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Float3;
-import uk.co.ryft.pipeline.model.Transformation;
 
 // XXX: Explain the rationale behind this being immutable
 public class CameraTransformation extends Transformation<Camera> {
@@ -39,15 +39,15 @@ public class CameraTransformation extends Transformation<Camera> {
 
     public CameraTransformation(Camera origin, Camera destination, int duration) {
         super(duration);
-        
+
         mOrigin = origin.clone();
         mDestination = destination.clone();
-        
+
         mRotationBase = mOrigin.getRotation();
         mRotationDiff = mDestination.getRotation() - mRotationBase;
         mScaleFactorBase = mOrigin.getScaleFactor();
         mScaleFactorDiff = mDestination.getScaleFactor() - mScaleFactorBase;
-        
+
         mEyeBase = mOrigin.getEye();
         mEyeDiff = mDestination.getEye().minus(mEyeBase);
         mFocusBase = mOrigin.getFocus();
@@ -72,6 +72,9 @@ public class CameraTransformation extends Transformation<Camera> {
     @Override
     protected Camera getTransformationState(float progress) {
 
+        if (mDestination == null)
+            throw new RuntimeException("NOPE");
+
         // We're required to clone here, or else the caller may alter our referenced objects
         if (progress <= 0)
             return mOrigin.clone();
@@ -88,7 +91,7 @@ public class CameraTransformation extends Transformation<Camera> {
         float top = mTopBase + (mTopDiff * progress);
         float near = mNearBase + (mNearDiff * progress);
         float far = mFarBase + (mFarDiff * progress);
-        
+
         Camera diff = new Camera(eye, focus, up, left, right, bottom, top, near, far);
         diff.setRotation(mRotationBase + mRotationDiff * progress);
         diff.setScaleFactor(mScaleFactorBase + mScaleFactorDiff * progress);

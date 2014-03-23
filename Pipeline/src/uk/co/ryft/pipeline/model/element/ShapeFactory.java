@@ -3,7 +3,7 @@ package uk.co.ryft.pipeline.model.element;
 import java.util.LinkedList;
 import java.util.List;
 
-import uk.co.ryft.pipeline.model.camera.Camera;
+import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Colour;
 import uk.co.ryft.pipeline.model.Float3;
 
@@ -11,7 +11,7 @@ import uk.co.ryft.pipeline.model.Float3;
 public class ShapeFactory {
 
     // XXX Regular polygons are created with the normal pointing along the negative z-axis
-    public static Primitive buildRegularPolygon(int vertexCount, boolean reverse, Float3 centre, float radius, float rotation,
+    protected static Primitive buildRegularPolygon(int vertexCount, boolean reverse, Float3 centre, float radius, float rotation,
             Colour colour) {
 
         List<Float3> points = new LinkedList<Float3>();
@@ -141,12 +141,12 @@ public class ShapeFactory {
     }
 
     // XXX Eye is at the origin, focuses along negative Z
-    public static Element buildCamera(float scale) {
+    public static Composite buildCamera(float scale) {
         return buildCamera(scale, Colour.GREY, Colour.WHITE, Colour.BLACK);
     }
 
     // XXX Eye is at the origin, focuses along negative Z
-    public static Element buildCamera(float scale, Colour bodyColour, Colour lensCasingColour, Colour shutterButtonColour) {
+    public static Composite buildCamera(float scale, Colour bodyColour, Colour lensCasingColour, Colour shutterButtonColour) {
 
         Float3 origin = new Float3(0, 0, 0);
 
@@ -218,7 +218,7 @@ public class ShapeFactory {
     }
 
     // XXX Points must be provided in correct winding order
-    public static Primitive buildConvexPolygon(List<Float3> points, Colour colour) {
+    protected static Primitive buildConvexPolygon(List<Float3> points, Colour colour) {
 
         return new Primitive(Primitive.Type.GL_TRIANGLE_FAN, points, colour);
     }
