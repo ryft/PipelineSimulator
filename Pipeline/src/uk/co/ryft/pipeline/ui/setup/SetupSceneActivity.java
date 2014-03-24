@@ -393,7 +393,6 @@ public class SetupSceneActivity extends ListActivity {
         CheckBox selectionCheckBox;
     }
 
-    // Uses a BaseAdapter - http://www.piwai.info/android-adapter-good-practices/
     class ElementAdapter extends BaseAdapter {
 
         final Context mContext;

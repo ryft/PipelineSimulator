@@ -66,7 +66,7 @@ public class Colour implements Serializable, Cloneable {
     
     @Override
     public String toString() {
-        return "("+red+", "+green+", "+blue+"): "+alpha;
+        return "("+red+", "+green+", "+blue+", "+alpha+")";
         
 //        return "#"
 //              + toHex((int) Math.floor(red / 16))

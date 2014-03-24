@@ -74,7 +74,6 @@ public abstract class LightingModel implements Serializable {
     protected float mLightLevel = 1;
 
     public void setGlobalLightLevel(float lightLevel) {
-        // TODO consider using alpha values here -- then we could do a convincing crossfade.
         mLightLevel = lightLevel;
     }
 

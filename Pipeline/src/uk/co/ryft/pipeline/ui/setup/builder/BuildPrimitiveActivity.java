@@ -103,7 +103,6 @@ public class BuildPrimitiveActivity extends ListActivity {
         mAdapter = new ArrayAdapter<Float3Wrapper>(this, R.layout.listitem_point, R.id.text_point, wrapped);
         setListAdapter(mAdapter);
 
-        // XXX reference https://github.com/romannurik/Android-SwipeToDismiss
         ListView listView = getListView();
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing

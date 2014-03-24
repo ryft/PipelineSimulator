@@ -45,8 +45,6 @@ public class PipelineActivity extends Activity {
     protected PipelineSurface mSurfaceMSAA;
     protected TextView mPipelineIndicator;
     protected SlidingLayer mPipelineNavigator;
-
-    protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
 
     // Animation length in milliseconds
@@ -200,10 +198,12 @@ public class PipelineActivity extends Activity {
                     }
                 }
 
-                // Consume all double-tap and swipe events as second highest priority
-                if (!gestureDetector.onTouchEvent(event) && mSurfaceNOAA.isEditMode()) {
+                boolean isEditMode = mSurfaceNOAA.isEditMode();
 
-                    // XXX There is a bug in ScaleGestureDetector where it always returns true
+                // Consume all double-tap and swipe events as second highest priority
+                if (!gestureDetector.onTouchEvent(event) && isEditMode) {
+
+                    // There is a bug in ScaleGestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
                     scaleDetector.onTouchEvent(event);
                     onSceneMove(event);
