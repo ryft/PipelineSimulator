@@ -54,7 +54,7 @@ public class Composite implements Element {
         }
 
         @Override
-        public boolean isPrimitive() {
+        public final boolean isPrimitive() {
             return false;
         }
     };

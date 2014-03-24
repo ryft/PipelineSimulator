@@ -519,7 +519,7 @@ public class SetupSceneActivity extends ListActivity {
 
                         Element elem = (Element) getItem(position);
                         if (isPrimitive)
-                            // XXX safe cast due to previous check.
+                            // This is a safe cast due to the previous check.
                             editPrimitive((Primitive) elem);
                         else {
                             Collection<Element> components = ((Composite) elem).getComponents();

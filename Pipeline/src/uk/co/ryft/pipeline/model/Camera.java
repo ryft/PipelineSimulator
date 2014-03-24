@@ -140,14 +140,14 @@ public class Camera implements Serializable, Cloneable {
     public boolean isTransforming() {
         // Used to check whether a projection re-calculation is required at render time,
         // or when a pipeline transition should be disallowed.
-        return (mTransformation != null && !mTransformation.isComplete(SystemClock.uptimeMillis()));
+        return (mTransformation != null && !mTransformation.isComplete());
     }
 
     public void setProjectionMatrix(float[] projectionMatrix, int offset, int width, int height) {
 
         // Fetch current transformation state
         if (mTransformation != null) {
-            Camera newCamera = mTransformation.getTransformation(SystemClock.uptimeMillis());
+            Camera newCamera = mTransformation.getTransformation();
             mScaleFactor = newCamera.mScaleFactor;
         }
 
