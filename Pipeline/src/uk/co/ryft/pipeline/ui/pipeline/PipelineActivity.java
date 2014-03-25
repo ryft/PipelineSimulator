@@ -1,11 +1,5 @@
 package uk.co.ryft.pipeline.ui.pipeline;
 
-import java.util.ArrayList;
-
-import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.Colour;
-import uk.co.ryft.pipeline.gl.PipelineRenderer;
-import uk.co.ryft.pipeline.model.Element;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -36,6 +30,10 @@ import com.espian.showcaseview.targets.ViewTarget;
 import com.slidinglayer.SlidingLayer;
 import com.slidinglayer.SlidingLayer.OnInteractListener;
 
+import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.model.Colour;
+import uk.co.ryft.pipeline.model.PipelineRenderer;
+
 public class PipelineActivity extends Activity {
 
     @SuppressWarnings("unused")
@@ -45,8 +43,6 @@ public class PipelineActivity extends Activity {
     protected PipelineSurface mSurfaceMSAA;
     protected TextView mPipelineIndicator;
     protected SlidingLayer mPipelineNavigator;
-
-    protected ArrayList<Element> mElements;
     protected Bundle mPipelineParams;
 
     // Animation length in milliseconds
@@ -71,6 +67,8 @@ public class PipelineActivity extends Activity {
         mPipelineParams = getIntent().getExtras();
         mSurfaceNOAA = new PipelineSurface(this, mPipelineParams, false);
         mSurfaceMSAA = new PipelineSurface(this, mPipelineParams, true);
+        mSurfaceNOAA.setPreserveEGLContextOnPause(true);
+        mSurfaceMSAA.setPreserveEGLContextOnPause(true);
         mSurfaceNOAA.setPadding(2, 2, 2, 2);
         mSurfaceMSAA.setPadding(2, 2, 2, 2);
         mSurfaceMSAA.setAlpha(0);
@@ -122,7 +120,8 @@ public class PipelineActivity extends Activity {
 
                     updatePipelineIndicator(!scrollingRight,
                             mScrollOriginX - e2.getX() >= mSurfaceNOAA.getWidth() / 3
-                                    || e2.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 3);
+                                    || e2.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 3
+                    );
 
                     // Update the indicator if we've changed direction or it's been cleared
                     if (scrollingRight != mIsScrollingRight || mIndicatorCleared) {
@@ -162,8 +161,8 @@ public class PipelineActivity extends Activity {
 
                     if (mScrollOriginX - event.getX() >= mSurfaceNOAA.getWidth() / 5) {
                         // Scrolled left
-                        mSurfaceNOAA.getRenderer().next();
-                        mSurfaceMSAA.getRenderer().next();
+                        mSurfaceNOAA.getRenderer().applyNextStep();
+                        mSurfaceMSAA.getRenderer().applyNextStep();
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
                         updatePipelineNavigator(true);
@@ -172,8 +171,8 @@ public class PipelineActivity extends Activity {
                         // Scrolled right
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
-                        mSurfaceNOAA.getRenderer().previous();
-                        mSurfaceMSAA.getRenderer().previous();
+                        mSurfaceNOAA.getRenderer().undoPreviousStep();
+                        mSurfaceMSAA.getRenderer().undoPreviousStep();
                         updatePipelineNavigator(false);
 
                     } else if (mScrollOriginY - event.getY() >= mSurfaceNOAA.getHeight() / 5) {
@@ -198,10 +197,12 @@ public class PipelineActivity extends Activity {
                     }
                 }
 
-                // Consume all double-tap and swipe events as second highest priority
-                if (!gestureDetector.onTouchEvent(event) && mSurfaceNOAA.isEditMode()) {
+                boolean isEditMode = mSurfaceNOAA.isEditMode();
 
-                    // XXX There is a bug in ScaleGestureDetector where it always returns true
+                // Consume all double-tap and swipe events as second highest priority
+                if (!gestureDetector.onTouchEvent(event) && isEditMode) {
+
+                    // There is a bug in ScaleGestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
                     scaleDetector.onTouchEvent(event);
                     onSceneMove(event);
@@ -317,8 +318,8 @@ public class PipelineActivity extends Activity {
         TextView blockBlending;
 
         TextView getStepBlock(int step) {
-            TextView[] blocks = new TextView[] { blockVertexAssembly, blockVertexShading, blockClipping, blockMultisampling,
-                    blockFaceCulling, blockFragmentShading, blockDepthBufferTest, blockBlending };
+            TextView[] blocks = new TextView[]{blockVertexAssembly, blockVertexShading, blockClipping, blockMultisampling,
+                    blockFaceCulling, blockFragmentShading, blockDepthBufferTest, blockBlending};
             if (step < 0 || step >= blocks.length)
                 return null;
             else
@@ -326,9 +327,9 @@ public class PipelineActivity extends Activity {
         }
 
         LinearLayout getStepGroup(int step) {
-            LinearLayout[] groups = new LinearLayout[] { groupVertexProcessing, groupVertexProcessing,
+            LinearLayout[] groups = new LinearLayout[]{groupVertexProcessing, groupVertexProcessing,
                     groupPrimitiveProcessing, groupRasterisation, groupRasterisation, groupFragmentProcessing,
-                    groupFragmentProcessing, groupPixelProcessing, groupPixelProcessing };
+                    groupFragmentProcessing, groupPixelProcessing, groupPixelProcessing};
             if (step < 0 || step >= groups.length)
                 return null;
             else
@@ -410,8 +411,8 @@ public class PipelineActivity extends Activity {
     }
 
     protected void updatePipelineIndicator(final String text) {
-        mPipelineIndicator.post(new Runnable() {
 
+        Runnable updater = new Runnable() {
             @Override
             public void run() {
                 mPipelineIndicator.setTextColor(Colour.WHITE.toArgb());
@@ -419,7 +420,9 @@ public class PipelineActivity extends Activity {
                 mPipelineIndicator.setText(text);
                 mIndicatorCleared = true;
             }
-        });
+        };
+
+        mPipelineIndicator.post(updater);
     }
 
     public void updatePipelineNavigator(boolean forward) {
@@ -540,7 +543,7 @@ public class PipelineActivity extends Activity {
     }
 
     protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
-            OnShowcaseEventListener listener) {
+                                              OnShowcaseEventListener listener) {
         ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options);
         sv.setOnShowcaseEventListener(listener);
         sv.setScaleMultiplier(scale);
@@ -577,7 +580,6 @@ public class PipelineActivity extends Activity {
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         PipelineRenderer renderer = mSurfaceNOAA.getRenderer();
-        // TODO check out GLSurfaceView.setPreserveEGLContextOnPause()
 
         savedInstanceState.putBoolean("edit_mode", mSurfaceNOAA.isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());

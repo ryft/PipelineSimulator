@@ -3,13 +3,13 @@ package uk.co.ryft.pipeline;
 import java.util.ArrayList;
 import java.util.Random;
 
-import uk.co.ryft.pipeline.gl.Colour;
-import uk.co.ryft.pipeline.gl.Float3;
-import uk.co.ryft.pipeline.gl.lighting.LightingModel;
-import uk.co.ryft.pipeline.gl.lighting.LightingModel.Model;
 import uk.co.ryft.pipeline.model.Camera;
-import uk.co.ryft.pipeline.model.Element;
-import uk.co.ryft.pipeline.model.shapes.ShapeFactory;
+import uk.co.ryft.pipeline.model.Colour;
+import uk.co.ryft.pipeline.model.Float3;
+import uk.co.ryft.pipeline.model.element.Element;
+import uk.co.ryft.pipeline.model.element.ShapeFactory;
+import uk.co.ryft.pipeline.model.lighting.LightingModel;
+import uk.co.ryft.pipeline.model.lighting.LightingModel.Model;
 import uk.co.ryft.pipeline.ui.pipeline.PipelineActivity;
 import uk.co.ryft.pipeline.ui.setup.GLConfig;
 import uk.co.ryft.pipeline.ui.setup.SetupBlendingActivity;
@@ -624,7 +624,7 @@ public class SetupActivity extends Activity {
                         insertShowcaseView(findViewById(R.id.button_row_positive), R.string.help_simulate_title,
                                 R.string.help_simulate_desc, 0.9f, options, OnShowcaseEventListener.NONE);
 
-                        // After the final tutrial screen, re-enable help button
+                        // After the final tutorial screen, re-enable help button
                         mHelpActivated = true;
                     }
                 };

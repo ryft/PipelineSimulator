@@ -1,7 +1,7 @@
 package uk.co.ryft.pipeline.ui.pipeline;
 
 import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.gl.PipelineRenderer;
+import uk.co.ryft.pipeline.model.PipelineRenderer;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
