@@ -63,7 +63,7 @@ public class Primitive implements Element {
         }
 
         @Override
-        public boolean isPrimitive() {
+        public final boolean isPrimitive() {
             return true;
         }
     };
@@ -101,10 +101,6 @@ public class Primitive implements Element {
 
     public Colour getColour() {
         return mColour;
-    }
-
-    public int getColourArgb() {
-        return mColour.toArgb();
     }
 
     /**

@@ -4,7 +4,7 @@ import uk.co.ryft.pipeline.model.PipelineRenderer;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import android.opengl.GLES20;
 
-public class PointSource extends LightingModel {
+class PointSource extends LightingModel {
     
     private static final long serialVersionUID = 588690466528371489L;
 

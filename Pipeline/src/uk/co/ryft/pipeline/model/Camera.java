@@ -1,11 +1,12 @@
 package uk.co.ryft.pipeline.model;
 
+import android.opengl.Matrix;
+import android.os.SystemClock;
+
 import java.io.Serializable;
 
 import uk.co.ryft.pipeline.model.transformation.CameraTransformation;
 import uk.co.ryft.pipeline.model.transformation.Transformation;
-import android.opengl.Matrix;
-import android.os.SystemClock;
 
 //XXX Virtual camera parameters including camera location and projection
 // Necessary because android.graphics.camera doesn't hold projection parameters
@@ -45,13 +46,19 @@ public class Camera implements Serializable, Cloneable {
         return mUp;
     }
 
-    // For touch events
+    // For touch events. This is modified by the UI thread so needs to be volatile to ensure a global access ordering.
     private volatile float mRotation = 0f;
 
     public float getRotation() {
         return mRotation;
     }
 
+    /**
+     * Set the scene rotation in degrees, about the y-axis.
+     * Thread safe operation, can be called by the UI thread.
+     *
+     * @param rotation The rotation in degrees.
+     */
     public void setRotation(float rotation) {
         mRotation = rotation % 360;
     }
@@ -134,20 +141,20 @@ public class Camera implements Serializable, Cloneable {
 
     /**
      * Determine whether the camera is currently in the process of transforming to another configuration.
-     * 
+     *
      * @return True if a transformation is ongoing, false otherwise.
      */
     public boolean isTransforming() {
         // Used to check whether a projection re-calculation is required at render time,
         // or when a pipeline transition should be disallowed.
-        return (mTransformation != null && !mTransformation.isComplete(SystemClock.uptimeMillis()));
+        return (mTransformation != null && !mTransformation.isComplete());
     }
 
     public void setProjectionMatrix(float[] projectionMatrix, int offset, int width, int height) {
 
         // Fetch current transformation state
         if (mTransformation != null) {
-            Camera newCamera = mTransformation.getTransformation(SystemClock.uptimeMillis());
+            Camera newCamera = mTransformation.getTransformation();
             mScaleFactor = newCamera.mScaleFactor;
         }
 

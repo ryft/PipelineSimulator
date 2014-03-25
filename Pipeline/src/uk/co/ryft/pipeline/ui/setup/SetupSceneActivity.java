@@ -393,7 +393,6 @@ public class SetupSceneActivity extends ListActivity {
         CheckBox selectionCheckBox;
     }
 
-    // Uses a BaseAdapter - http://www.piwai.info/android-adapter-good-practices/
     class ElementAdapter extends BaseAdapter {
 
         final Context mContext;
@@ -520,7 +519,7 @@ public class SetupSceneActivity extends ListActivity {
 
                         Element elem = (Element) getItem(position);
                         if (isPrimitive)
-                            // XXX safe cast due to previous check.
+                            // This is a safe cast due to the previous check.
                             editPrimitive((Primitive) elem);
                         else {
                             Collection<Element> components = ((Composite) elem).getComponents();

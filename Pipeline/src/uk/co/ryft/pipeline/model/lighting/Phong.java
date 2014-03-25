@@ -1,6 +1,6 @@
 package uk.co.ryft.pipeline.model.lighting;
 
-public class Phong extends InterpolatedLighting {
+class Phong extends InterpolatedLighting {
     
     private static final long serialVersionUID = -5778052567824271818L;
 

@@ -7,7 +7,7 @@ import uk.co.ryft.pipeline.model.PipelineRenderer;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import android.opengl.GLES20;
 
-public abstract class InterpolatedLighting extends LightingModel {
+abstract class InterpolatedLighting extends LightingModel {
 
     private static final long serialVersionUID = -3397825035311793185L;
 

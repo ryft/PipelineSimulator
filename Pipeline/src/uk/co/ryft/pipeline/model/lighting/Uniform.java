@@ -4,7 +4,7 @@ import uk.co.ryft.pipeline.model.PipelineRenderer;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import android.opengl.GLES20;
 
-public class Uniform extends LightingModel {
+class Uniform extends LightingModel {
     
     private static final long serialVersionUID = -2930605266784494521L;
 

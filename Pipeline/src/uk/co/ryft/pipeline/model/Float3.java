@@ -88,10 +88,6 @@ public class Float3 implements Serializable, Cloneable {
         float norm = d.floatValue();
         return new Float3(getX() / norm, getY() / norm, getZ() / norm);
     }
-    
-    public Float3Wrapper wrap() {
-        return new Float3Wrapper(this);
-    }
 
     public float[] toArray() {
         float[] a = { x, y, z };

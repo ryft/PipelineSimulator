@@ -7,7 +7,7 @@ import java.util.List;
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Colour;
 import uk.co.ryft.pipeline.model.Float3;
-import uk.co.ryft.pipeline.model.Float3Wrapper;
+import uk.co.ryft.pipeline.model.Float3;
 import uk.co.ryft.pipeline.model.element.Primitive;
 import uk.co.ryft.pipeline.model.element.Primitive.Type;
 import uk.co.ryft.pipeline.ui.component.EditColourHandler;
@@ -37,8 +37,8 @@ import com.example.android.swipedismiss.SwipeDismissListViewTouchListener;
 
 public class BuildPrimitiveActivity extends ListActivity {
 
-    // Build an adapter of Float3Wrappers because they are mutable
-    protected ArrayAdapter<Float3Wrapper> mAdapter;
+    // Build an adapter of Float3s because they are mutable
+    protected ArrayAdapter<Float3> mAdapter;
     // protected Primitive mElement;
     protected Type mElementType;
     protected List<Float3> mElementVertices;
@@ -97,13 +97,9 @@ public class BuildPrimitiveActivity extends ListActivity {
         mTypeSpinner.setAdapter(typeAdapter);
         mTypeSpinner.setSelection(mElementType);
 
-        LinkedList<Float3Wrapper> wrapped = new LinkedList<Float3Wrapper>();
-        for (Float3 e : mElementVertices)
-            wrapped.add(e.wrap());
-        mAdapter = new ArrayAdapter<Float3Wrapper>(this, R.layout.listitem_point, R.id.text_point, wrapped);
+        mAdapter = new ArrayAdapter<Float3>(this, R.layout.listitem_point, R.id.text_point, mElementVertices);
         setListAdapter(mAdapter);
 
-        // XXX reference https://github.com/romannurik/Android-SwipeToDismiss
         ListView listView = getListView();
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing
@@ -144,7 +140,7 @@ public class BuildPrimitiveActivity extends ListActivity {
                 final EditText editX = (EditText) dialogueView.findViewById(R.id.edit_point_x);
                 final EditText editY = (EditText) dialogueView.findViewById(R.id.edit_point_y);
                 final EditText editZ = (EditText) dialogueView.findViewById(R.id.edit_point_z);
-                final Float3Wrapper thisPoint = mAdapter.getItem(position);
+                final Float3 thisPoint = mAdapter.getItem(position);
 
                 builder.setView(dialogueView);
                 builder.setPositiveButton(R.string.dialogue_button_save, new DialogInterface.OnClickListener() {
@@ -152,7 +148,8 @@ public class BuildPrimitiveActivity extends ListActivity {
                         float x = (editX.getText().toString().length() == 0) ? 0 : Float.valueOf(editX.getText().toString());
                         float y = (editY.getText().toString().length() == 0) ? 0 : Float.valueOf(editY.getText().toString());
                         float z = (editZ.getText().toString().length() == 0) ? 0 : Float.valueOf(editZ.getText().toString());
-                        thisPoint.wrap(new Float3(x, y, z));
+                        mAdapter.remove(thisPoint);
+                        mAdapter.insert(new Float3(x, y, z), position);
                         mAdapter.notifyDataSetChanged();
                     }
                 });
@@ -165,15 +162,15 @@ public class BuildPrimitiveActivity extends ListActivity {
                 // Get the AlertDialog, initialise values and show it.
                 AlertDialog dialogue = builder.create();
 
-                editX.setText(String.valueOf(thisPoint.unwrap().getX()));
-                editY.setText(String.valueOf(thisPoint.unwrap().getY()));
-                editZ.setText(String.valueOf(thisPoint.unwrap().getZ()));
+                editX.setText(String.valueOf(thisPoint.getX()));
+                editY.setText(String.valueOf(thisPoint.getY()));
+                editZ.setText(String.valueOf(thisPoint.getZ()));
                 dialogue.show();
             }
         });
 
         final ImageButton buttonColour = (ImageButton) findViewById(R.id.button_element_colour);
-        final View swatch = (View) findViewById(R.id.element_colour_swatch);
+        final View swatch = findViewById(R.id.element_colour_swatch);
         swatch.setBackgroundColor(mElementColour.toArgb());
         buttonColour.setOnClickListener(new EditColourHandler(this, mElementColour, new OnColourChangedListener() {
 
@@ -199,7 +196,7 @@ public class BuildPrimitiveActivity extends ListActivity {
             Type type = (Type) mTypeSpinner.getSelectedItem();
             LinkedList<Float3> vertices = new LinkedList<Float3>();
             for (int i = 0; i < mAdapter.getCount(); i++) {
-                vertices.add(mAdapter.getItem(i).unwrap());
+                vertices.add(mAdapter.getItem(i));
             }
             result.putExtra("element", new Primitive(type, vertices, mElementColour));
         }
@@ -228,7 +225,7 @@ public class BuildPrimitiveActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_points_new:
-                mAdapter.add(new Float3(0f, 0f, 0f).wrap());
+                mAdapter.add(new Float3(0f, 0f, 0f));
                 mAdapter.notifyDataSetChanged();
                 break;
 
@@ -238,36 +235,5 @@ public class BuildPrimitiveActivity extends ListActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    class PointAdapter extends ArrayAdapter<Float3Wrapper> {
-
-        final Context mContext;
-        final LayoutInflater mInflater;
-
-        public PointAdapter(Context context, Collection<Float3> points) {
-            super(context, 0);
-
-            mContext = context;
-            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-
-            // Recycle view if possible
-            if (convertView == null)
-                convertView = mInflater.inflate(R.layout.listitem_point, null);
-            
-            // All events are handled from the listview (parent) level.
-            return convertView;
-        }
-
-        protected void updatePoint(int position, float x, float y, float z) {
-            Float3Wrapper pointWrapper = getItem(position);
-            pointWrapper.wrap(new Float3(x, y, z));
-        }
-
     }
 }
