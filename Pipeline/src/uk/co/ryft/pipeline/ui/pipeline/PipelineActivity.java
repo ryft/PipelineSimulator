@@ -1,11 +1,5 @@
 package uk.co.ryft.pipeline.ui.pipeline;
 
-import java.util.ArrayList;
-
-import uk.co.ryft.pipeline.R;
-import uk.co.ryft.pipeline.model.Colour;
-import uk.co.ryft.pipeline.model.PipelineRenderer;
-import uk.co.ryft.pipeline.model.element.Element;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;
@@ -35,6 +29,10 @@ import com.espian.showcaseview.SimpleShowcaseEventListener;
 import com.espian.showcaseview.targets.ViewTarget;
 import com.slidinglayer.SlidingLayer;
 import com.slidinglayer.SlidingLayer.OnInteractListener;
+
+import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.model.Colour;
+import uk.co.ryft.pipeline.model.PipelineRenderer;
 
 public class PipelineActivity extends Activity {
 
@@ -122,7 +120,8 @@ public class PipelineActivity extends Activity {
 
                     updatePipelineIndicator(!scrollingRight,
                             mScrollOriginX - e2.getX() >= mSurfaceNOAA.getWidth() / 3
-                                    || e2.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 3);
+                                    || e2.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 3
+                    );
 
                     // Update the indicator if we've changed direction or it's been cleared
                     if (scrollingRight != mIsScrollingRight || mIndicatorCleared) {
@@ -319,8 +318,8 @@ public class PipelineActivity extends Activity {
         TextView blockBlending;
 
         TextView getStepBlock(int step) {
-            TextView[] blocks = new TextView[] { blockVertexAssembly, blockVertexShading, blockClipping, blockMultisampling,
-                    blockFaceCulling, blockFragmentShading, blockDepthBufferTest, blockBlending };
+            TextView[] blocks = new TextView[]{blockVertexAssembly, blockVertexShading, blockClipping, blockMultisampling,
+                    blockFaceCulling, blockFragmentShading, blockDepthBufferTest, blockBlending};
             if (step < 0 || step >= blocks.length)
                 return null;
             else
@@ -328,9 +327,9 @@ public class PipelineActivity extends Activity {
         }
 
         LinearLayout getStepGroup(int step) {
-            LinearLayout[] groups = new LinearLayout[] { groupVertexProcessing, groupVertexProcessing,
+            LinearLayout[] groups = new LinearLayout[]{groupVertexProcessing, groupVertexProcessing,
                     groupPrimitiveProcessing, groupRasterisation, groupRasterisation, groupFragmentProcessing,
-                    groupFragmentProcessing, groupPixelProcessing, groupPixelProcessing };
+                    groupFragmentProcessing, groupPixelProcessing, groupPixelProcessing};
             if (step < 0 || step >= groups.length)
                 return null;
             else
@@ -412,8 +411,8 @@ public class PipelineActivity extends Activity {
     }
 
     protected void updatePipelineIndicator(final String text) {
-        mPipelineIndicator.post(new Runnable() {
 
+        Runnable updater = new Runnable() {
             @Override
             public void run() {
                 mPipelineIndicator.setTextColor(Colour.WHITE.toArgb());
@@ -421,7 +420,9 @@ public class PipelineActivity extends Activity {
                 mPipelineIndicator.setText(text);
                 mIndicatorCleared = true;
             }
-        });
+        };
+
+        mPipelineIndicator.post(updater);
     }
 
     public void updatePipelineNavigator(boolean forward) {
@@ -542,7 +543,7 @@ public class PipelineActivity extends Activity {
     }
 
     protected ShowcaseView insertShowcaseView(View target, int title, int description, float scale, ConfigOptions options,
-            OnShowcaseEventListener listener) {
+                                              OnShowcaseEventListener listener) {
         ShowcaseView sv = ShowcaseView.insertShowcaseView(new ViewTarget(target), this, title, description, options);
         sv.setOnShowcaseEventListener(listener);
         sv.setScaleMultiplier(scale);

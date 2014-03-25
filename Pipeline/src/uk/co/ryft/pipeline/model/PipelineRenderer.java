@@ -38,6 +38,9 @@ public class PipelineRenderer implements Renderer, Serializable {
 
     // Renderer helper objects passed from the parent
     private final ArrayList<Element> mElements = new ArrayList<Element>();
+
+    // This map is modified from animation threads, so needs concurrent modification support
+    // Retrieval ops are non-blocking; iterators never throw ConcurrentModificationExceptions
     private final Map<Element, Drawable> mSceneElements = new ConcurrentHashMap<Element, Drawable>();
 
     private LightingModel mLightingScene;
