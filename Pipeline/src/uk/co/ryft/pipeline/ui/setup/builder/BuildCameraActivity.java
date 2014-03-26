@@ -23,9 +23,9 @@ public class BuildCameraActivity extends Activity {
 
     protected Float3 mPointEye = new Float3(0, 0, 0);
 
-    protected Colour mColourBody = Colour.GREY;
-    protected Colour mColourLens = Colour.WHITE;
-    protected Colour mColourShutter = Colour.BLACK;
+    protected Colour mColourBody = Colour.GREY();
+    protected Colour mColourLens = Colour.WHITE();
+    protected Colour mColourShutter = Colour.BLACK();
 
     // Store references to view elements
     protected TextView mTextEye;

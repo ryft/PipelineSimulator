@@ -1,14 +1,11 @@
-package uk.co.ryft.pipeline.test;
+package uk.co.ryft.pipeline.test.model;
 
 import uk.co.ryft.pipeline.model.Camera;
 import uk.co.ryft.pipeline.model.Float3;
-import uk.co.ryft.pipeline.model.PipelineRenderer;
+import uk.co.ryft.pipeline.test.Common;
 
-import android.os.Bundle;
 import android.test.AndroidTestCase;
-import android.test.InstrumentationTestCase;
 import android.util.FloatMath;
-import android.util.Log;
 
 import java.util.Random;
 
@@ -16,7 +13,6 @@ public class CameraTest extends AndroidTestCase {
 
     Camera testCamera;
     Camera destCamera;
-    float delta = 0.00001f;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -46,8 +42,8 @@ public class CameraTest extends AndroidTestCase {
         testCamera.setProjectionMatrix(projection1, 0, 100, 100);
 
         // Compare generated matrices
-        assertEquals(view0, view1, delta);
-        assertEquals(projection0, projection1, delta);
+        Common.assertEquals(view0, view1);
+        Common.assertEquals(projection0, projection1);
 
         // Reset camera ready for next tests
         testCamera.setRotation(0);
@@ -79,27 +75,27 @@ public class CameraTest extends AndroidTestCase {
         // Left vector = (1, 0 -1)
         float[] leftExpected = new Float3(1, 0, -1).normalised().toArray();
         float[] leftActual = new float[]{view[0], view[4], view[8]};
-        assertEquals(leftExpected, leftActual, delta);
+        Common.assertEquals(leftExpected, leftActual);
 
         // Up vector = (-1, 2, -1)
         float[] upExpected = new Float3(-1, 2, -1).normalised().toArray();
         float[] upActual = new float[]{view[1], view[5], view[9]};
-        assertEquals(upExpected, upActual, delta);
+        Common.assertEquals(upExpected, upActual);
 
         // Forward vector = (1, 1, 1)
         float[] forwardExpected = new Float3(1, 1, 1).normalised().toArray();
         float[] forwardActual = new float[]{view[2], view[6], view[10]};
-        assertEquals(forwardExpected, forwardActual, delta);
+        Common.assertEquals(forwardExpected, forwardActual);
 
         // Translation = (0, 0, sqrt(3))
         float[] transExpected = new Float3(0, 0, -FloatMath.sqrt(3)).toArray();
         float[] transActual = new float[]{view[12], view[13], view[14]};
-        assertEquals(transExpected, transActual, delta);
+        Common.assertEquals(transExpected, transActual);
 
         // Homogeneous coordinates = (0, 0, 0, 1)
         float[] homogeneousExpected = new float[]{0, 0, 0, 1};
         float[] homogeneousActual = new float[]{view[3], view[7], view[11], view[15]};
-        assertEquals(homogeneousExpected, homogeneousActual, delta);
+        Common.assertEquals(homogeneousExpected, homogeneousActual);
     }
 
     public void testSetProjectionMatrix() throws Exception {
@@ -110,6 +106,7 @@ public class CameraTest extends AndroidTestCase {
 
         float near = testCamera.getNear();
         float far = testCamera.getFar();
+        float delta = 0.00001f;
 
         // Test projection correctness
         // m[0] = near / right
@@ -125,15 +122,7 @@ public class CameraTest extends AndroidTestCase {
     }
 
     public void testClone() throws Exception {
-        Camera cloned = testCamera.clone();
-        assertTrue(testCamera.equals(cloned));
+        assertEquals(testCamera, testCamera.clone());
+        assertEquals(destCamera, destCamera.clone());
     }
-
-    // Custom assertion for float arrays
-    private void assertEquals(float[] expected, float[] actual, float delta) {
-        assertEquals(expected.length, actual.length);
-        for (int i = 0; i < expected.length; i++)
-            assertEquals(expected[i], actual[i], delta);
-    }
-
 }

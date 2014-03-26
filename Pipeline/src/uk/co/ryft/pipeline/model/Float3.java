@@ -30,6 +30,7 @@ public class Float3 implements Serializable, Cloneable {
         return z;
     }
 
+    /* Modifications return new objects */
     public Float3 transform(float[] transformation) {
 
         float[] v = new float[]{this.x, this.y, this.z, 1};
@@ -55,10 +56,9 @@ public class Float3 implements Serializable, Cloneable {
     }
 
     public Float3 translate(float x, float y, float z) {
-        return new Float3(getX() + x, getY() + y, getZ() + z);
+        return plus(new Float3(x, y, z));
     }
 
-    /* Modifications which return new objects */
     public Float3 plus(Float3 v) {
         return new Float3(getX() + v.getX(), getY() + v.getY(), getZ() + v.getZ());
     }
@@ -105,6 +105,9 @@ public class Float3 implements Serializable, Cloneable {
     }
 
     @Override
+    /**
+     * This tests for exact equality which is unrealistic for most uses with floating points numbers.
+     */
     public boolean equals(Object object) {
 
         if (object.getClass() != Float3.class)

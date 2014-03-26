@@ -23,8 +23,8 @@ public class BuildCuboidActivity extends Activity {
 
     protected Float3 mPointCentre = new Float3(0, 0, 0);
 
-    protected Colour mColourFront = Colour.BLUE;
-    protected Colour mColourSide = Colour.GREEN;
+    protected Colour mColourFront = Colour.BLUE();
+    protected Colour mColourSide = Colour.GREEN();
 
     // Store references to view elements
     protected TextView mTextCentre;

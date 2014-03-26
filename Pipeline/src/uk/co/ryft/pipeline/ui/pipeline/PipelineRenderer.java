@@ -1,4 +1,4 @@
-package uk.co.ryft.pipeline.model;
+package uk.co.ryft.pipeline.ui.pipeline;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
@@ -15,6 +15,9 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import uk.co.ryft.pipeline.SetupActivity;
+import uk.co.ryft.pipeline.model.Camera;
+import uk.co.ryft.pipeline.model.Colour;
+import uk.co.ryft.pipeline.model.Float3;
 import uk.co.ryft.pipeline.model.element.Composite;
 import uk.co.ryft.pipeline.model.element.Element;
 import uk.co.ryft.pipeline.model.element.Primitive;
@@ -122,7 +125,7 @@ public class PipelineRenderer implements Renderer, Serializable {
         mLightingPoint = LightingModel.getLightingModel(Model.POINT_SOURCE);
 
         sLightPosition = (Float3) params.getSerializable("light_position");
-        mLightElement = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE);
+        mLightElement = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE());
         mLightDrawable = mLightElement.getDrawable();
 
         mGLCullingEnabled = false;
