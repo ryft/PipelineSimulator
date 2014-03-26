@@ -352,20 +352,21 @@ public class PipelineRenderer implements Renderer, Serializable {
     }
 
     // Prints matrices in OpenGL-style column-major order.
-    public static void printMatrix(float[] m, int cols, int rows) {
+    public static String matrixToString(float[] m, int cols, int rows) {
+        StringBuilder output = new StringBuilder();
         for (int i = 0; i < rows; i++) {
             if (i == 0)
-                System.out.print("[");
+                output.append("[");
             else
-                System.out.print(" ");
+                output.append(" ");
             for (int j = 0; j < cols; j++) {
-                System.out.print(m[i + (j * 4)] + " ");
+                output.append(m[i + (j * 4)] + " ");
             }
             if (i == rows - 1)
-                System.out.println("]");
-            else
-                System.out.println();
+                output.append("]");
+            output.append("\n");
         }
+        return output.toString();
     }
 
     // Each pipeline stage is represented by the most recently completed pipeline step transition.
