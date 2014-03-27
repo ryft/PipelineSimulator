@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
@@ -71,6 +72,7 @@ public class PipelineActivity extends Activity {
         mSurfaceNOAA.setPadding(2, 2, 2, 2);
         mSurfaceMSAA.setPadding(2, 2, 2, 2);
         mSurfaceMSAA.setAlpha(0);
+        mSurfaceMSAA.setVisibility(View.GONE);
         pipelineFrame.addView(mSurfaceNOAA);
         pipelineFrame.addView(mSurfaceMSAA);
 
@@ -82,10 +84,9 @@ public class PipelineActivity extends Activity {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 if (mSurfaceNOAA.getRenderer().getCurrentState() < PipelineRenderer.STEP_CLIPPING) {
-                    mSurfaceNOAA.toggleEditMode();
-                    mSurfaceMSAA.toggleEditMode();
+                    toggleEditMode();
 
-                    if (mSurfaceNOAA.isEditMode())
+                    if (isEditMode())
                         updatePipelineIndicator("Move mode");
                     else
                         updatePipelineIndicator("Simulator mode");
@@ -104,7 +105,7 @@ public class PipelineActivity extends Activity {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (!mSurfaceNOAA.isEditMode()) {
+                if (!isEditMode()) {
                     mIsScrolling = true;
 
                     // Store y-coordinate for simple vertical swipe detection
@@ -160,10 +161,10 @@ public class PipelineActivity extends Activity {
 
                     if (mScrollOriginX - event.getX() >= mSurfaceNOAA.getWidth() / 5) {
                         // Scrolled left
+                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING - 1)
+                            new Thread(crossFader).start();
                         mSurfaceNOAA.getRenderer().applyNextStep();
                         mSurfaceMSAA.getRenderer().applyNextStep();
-                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
-                            new Thread(crossFader).start();
                         updatePipelineNavigator(true);
 
                     } else if (event.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 5) {
@@ -196,15 +197,16 @@ public class PipelineActivity extends Activity {
                     }
                 }
 
-                boolean isEditMode = mSurfaceNOAA.isEditMode();
-
                 // Consume all double-tap and swipe events as second highest priority
-                if (!gestureDetector.onTouchEvent(event) && isEditMode) {
+                if (!gestureDetector.onTouchEvent(event) && isEditMode()) {
 
                     // There is a bug in ScaleGestureDetector where it always returns true
                     // See https://code.google.com/p/android/issues/detail?id=42591
                     scaleDetector.onTouchEvent(event);
-                    onSceneMove(event);
+
+                    // We only need to move the scene in the NOAA surface
+                    // because viewport mapping happens before multisampling
+                    mSurfaceNOAA.onSceneMove(event);
                 }
 
                 return true;
@@ -239,7 +241,26 @@ public class PipelineActivity extends Activity {
         updatePipelineIndicator("Swipe up to show navigator");
     }
 
-    private boolean multisampled = false;
+    private boolean mEditMode;
+
+    private boolean isEditMode() {
+        return mEditMode;
+    }
+
+    private void toggleEditMode() {
+        setEditMode(!isEditMode());
+    }
+
+    private void setEditMode(boolean editMode) {
+        mEditMode = editMode;
+
+        if (editMode)
+            mSurfaceNOAA.setBackgroundResource(R.drawable.surface_border);
+        else
+            mSurfaceNOAA.setBackgroundResource(0);
+    }
+
+    private boolean mMultisampled = false;
     private CrossFader crossFader = new CrossFader();
 
     private class CrossFader implements Runnable {
@@ -247,16 +268,16 @@ public class PipelineActivity extends Activity {
         @Override
         public void run() {
 
-            final PipelineSurface viewSrc = (multisampled) ? mSurfaceMSAA : mSurfaceNOAA;
-            final PipelineSurface viewDst = (multisampled) ? mSurfaceNOAA : mSurfaceMSAA;
+            final PipelineSurface viewSrc = (mMultisampled) ? mSurfaceMSAA : mSurfaceNOAA;
+            final PipelineSurface viewDst = (mMultisampled) ? mSurfaceNOAA : mSurfaceMSAA;
 
-            Runnable showDst = new Runnable() {
+            viewDst.post(new Runnable() {
                 @Override
                 public void run() {
-                    viewDst.setAlpha(0);
                     viewDst.setVisibility(View.VISIBLE);
                 }
-            };
+            });
+
             Runnable hideSrc = new Runnable() {
                 @Override
                 public void run() {
@@ -279,15 +300,16 @@ public class PipelineActivity extends Activity {
                 viewSrc.setAlpha(1.0f - ((float) step / steps));
                 threadSleep(10);
             }
-            viewDst.post(showDst);
             viewSrc.post(hideSrc);
+            viewDst.getRenderer().setScaleFactor(1);
+            viewDst.postInvalidate();
+
             for (int step = 0; step <= steps; step++) {
                 viewDst.setAlpha((float) step / steps);
                 threadSleep(10);
             }
 
-            multisampled = !multisampled;
-
+            mMultisampled = !mMultisampled;
         }
     }
 
@@ -482,52 +504,13 @@ public class PipelineActivity extends Activity {
         view.setBackground(background);
     }
 
-    private float mPreviousX = 0;
-    private float mPreviousY = 0;
-    private float TOUCH_SCALE_FACTOR = 0.3f;
-
-    public boolean onSceneMove(MotionEvent e) {
-        // MotionEvent reports input details from the touch screen
-        // and other input controls. In this case, you are only
-        // interested in events where the touch position changed.
-
-        float x = e.getX();
-        float y = e.getY();
-
-        switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-
-                float dx = x - mPreviousX;
-                float dy = y - mPreviousY;
-
-                // reverse direction of rotation above the mid-line
-                if (y > mSurfaceNOAA.getHeight() / 2)
-                    dx = dx * -1;
-
-                // reverse direction of rotation to left of the mid-line
-                if (x < mSurfaceNOAA.getWidth() / 2)
-                    dy = dy * -1;
-
-                mSurfaceNOAA.getRenderer().setRotation(
-                        mSurfaceNOAA.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
-                mSurfaceMSAA.getRenderer().setRotation(
-                        mSurfaceMSAA.getRenderer().getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
-        }
-
-        mPreviousX = x;
-        mPreviousY = y;
-
-        return true;
-    }
-
     @Override
     public void onBackPressed() {
-        if (mPipelineNavigator.isOpened()) {
+        if (mPipelineNavigator.isOpened())
             mPipelineNavigator.closeLayer(true);
-        } else if (mSurfaceNOAA.isEditMode()) {
-            mSurfaceNOAA.toggleEditMode();
-            mSurfaceMSAA.toggleEditMode();
-        } else
+        else if (isEditMode())
+            toggleEditMode();
+        else
             super.onBackPressed();
     }
 
@@ -580,7 +563,7 @@ public class PipelineActivity extends Activity {
         super.onSaveInstanceState(savedInstanceState);
         PipelineRenderer renderer = mSurfaceNOAA.getRenderer();
 
-        savedInstanceState.putBoolean("edit_mode", mSurfaceNOAA.isEditMode());
+        savedInstanceState.putBoolean("edit_mode", isEditMode());
         savedInstanceState.putFloat("angle", renderer.getRotation());
     }
 
@@ -591,8 +574,7 @@ public class PipelineActivity extends Activity {
         PipelineRenderer rendererNOAA = mSurfaceNOAA.getRenderer();
         PipelineRenderer rendererMSAA = mSurfaceMSAA.getRenderer();
 
-        mSurfaceNOAA.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
-        mSurfaceMSAA.setEditMode(savedInstanceState.getBoolean("edit_mode", false));
+        setEditMode(savedInstanceState.getBoolean("edit_mode", false));
         rendererNOAA.setRotation(savedInstanceState.getFloat("angle", 0));
         rendererMSAA.setRotation(savedInstanceState.getFloat("angle", 0));
     }

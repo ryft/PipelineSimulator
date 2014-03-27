@@ -29,7 +29,7 @@ public class PipelineSurface extends GLSurfaceView {
     public PipelineSurface(Context context, Bundle params, boolean multisample) {
         super(context);
         mContext = context;
-        mRenderer = new PipelineRenderer(params);
+        mRenderer = new PipelineRenderer(params, multisample);
         
         int minSamples = params.getInt("min_samples", 2);
 
@@ -46,25 +46,6 @@ public class PipelineSurface extends GLSurfaceView {
         // Render the view continuously so we can support transition effects.
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-    }
-
-    private boolean mEditMode;
-
-    public boolean isEditMode() {
-        return mEditMode;
-    }
-
-    public void toggleEditMode() {
-        setEditMode(!isEditMode());
-    }
-
-    public void setEditMode(boolean editMode) {
-        mEditMode = editMode;
-
-        if (editMode)
-            setBackgroundResource(R.drawable.surface_border);
-        else
-            setBackgroundResource(0);
     }
 
     @Override
@@ -98,8 +79,7 @@ public class PipelineSurface extends GLSurfaceView {
                 if (x < getWidth() / 2)
                     dy = dy * -1;
 
-                mRenderer.setRotation(mRenderer.getRotation() - (dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
-                requestRender();
+                mRenderer.updateRotation((dx + dy) * TOUCH_SCALE_FACTOR); // = 180.0f / 320
         }
 
         mPreviousX = x;
