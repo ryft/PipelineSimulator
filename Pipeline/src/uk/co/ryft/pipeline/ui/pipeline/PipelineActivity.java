@@ -271,38 +271,34 @@ public class PipelineActivity extends Activity {
             final PipelineSurface viewSrc = (mMultisampled) ? mSurfaceMSAA : mSurfaceNOAA;
             final PipelineSurface viewDst = (mMultisampled) ? mSurfaceNOAA : mSurfaceMSAA;
 
+            viewSrc.post(new Runnable() {
+                @Override
+                public void run() {
+                    viewSrc.bringToFront();
+                }
+            });
+
+            // Calculate number of steps from (duration = #steps * interval)
+            // Interval is fixed length (10ms)
+            int steps = mAnimationDuration / 20;
+            for (int step = 0; step <= steps; step++) {
+                viewSrc.setAlpha(1.0f - ((float) step / steps));
+                viewSrc.postInvalidate();
+                threadSleep(10);
+            }
+
             viewDst.post(new Runnable() {
                 @Override
                 public void run() {
                     viewDst.setVisibility(View.VISIBLE);
                 }
             });
-
-            Runnable hideSrc = new Runnable() {
+            viewSrc.post(new Runnable() {
                 @Override
                 public void run() {
                     viewSrc.setVisibility(View.GONE);
                 }
-            };
-            Runnable raiseSrc = new Runnable() {
-                @Override
-                public void run() {
-                    viewSrc.bringToFront();
-                }
-            };
-
-            // Calculate number of steps from (duration = #steps * interval)
-            // Interval is fixed length (10ms)
-            int steps = mAnimationDuration / 20;
-
-            viewSrc.post(raiseSrc);
-            for (int step = 0; step <= steps; step++) {
-                viewSrc.setAlpha(1.0f - ((float) step / steps));
-                threadSleep(10);
-            }
-            viewSrc.post(hideSrc);
-            viewDst.getRenderer().setScaleFactor(1);
-            viewDst.postInvalidate();
+            });
 
             for (int step = 0; step <= steps; step++) {
                 viewDst.setAlpha((float) step / steps);
