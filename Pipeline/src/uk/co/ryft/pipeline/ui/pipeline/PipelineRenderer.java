@@ -179,10 +179,6 @@ public class PipelineRenderer implements Renderer, Serializable {
         mLightingPoint.reset();
     }
 
-    public void reinitialise() {
-        mCameraActual.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
-    }
-
     private int mSurfaceWidth;
     private int mSurfaceHeight;
 
@@ -263,9 +259,14 @@ public class PipelineRenderer implements Renderer, Serializable {
     int frameNumber = 0;
     long[] frameTimes = new long[100];
 
+    long totalMatrices = 0;
+    long totalConstruction = 0;
+    long totalDrawing = 0;
+    long totalTime = 0;
+
     @Override
     public void onDrawFrame(GL10 unused) {
-        long prevFrame = SystemClock.uptimeMillis();
+        long time0 = SystemClock.uptimeMillis();
 
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -292,22 +293,26 @@ public class PipelineRenderer implements Renderer, Serializable {
         Matrix.multiplyMM(mLVPMatrix, 0, mProjectionMatrix, 0, mLVMatrix, 0);
         Matrix.multiplyMM(mCVPMatrix, 0, mProjectionMatrix, 0, mCVMatrix, 0);
 
-        // Draw light point
+        long timeMatrices = SystemClock.uptimeMillis();
+
+        // Initialise light point, axes and camera drawables if necessary
+        // (avoid object construction as much as possible at render time)
         if (mLightDrawable == null)
             mLightDrawable = mLightElement.getDrawable();
-        mLightDrawable.draw(mLightingPoint, mLVMatrix, mLVPMatrix);
-
-        // Reset OpenGL parameters for scene accessories
-        resetGLParameters();
-
-        // Initialise axes and camera drawables if necessary
-        // (avoid object construction as much as possible at render time)
         if (mAxesDrawable == null)
             mAxesDrawable = mAxesElement.getDrawable();
         if (mCameraDrawable == null)
             mCameraDrawable = mCameraElement.getDrawable();
         if (mFrustumDrawable == null)
             mFrustumDrawable = mFrustumElement.getDrawable();
+
+        long timeConstruction = SystemClock.uptimeMillis();
+
+        // Reset OpenGL parameters for scene accessories
+        resetGLParameters();
+
+        // Draw light point
+        mLightDrawable.draw(mLightingPoint, mLVMatrix, mLVPMatrix);
 
         // Draw axes and virtual camera
         if (mDrawAxes)
@@ -337,27 +342,43 @@ public class PipelineRenderer implements Renderer, Serializable {
             drawnElements++;
         }
 
-        long thisFrame = SystemClock.uptimeMillis();
-        frameTimes[frameNumber] = thisFrame - prevFrame;
-        prevFrame = thisFrame;
+        long timeEnd = SystemClock.uptimeMillis();
+
+        totalTime += timeEnd - time0;
+        totalMatrices += timeMatrices - time0;
+        totalConstruction += timeConstruction - timeMatrices;
+        totalDrawing += timeEnd - timeConstruction;
+
+        frameTimes[frameNumber] = timeEnd - time0;
         frameNumber = (frameNumber + 1) % frameTimes.length;
 
         if (frameNumber % 25 == 0) {
-            double ave = 0;
+            double mean = 0;
             int min = Integer.MAX_VALUE;
             int max = Integer.MIN_VALUE;
             for (int i = 0; i < frameTimes.length; i++) {
                 int ft = (int) frameTimes[i];
                 min = Math.min(min, ft);
                 max = Math.max(max, ft);
-                ave += frameTimes[i];
+                mean += frameTimes[i];
             }
-            ave /= frameTimes.length;
+            mean /= frameTimes.length;
 
             if (mMultisample)
-                Log.i(TAG, "MSAA: (" + min + ", " + ave + ", " + max + ") ms, " + Math.round(1000.0 / ave) + " fps");
+                Log.i(TAG, "MSAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
             else
-                Log.i(TAG, "NOAA: (" + min + ", " + ave + ", " + max + ") ms, " + Math.round(1000.0 / ave) + " fps");
+                Log.i(TAG, "NOAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
+
+            double percentMatrices = (100.0 * totalMatrices) / totalTime;
+            double percentConstruction = (100.0 * totalConstruction) / totalTime;
+            double percentDrawing = (100.0 * totalDrawing) / totalTime;
+
+            Log.i(TAG, "Breakdown (matrix operations, construction, drawing):  (" + Math.round(percentMatrices) + "%, " + Math.round(percentConstruction) + "%, " + Math.round(percentDrawing) + "%)");
+
+            totalMatrices = 0;
+            totalConstruction = 0;
+            totalDrawing = 0;
+            totalTime = 0;
         }
     }
 

@@ -165,7 +165,7 @@ public class SetupActivity extends Activity {
 
         // Put some interesting things in the scene
         Random r = new Random();
-        for (int i = 0; i < 48; i++) {
+        for (int i = 0; i < 36; i++) {
             Element e = ShapeFactory.buildCuboid(new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 3 - 1.5f,
                     r.nextFloat() * 3 - 1.5f), r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f,
                     Colour.RANDOM, Colour.RANDOM);
