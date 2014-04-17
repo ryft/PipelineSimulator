@@ -381,7 +381,8 @@ public class PipelineRenderer implements Renderer, Serializable {
     public static final int STEP_BLENDING = 8;
     public static final int STEP_FINAL = STEP_BLENDING;
 
-    // This is modified by animation threads so needs to be volatile to ensure a global access ordering.
+    // This is modified by animation threads so needs to be volatile to
+    // enforce a global access ordering.
     private volatile boolean mAnimationLock = false;
 
     class TransitionAnimator extends Thread {

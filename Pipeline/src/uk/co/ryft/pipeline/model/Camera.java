@@ -30,6 +30,13 @@ public class Camera implements Serializable, Cloneable {
         setProjection(left, right, bottom, top, near, far);
     }
 
+    /**
+     * Transform this camera to another location over a certain period of time.
+     * Interpolates all camera parameters for the duration of the transformation.
+     *
+     * @param destination The camera to transform to.
+     * @param duration    The transformation time, in milliseconds.
+     */
     public void transformTo(Camera destination, int duration) {
         mTransformation = new CameraTransformation(this, destination, duration);
     }
