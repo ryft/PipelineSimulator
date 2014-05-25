@@ -14,12 +14,19 @@ public class CameraTest extends AndroidTestCase {
     Camera testCamera;
     Camera destCamera;
 
+    /**
+     * Construct two sample cameras to be tested
+     */
     protected void setUp() throws Exception {
         super.setUp();
         testCamera = new Camera(new Float3(1, 1, 1), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 1, 2);
         destCamera = new Camera(new Float3(0, 0, 0), new Float3(1, 1, 1), new Float3(1, 0, 1), -1, 1, -1, 1, 1, 2);
     }
 
+    /**
+     * Test the transformTo() method by performing a transformation and
+     * validating the resulting generated view and projection matrices
+     */
     public void testTransformTo() throws Exception {
 
         // Start transformation
@@ -50,6 +57,10 @@ public class CameraTest extends AndroidTestCase {
         testCamera.setScaleFactor(1);
     }
 
+    /**
+     * Test the updateScaleFactor() method by updating 100 times and validating the resulting factor
+     * @throws Exception
+     */
     public void testUpdateScaleFactor() throws Exception {
 
         Random r = new Random();
@@ -66,6 +77,9 @@ public class CameraTest extends AndroidTestCase {
         assertEquals(scaleFactor, testCamera.getScaleFactor());
     }
 
+    /**
+     * Test the setViewMatrix() function by validating the generated view matrix for the test camera
+     */
     public void testSetViewMatrix() throws Exception {
 
         // Generate view matrix for the test camera
