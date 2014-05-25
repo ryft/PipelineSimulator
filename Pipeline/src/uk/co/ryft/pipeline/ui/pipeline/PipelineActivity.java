@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
@@ -53,6 +52,7 @@ public class PipelineActivity extends Activity {
     protected boolean mIsScrollingRight = false;
     protected float mScrollOriginX = 0;
     protected float mScrollOriginY = 0;
+    protected int mCurrentState = PipelineRenderer.STEP_INITIAL;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,7 +152,6 @@ public class PipelineActivity extends Activity {
 
         final int surfaceWidth = mSurfaceNOAA.getWidth();
         final int surfaceHeight = mSurfaceNOAA.getHeight();
-        final int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
 
         // Combine double-tap, scale and swipe listeners
         final OnTouchListener touchListener = new OnTouchListener() {
@@ -166,13 +165,13 @@ public class PipelineActivity extends Activity {
                     // Scrolled left event
                     if (mScrollOriginX - event.getX() >= surfaceWidth / 5) {
                         nextStep();
-                        if (currentState == PipelineRenderer.STEP_MULTISAMPLING)
+                        if (mCurrentState == PipelineRenderer.STEP_MULTISAMPLING - 1)
                             new Thread(crossFader).start();
                         updatePipelineNavigator(true);
 
                         // Scrolled right event
                     } else if (event.getX() - mScrollOriginX >= surfaceWidth / 5) {
-                        if (currentState == PipelineRenderer.STEP_MULTISAMPLING)
+                        if (mCurrentState == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
                         prevStep();
                         updatePipelineNavigator(false);
@@ -188,6 +187,8 @@ public class PipelineActivity extends Activity {
                             mPipelineNavigator.closeLayer(true);
 
                     }
+
+                    mCurrentState = mSurfaceNOAA.getRenderer().getCurrentState();
 
                     // Reset the indicator text after the transition animation completes
                     if (event.getAction() == MotionEvent.ACTION_UP) {

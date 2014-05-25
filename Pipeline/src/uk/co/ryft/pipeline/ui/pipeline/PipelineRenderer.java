@@ -369,16 +369,16 @@ public class PipelineRenderer implements Renderer, Serializable {
 
             // Output appropriate message with frame times and average frames per second
             if (mMultisample)
-                Log.i(TAG, "MSAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
+                Log.v(TAG, "MSAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
             else
-                Log.i(TAG, "NOAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
+                Log.v(TAG, "NOAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
 
             // Convert to percentages to display a breakdown of render step durations
             double percentMatrices = (100.0 * totalMatrices) / totalTime;
             double percentConstruction = (100.0 * totalConstruction) / totalTime;
             double percentDrawing = (100.0 * totalDrawing) / totalTime;
 
-            Log.i(TAG, "Breakdown (matrix operations, construction, drawing):  (" + Math.round(percentMatrices) + "%, " + Math.round(percentConstruction) + "%, " + Math.round(percentDrawing) + "%)");
+            Log.v(TAG, "Breakdown (matrix operations, construction, drawing):  (" + Math.round(percentMatrices) + "%, " + Math.round(percentConstruction) + "%, " + Math.round(percentDrawing) + "%)");
 
             totalMatrices = 0;
             totalConstruction = 0;
