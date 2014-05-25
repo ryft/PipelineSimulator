@@ -9,7 +9,7 @@ class Uniform extends LightingModel {
     private static final long serialVersionUID = -2930605266784494521L;
 
     protected Uniform() {
-        super(Model.UNIFORM);
+        super(ModelType.UNIFORM);
     }
 
     @Override

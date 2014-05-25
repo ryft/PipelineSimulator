@@ -6,6 +6,7 @@
     <string name="action_primitive_new">New primitive</string>
     <string name="action_composite_new">New composite</string>
     <string name="action_elements_discard">Clear scene</string>
+    <string name="action_scene_reset">Sample scene</string>
     
     <string name="action_points_new">New vertex</string>
     <string name="action_points_discard">Discard vertices</string>

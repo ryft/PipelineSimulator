@@ -159,31 +159,34 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
 
+                    // Scrolled left event
                     if (mScrollOriginX - event.getX() >= mSurfaceNOAA.getWidth() / 5) {
-                        // Scrolled left
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING - 1)
                             new Thread(crossFader).start();
                         mSurfaceNOAA.getRenderer().applyNextStep();
                         mSurfaceMSAA.getRenderer().applyNextStep();
                         updatePipelineNavigator(true);
 
+                    // Scrolled right event
                     } else if (event.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 5) {
-                        // Scrolled right
                         if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
                         mSurfaceNOAA.getRenderer().undoPreviousStep();
                         mSurfaceMSAA.getRenderer().undoPreviousStep();
                         updatePipelineNavigator(false);
 
+                    // Scrolled up event
                     } else if (mScrollOriginY - event.getY() >= mSurfaceNOAA.getHeight() / 5) {
                         if (!mPipelineNavigator.isOpened())
                             mPipelineNavigator.openLayer(true);
 
+                    // Scrolled down event
                     } else if (event.getY() - mScrollOriginY >= mSurfaceNOAA.getHeight() / 5) {
                         if (mPipelineNavigator.isOpened())
                             mPipelineNavigator.closeLayer(true);
                     }
 
+                    // Reset the indicator text after the transition animation completes
                     if (event.getAction() == MotionEvent.ACTION_UP) {
                         new Thread(new Runnable() {
 
@@ -241,6 +244,19 @@ public class PipelineActivity extends Activity {
         updatePipelineIndicator("Swipe up to show navigator");
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            findViewById(R.id.simulator_parent).setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
+    }
+
     private boolean mEditMode;
 
     private boolean isEditMode() {
@@ -271,6 +287,7 @@ public class PipelineActivity extends Activity {
             final PipelineSurface viewSrc = (mMultisampled) ? mSurfaceMSAA : mSurfaceNOAA;
             final PipelineSurface viewDst = (mMultisampled) ? mSurfaceNOAA : mSurfaceMSAA;
 
+            // Ensure source view is positioned above the destination in the z-order
             viewSrc.post(new Runnable() {
                 @Override
                 public void run() {
@@ -287,6 +304,7 @@ public class PipelineActivity extends Activity {
                 threadSleep(10);
             }
 
+            // Swap the visibility of the source & destination views
             viewDst.post(new Runnable() {
                 @Override
                 public void run() {
@@ -300,6 +318,7 @@ public class PipelineActivity extends Activity {
                 }
             });
 
+            // Fade in the destination view
             for (int step = 0; step <= steps; step++) {
                 viewDst.setAlpha((float) step / steps);
                 threadSleep(10);

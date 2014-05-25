@@ -9,7 +9,7 @@ class PointSource extends LightingModel {
     private static final long serialVersionUID = 588690466528371489L;
 
     protected PointSource() {
-        super(Model.POINT_SOURCE);
+        super(ModelType.POINT_SOURCE);
     }
 
     @Override

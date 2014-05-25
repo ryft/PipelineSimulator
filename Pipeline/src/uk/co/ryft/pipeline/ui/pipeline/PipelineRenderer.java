@@ -26,7 +26,6 @@ import uk.co.ryft.pipeline.model.element.Primitive;
 import uk.co.ryft.pipeline.model.element.ShapeFactory;
 import uk.co.ryft.pipeline.model.element.drawable.Drawable;
 import uk.co.ryft.pipeline.model.lighting.LightingModel;
-import uk.co.ryft.pipeline.model.lighting.LightingModel.Model;
 
 public class PipelineRenderer implements Renderer, Serializable {
 
@@ -128,9 +127,9 @@ public class PipelineRenderer implements Renderer, Serializable {
         mFrustumElement = ShapeFactory.buildFrustum(mCameraVirtual);
 
         // Initialise lighting models
-        mLightingScene = LightingModel.getLightingModel(Model.UNIFORM);
-        mLightingAccessory = LightingModel.getLightingModel(Model.UNIFORM);
-        mLightingPoint = LightingModel.getLightingModel(Model.POINT_SOURCE);
+        mLightingScene = LightingModel.getLightingModel(LightingModel.ModelType.UNIFORM);
+        mLightingAccessory = LightingModel.getLightingModel(LightingModel.ModelType.UNIFORM);
+        mLightingPoint = LightingModel.getLightingModel(LightingModel.ModelType.POINT_SOURCE);
 
         sLightPosition = (Float3) params.getSerializable("light_position");
         mLightElement = new Primitive(Primitive.Type.GL_POINTS, Collections.singletonList(sLightPosition), Colour.WHITE());
@@ -349,10 +348,14 @@ public class PipelineRenderer implements Renderer, Serializable {
         totalConstruction += timeConstruction - timeMatrices;
         totalDrawing += timeEnd - timeConstruction;
 
+        // Record this frame render time and store it in the circular frameTimes array
         frameTimes[frameNumber] = timeEnd - time0;
         frameNumber = (frameNumber + 1) % frameTimes.length;
 
+        // To minimise adverse performance effects, only print output every 25 frames
         if (frameNumber % 25 == 0) {
+
+            // Calculate min/mean/max frame times over the contents of the frameTimes array
             double mean = 0;
             int min = Integer.MAX_VALUE;
             int max = Integer.MIN_VALUE;
@@ -364,11 +367,13 @@ public class PipelineRenderer implements Renderer, Serializable {
             }
             mean /= frameTimes.length;
 
+            // Output appropriate message with frame times and average frames per second
             if (mMultisample)
                 Log.i(TAG, "MSAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
             else
                 Log.i(TAG, "NOAA render time over last 25 frames (min, mean, max): (" + min + ", " + mean + ", " + max + ")ms = " + Math.round(1000.0 / mean) + " fps");
 
+            // Convert to percentages to display a breakdown of render step durations
             double percentMatrices = (100.0 * totalMatrices) / totalTime;
             double percentConstruction = (100.0 * totalConstruction) / totalTime;
             double percentDrawing = (100.0 * totalDrawing) / totalTime;
@@ -513,6 +518,10 @@ public class PipelineRenderer implements Renderer, Serializable {
             mForward = forward;
         }
 
+        /**
+         * Increments mIteratedElements from 0 to the total number of elements
+         * over the course of mAnimationDuration milliseconds
+         */
         private void iterate() throws InterruptedException {
             int interval = (int) ((double) mAnimationDuration / mElements.size());
 
@@ -523,6 +532,9 @@ public class PipelineRenderer implements Renderer, Serializable {
             mIteratedElements = 0;
         }
 
+        /**
+         * Animates the vertex assembly pipeline transition over mAnimationDuration ms
+         */
         private void animateVertexAssembly(boolean forward) throws InterruptedException {
 
             int interval = (int) ((double) mAnimationDuration / mElements.size());
@@ -546,8 +558,8 @@ public class PipelineRenderer implements Renderer, Serializable {
                 mLightingScene.setGlobalLightLevel(1 - ((float) step / steps));
                 Thread.sleep(10);
             }
-            mLightingScene = (forward) ? LightingModel.getLightingModel(Model.LAMBERTIAN) : LightingModel
-                    .getLightingModel(Model.UNIFORM);
+            mLightingScene = (forward) ? LightingModel.getLightingModel(LightingModel.ModelType.LAMBERTIAN) : LightingModel
+                    .getLightingModel(LightingModel.ModelType.UNIFORM);
             for (int step = 0; step <= steps; step++) {
                 mLightingScene.setGlobalLightLevel((float) step / steps);
                 Thread.sleep(10);
@@ -583,8 +595,8 @@ public class PipelineRenderer implements Renderer, Serializable {
                 mLightingScene.setGlobalLightLevel(1 - ((float) step / steps));
                 Thread.sleep(10);
             }
-            mLightingScene = (forward) ? LightingModel.getLightingModel(Model.PHONG) : LightingModel
-                    .getLightingModel(Model.LAMBERTIAN);
+            mLightingScene = (forward) ? LightingModel.getLightingModel(LightingModel.ModelType.PHONG) : LightingModel
+                    .getLightingModel(LightingModel.ModelType.LAMBERTIAN);
             for (int step = 0; step <= steps; step++) {
                 mLightingScene.setGlobalLightLevel((float) step / steps);
                 Thread.sleep(10);

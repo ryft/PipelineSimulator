@@ -17,6 +17,12 @@
         android:title="@string/action_elements_discard"
         android:icon="@drawable/ic_action_discard"
         android:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/action_scene_reset"
+        android:title="@string/action_scene_reset"
+        android:icon="@drawable/ic_action_replay"
+        android:showAsAction="ifRoom|withText" />
     
     <item
         android:id="@+id/action_primitive_help"
