@@ -89,6 +89,8 @@ public class Camera implements Serializable, Cloneable {
             setProjection(newCamera.getLeft(), newCamera.getRight(), newCamera.getBottom(), newCamera.getTop(),
                     newCamera.getNear(), newCamera.getFar());
             mRotation = newCamera.mRotation;
+            if (mTransformation.isComplete(time))
+                mTransformation = null;
         }
 
         // Use negative angle to rotate in the correct direction about the y-axis
@@ -154,8 +156,11 @@ public class Camera implements Serializable, Cloneable {
 
         // Fetch current transformation state
         if (mTransformation != null) {
-            Camera newCamera = mTransformation.getTransformation();
+            long time = SystemClock.uptimeMillis();
+            Camera newCamera = mTransformation.getTransformation(time);
             mScaleFactor = newCamera.mScaleFactor;
+            if (mTransformation.isComplete(time))
+                mTransformation = null;
         }
 
         // Display a unit square with correct aspect ratio, regardless of screen orientation

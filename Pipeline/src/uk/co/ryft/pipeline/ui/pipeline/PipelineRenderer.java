@@ -4,6 +4,8 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -102,9 +104,12 @@ public class PipelineRenderer implements Renderer, Serializable {
     private Composite mAxesElement;
     private Drawable mAxesDrawable;
 
-    public PipelineRenderer(Bundle params) {
+    private boolean mMultisample;
+
+    public PipelineRenderer(Bundle params, boolean multisample) {
 
         mAxesElement = ShapeFactory.buildAxes();
+        mMultisample = multisample;
 
         // Get list of elements from the parameters bundle
         @SuppressWarnings("unchecked")
@@ -113,8 +118,11 @@ public class PipelineRenderer implements Renderer, Serializable {
 
         // Initialise cameras
         mCameraScene = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
-        mCameraActual = new Camera(new Float3(3, 3, 3), new Float3(0, 0, 0), new Float3(0, 1, 0), -1, 1, -1, 1, 2, 8);
         mCameraVirtual = (Camera) params.getSerializable("camera");
+        if (multisample)
+            mCameraActual = mCameraVirtual.clone();
+        else
+            mCameraActual = mCameraScene.clone();
 
         mCameraElement = ShapeFactory.buildCamera(0.25f);
         mFrustumElement = ShapeFactory.buildFrustum(mCameraVirtual);
@@ -169,6 +177,10 @@ public class PipelineRenderer implements Renderer, Serializable {
         mLightingScene.reset();
         mLightingAccessory.reset();
         mLightingPoint.reset();
+    }
+
+    public void reinitialise() {
+        mCameraActual.setProjectionMatrix(mProjectionMatrix, 0, mSurfaceWidth, mSurfaceHeight);
     }
 
     private int mSurfaceWidth;
@@ -248,8 +260,12 @@ public class PipelineRenderer implements Renderer, Serializable {
             GLES20.glDisable(GLES20.GL_BLEND);
     }
 
+    int frameNumber = 0;
+    long[] frameTimes = new long[100];
+
     @Override
     public void onDrawFrame(GL10 unused) {
+        long prevFrame = SystemClock.uptimeMillis();
 
         // Clear background colour and depth buffer
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -321,6 +337,28 @@ public class PipelineRenderer implements Renderer, Serializable {
             drawnElements++;
         }
 
+        long thisFrame = SystemClock.uptimeMillis();
+        frameTimes[frameNumber] = thisFrame - prevFrame;
+        prevFrame = thisFrame;
+        frameNumber = (frameNumber + 1) % frameTimes.length;
+
+        if (frameNumber % 25 == 0) {
+            double ave = 0;
+            int min = Integer.MAX_VALUE;
+            int max = Integer.MIN_VALUE;
+            for (int i = 0; i < frameTimes.length; i++) {
+                int ft = (int) frameTimes[i];
+                min = Math.min(min, ft);
+                max = Math.max(max, ft);
+                ave += frameTimes[i];
+            }
+            ave /= frameTimes.length;
+
+            if (mMultisample)
+                Log.i(TAG, "MSAA: (" + min + ", " + ave + ", " + max + ") ms, " + Math.round(1000.0 / ave) + " fps");
+            else
+                Log.i(TAG, "NOAA: (" + min + ", " + ave + ", " + max + ") ms, " + Math.round(1000.0 / ave) + " fps");
+        }
     }
 
     public float getRotation() {
@@ -330,6 +368,10 @@ public class PipelineRenderer implements Renderer, Serializable {
     public void setRotation(float angle) {
         if (mPipelineState < STEP_CLIPPING)
             mCameraActual.setRotation(angle);
+    }
+
+    public void updateRotation(float angle) {
+        setRotation(getRotation() - angle);
     }
 
     public float getScaleFactor() {

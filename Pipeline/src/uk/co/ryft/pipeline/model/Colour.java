@@ -143,6 +143,7 @@ public class Colour implements Serializable, Cloneable {
             return super.toArray();
         }
 
+        @Override
         public int toArgb() {
             randomise();
             return super.toArgb();
