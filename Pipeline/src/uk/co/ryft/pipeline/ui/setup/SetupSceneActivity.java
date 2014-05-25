@@ -5,15 +5,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 
 import uk.co.ryft.pipeline.R;
+import uk.co.ryft.pipeline.model.Colour;
 import uk.co.ryft.pipeline.model.Float3;
 import uk.co.ryft.pipeline.model.element.Composite;
 import uk.co.ryft.pipeline.model.element.Composite.Type;
 import uk.co.ryft.pipeline.model.element.Element;
 import uk.co.ryft.pipeline.model.element.Element.ElementType;
 import uk.co.ryft.pipeline.model.element.Primitive;
+import uk.co.ryft.pipeline.model.element.ShapeFactory;
 import uk.co.ryft.pipeline.ui.component.EditPointHandler;
 import uk.co.ryft.pipeline.ui.component.EditPointHandler.OnPointChangedListener;
 import uk.co.ryft.pipeline.ui.setup.builder.BuildPrimitiveActivity;
@@ -211,6 +214,19 @@ public class SetupSceneActivity extends ListActivity {
                 mAdapter.clear();
                 Toast.makeText(this, R.string.message_scene_clear, Toast.LENGTH_SHORT).show();
                 return true;
+
+            case R.id.action_scene_reset:
+                mAdapter.clear();
+                // Put some interesting things in the scene
+                Random r = new Random();
+                for (int i = 0; i < 36; i++) {
+                    Element e = ShapeFactory.buildCuboid(new Float3(r.nextFloat() * 2 - 1, r.nextFloat() * 3 - 1.5f,
+                                    r.nextFloat() * 3 - 1.5f), r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f, r.nextFloat() / 5 + 0.1f,
+                            Colour.RANDOM, Colour.RANDOM
+                    );
+                    mAdapter.add(e);
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -385,6 +401,8 @@ public class SetupSceneActivity extends ListActivity {
     // View holder stores references to the view components
     // see http://www.google.com/events/io/2010/sessions/world-of-listview-android.html
     static class ElementViewHolder {
+
+        // References to all UI components for easy modification on view recovery
         ImageView elemIcon;
         TextView typeTextView;
         ImageButton transformButton;
@@ -399,6 +417,12 @@ public class SetupSceneActivity extends ListActivity {
         final ArrayList<Element> mElems;
         final LayoutInflater mInflater;
 
+        /**
+         * Adapter specifically designed for lists of elements
+         *
+         * @param context     Context in which the list is shown
+         * @param elements    List of elements to initially populate the list with
+         */
         public ElementAdapter(Context context, Collection<Element> elements) {
             super();
 
@@ -450,7 +474,9 @@ public class SetupSceneActivity extends ListActivity {
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.listitem_element, null);
 
-                // Implement the View Holder pattern
+                // Implement the View Holder pattern:
+                // Construct an ElementViewHolder and populate it with references
+                // to the UI components which need to be updated for each element
                 viewHolder = new ElementViewHolder();
                 viewHolder.elemIcon = (ImageView) convertView.findViewById(R.id.element_icon);
                 viewHolder.typeTextView = (TextView) convertView.findViewById(R.id.element_type);
@@ -461,9 +487,11 @@ public class SetupSceneActivity extends ListActivity {
                 convertView.setTag(viewHolder);
 
             } else {
+                // Recover the previous view holder if there is one
                 viewHolder = (ElementViewHolder) convertView.getTag();
             }
 
+            // Use the references in the view holder to update the UI
             ImageView elemIcon = viewHolder.elemIcon;
             TextView typeTextView = viewHolder.typeTextView;
             ImageButton transformButton = viewHolder.transformButton;

@@ -186,17 +186,21 @@ public class PipelineActivity extends Activity {
                     } else if (event.getY() - mScrollOriginY >= surfaceHeight / 5) {
                         if (mPipelineNavigator.isOpened())
                             mPipelineNavigator.closeLayer(true);
+
                     }
 
-                    new Thread(new Runnable() {
+                    // Reset the indicator text after the transition animation completes
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        new Thread(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            threadSleep(mAnimationDuration);
-                            if (!mPipelineNavigator.isOpened())
-                                updatePipelineIndicator("Swipe up to show navigator");
-                        }
-                    }).start();
+                            @Override
+                            public void run() {
+                                threadSleep(mAnimationDuration);
+                                if (!mPipelineNavigator.isOpened())
+                                    updatePipelineIndicator("Swipe up to show navigator");
+                            }
+                        }).start();
+                    }
                 }
 
                 // Consume all double-tap and swipe events as second highest priority
@@ -242,6 +246,19 @@ public class PipelineActivity extends Activity {
         updatePipelineIndicator("Swipe up to show navigator");
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            findViewById(R.id.simulator_parent).setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
+    }
+
     private boolean mEditMode;
 
     private boolean isEditMode() {
@@ -283,6 +300,7 @@ public class PipelineActivity extends Activity {
             final PipelineSurface viewSrc = (mMultisampled) ? mSurfaceMSAA : mSurfaceNOAA;
             final PipelineSurface viewDst = (mMultisampled) ? mSurfaceNOAA : mSurfaceMSAA;
 
+            // Ensure source view is positioned above the destination in the z-order
             viewSrc.post(new Runnable() {
                 @Override
                 public void run() {
@@ -299,6 +317,7 @@ public class PipelineActivity extends Activity {
                 threadSleep(10);
             }
 
+            // Swap the visibility of the source & destination views
             viewDst.post(new Runnable() {
                 @Override
                 public void run() {
@@ -312,6 +331,7 @@ public class PipelineActivity extends Activity {
                 }
             });
 
+            // Fade in the destination view
             for (int step = 0; step <= steps; step++) {
                 viewDst.setAlpha((float) step / steps);
                 threadSleep(10);

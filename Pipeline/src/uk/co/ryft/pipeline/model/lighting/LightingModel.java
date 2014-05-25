@@ -1,29 +1,39 @@
 package uk.co.ryft.pipeline.model.lighting;
 
+import android.opengl.GLES20;
+import android.util.Log;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
-import android.opengl.GLES20;
-import android.util.Log;
 
+/**
+ *
+ */
 public abstract class LightingModel implements Serializable {
 
     private static final long serialVersionUID = -8281004338010378525L;
     private static final String TAG = "LightingModel";
 
-    public static enum Model {
+    /**
+     * Enumeration of all types of lighting model
+     * This exists so that we can have two different LightingModel objects
+     * (typically for distinct render threads) for the same lighting model
+     */
+    public static enum ModelType {
         UNIFORM, LAMBERTIAN, PHONG, POINT_SOURCE;
 
-        private static final Map<Model, String> mTitleMap;
+        private static final Map<ModelType, String> mTitleMap;
+
         static {
-            Map<Model, String> titleMap = new HashMap<Model, String>();
-            titleMap.put(Model.UNIFORM, "Uniform lighting");
-            titleMap.put(Model.LAMBERTIAN, "Lambertian reflectance");
-            titleMap.put(Model.PHONG, "Phong shading");
-            titleMap.put(Model.POINT_SOURCE, "Point light source");
+            Map<ModelType, String> titleMap = new HashMap<ModelType, String>();
+            titleMap.put(ModelType.UNIFORM, "Uniform lighting");
+            titleMap.put(ModelType.LAMBERTIAN, "Lambertian reflectance");
+            titleMap.put(ModelType.PHONG, "Phong shading");
+            titleMap.put(ModelType.POINT_SOURCE, "Point light source");
             mTitleMap = Collections.unmodifiableMap(titleMap);
         }
 
@@ -32,19 +42,28 @@ public abstract class LightingModel implements Serializable {
         }
     }
 
-    protected final Model mModel;
+    protected final ModelType mModelType;
     protected int mProgram = 0;
 
-    protected LightingModel(Model m) {
-        mModel = m;
+    /**
+     * Constructs a LightingModel used for drawing elements
+     *
+     * @param model The model which defines how each primitive is drawn
+     */
+    protected LightingModel(ModelType model) {
+        mModelType = model;
     }
 
-    public Model getModel() {
-        return mModel;
+    public ModelType getModel() {
+        return mModelType;
     }
 
-    public static LightingModel getLightingModel(Model model) {
-        switch (model) {
+    /**
+     * Factory method which returns a suitable LightingModel object from a
+     * given model type
+     */
+    public static LightingModel getLightingModel(ModelType modelType) {
+        switch (modelType) {
             case UNIFORM:
                 return new Uniform();
             case LAMBERTIAN:
@@ -58,6 +77,15 @@ public abstract class LightingModel implements Serializable {
         }
     }
 
+    /**
+     * Compiles shaders, creates and links an OpenGL program.
+     * Re-uses previous program whenever possible
+     *
+     * @param primitiveType The type of primitive to be drawn.
+     *                      Some lighting models will return different programs
+     *                      for different primitive types, e.g. 1D/2D primitives
+     * @return An OpenGL with which new primitives should be drawn
+     */
     public int getGLProgram(int primitiveType) {
 
         if (mProgram == 0) {
@@ -77,15 +105,25 @@ public abstract class LightingModel implements Serializable {
         mLightLevel = lightLevel;
     }
 
+    /** @return Attribute names passed to the vertex shader */
     protected abstract String[] getVertexShaderAttributes();
 
     public abstract String getVertexShader(int primitiveType);
 
     public abstract String getFragmentShader(int primitiveType);
 
+    /**
+     * Draw the given primitive in the current OpenGL context, using the provided scene definition matrices
+     *
+     * @param primitive Primitive to be drawn
+     * @param mvMatrix  Model-view matrix defining the position of the primitive in world coords
+     * @param mvpMatrix Model-view-projection matrix defining the position of the primitive in projected screen coords
+     */
     public abstract void draw(GL_Primitive primitive, float[] mvMatrix, float[] mvpMatrix);
 
-    // Clears the GL program for use in a new render thread
+    /**
+     * Clears the GL program for use in a new render thread
+     */
     public void reset() {
         mProgram = 0;
         setGlobalLightLevel(1);
@@ -93,16 +131,14 @@ public abstract class LightingModel implements Serializable {
 
     @Override
     public String toString() {
-        return mModel.getTitle();
+        return mModelType.getTitle();
     }
 
     /**
      * Helper function to compile a shader.
-     * 
-     * @param shaderType
-     *            The shader type.
-     * @param shaderSource
-     *            The shader source code.
+     *
+     * @param shaderType   The shader type.
+     * @param shaderSource The shader source code.
      * @return An OpenGL handle to the shader.
      */
     protected int compileShader(final int shaderType, final String shaderSource) {
@@ -136,13 +172,10 @@ public abstract class LightingModel implements Serializable {
 
     /**
      * Helper function to compile and link a program.
-     * 
-     * @param vertexShaderHandle
-     *            An OpenGL handle to an already-compiled vertex shader.
-     * @param fragmentShaderHandle
-     *            An OpenGL handle to an already-compiled fragment shader.
-     * @param attributes
-     *            Attributes that need to be bound to the program.
+     *
+     * @param vertexShaderHandle   An OpenGL handle to an already-compiled vertex shader.
+     * @param fragmentShaderHandle An OpenGL handle to an already-compiled fragment shader.
+     * @param attributes           Attributes that need to be bound to the program.
      * @return An OpenGL handle to the program.
      */
     protected int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle, final String[] attributes) {
@@ -187,12 +220,12 @@ public abstract class LightingModel implements Serializable {
 
     /**
      * Utility method for debugging OpenGL calls:
-     * 
+     * <p/>
      * <pre>
      * mColorHandle = GLES20.glGetUniformLocation(mProgram, &quot;vColor&quot;);
      * MyGLRenderer.checkGlError();
      * </pre>
-     * 
+     * <p/>
      * If the operation is not successful, the check throws an error.
      */
     public void checkGlError() {

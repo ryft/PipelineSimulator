@@ -9,7 +9,6 @@ import uk.co.ryft.pipeline.model.Float3;
 import uk.co.ryft.pipeline.model.element.Element;
 import uk.co.ryft.pipeline.model.element.ShapeFactory;
 import uk.co.ryft.pipeline.model.lighting.LightingModel;
-import uk.co.ryft.pipeline.model.lighting.LightingModel.Model;
 import uk.co.ryft.pipeline.ui.pipeline.PipelineActivity;
 import uk.co.ryft.pipeline.ui.setup.GLConfig;
 import uk.co.ryft.pipeline.ui.setup.SetupBlendingActivity;
@@ -58,7 +57,7 @@ public class SetupActivity extends Activity {
     // Light source position
     protected Float3 mLightPosition = new Float3(-2, 2, -3);
     // Lighting model
-    protected LightingModel mPreviewLightingModel = LightingModel.getLightingModel(Model.PHONG);
+    protected LightingModel mPreviewLightingModel = LightingModel.getLightingModel(LightingModel.ModelType.PHONG);
     // Transition animation duration
     protected int mAnimationDuration = 2000;
     // Multisampling
@@ -282,14 +281,14 @@ public class SetupActivity extends Activity {
                 // Instantiate and display a configuration dialogue
                 AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
                 builder.setTitle(R.string.dialogue_title_lighting_model);
-                final LightingModel.Model[] models = LightingModel.Model.values();
-                CharSequence[] modelNames = new CharSequence[models.length];
-                for (int i = 0; i < models.length; i++)
-                    modelNames[i] = models[i].getTitle();
+                final LightingModel.ModelType[] modelTypes = LightingModel.ModelType.values();
+                CharSequence[] modelNames = new CharSequence[modelTypes.length];
+                for (int i = 0; i < modelTypes.length; i++)
+                    modelNames[i] = modelTypes[i].getTitle();
                 builder.setItems(modelNames, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mPreviewLightingModel = LightingModel.getLightingModel(models[which]);
+                        mPreviewLightingModel = LightingModel.getLightingModel(modelTypes[which]);
                         updateViews();
                     }
                 });

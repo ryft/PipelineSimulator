@@ -15,7 +15,7 @@ abstract class InterpolatedLighting extends LightingModel {
             .asList(new Integer[] { GLES20.GL_TRIANGLES, GLES20.GL_TRIANGLE_FAN, GLES20.GL_TRIANGLE_STRIP });
 
     // This class allows Lambertian, Phong models to use distinct shaders for 1D and 2D primitives
-    protected InterpolatedLighting(Model m) {
+    protected InterpolatedLighting(ModelType m) {
         super(m);
     }
 

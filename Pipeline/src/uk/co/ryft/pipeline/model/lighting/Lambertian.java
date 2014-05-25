@@ -5,7 +5,7 @@ class Lambertian extends InterpolatedLighting {
     private static final long serialVersionUID = -5547031387655285667L;
 
     protected Lambertian() {
-        super(Model.LAMBERTIAN);
+        super(ModelType.LAMBERTIAN);
     }
 
     @Override

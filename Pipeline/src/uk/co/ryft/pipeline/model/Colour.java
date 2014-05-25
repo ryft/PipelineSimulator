@@ -127,12 +127,15 @@ public class Colour implements Serializable, Cloneable {
         return this.red == that.red && this.green == that.green && this.blue == that.blue && this.alpha == that.alpha;
     }
 
-    // Randomises its colour on each call of toArray()
     static class RandomColour extends Colour {
 
         private static final long serialVersionUID = -5270392509485931336L;
         private static Random r = new Random();
 
+        /**
+         * A colour subclass which randomises its colour values on each access,
+         * mainly used when testing colour rendering.
+         */
         public RandomColour() {
             super(r.nextInt(256), r.nextInt(256), r.nextInt(256));
         }

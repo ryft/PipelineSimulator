@@ -5,7 +5,7 @@ class Phong extends InterpolatedLighting {
     private static final long serialVersionUID = -5778052567824271818L;
 
     protected Phong() {
-        super(Model.PHONG);
+        super(ModelType.PHONG);
     }
 
     @Override
