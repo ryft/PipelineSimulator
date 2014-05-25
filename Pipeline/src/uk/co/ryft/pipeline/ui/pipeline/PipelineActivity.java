@@ -150,7 +150,11 @@ public class PipelineActivity extends Activity {
             }
         });
 
-        // Combine previous listeners and detect left- and right-swipes
+        final int surfaceWidth = mSurfaceNOAA.getWidth();
+        final int surfaceHeight = mSurfaceNOAA.getHeight();
+        final int currentState = mSurfaceNOAA.getRenderer().getCurrentState();
+
+        // Combine double-tap, scale and swipe listeners
         final OnTouchListener touchListener = new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -159,42 +163,40 @@ public class PipelineActivity extends Activity {
                 if (mIsScrolling && event.getAction() == MotionEvent.ACTION_UP) {
                     mIsScrolling = false;
 
-                    if (mScrollOriginX - event.getX() >= mSurfaceNOAA.getWidth() / 5) {
-                        // Scrolled left
-                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING - 1)
+                    // Scrolled left event
+                    if (mScrollOriginX - event.getX() >= surfaceWidth / 5) {
+                        nextStep();
+                        if (currentState == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
-                        mSurfaceNOAA.getRenderer().applyNextStep();
-                        mSurfaceMSAA.getRenderer().applyNextStep();
                         updatePipelineNavigator(true);
 
-                    } else if (event.getX() - mScrollOriginX >= mSurfaceNOAA.getWidth() / 5) {
-                        // Scrolled right
-                        if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_MULTISAMPLING)
+                        // Scrolled right event
+                    } else if (event.getX() - mScrollOriginX >= surfaceWidth / 5) {
+                        if (currentState == PipelineRenderer.STEP_MULTISAMPLING)
                             new Thread(crossFader).start();
-                        mSurfaceNOAA.getRenderer().undoPreviousStep();
-                        mSurfaceMSAA.getRenderer().undoPreviousStep();
+                        prevStep();
                         updatePipelineNavigator(false);
 
-                    } else if (mScrollOriginY - event.getY() >= mSurfaceNOAA.getHeight() / 5) {
+                        // Scrolled up event
+                    } else if (mScrollOriginY - event.getY() >= surfaceHeight / 5) {
                         if (!mPipelineNavigator.isOpened())
                             mPipelineNavigator.openLayer(true);
 
-                    } else if (event.getY() - mScrollOriginY >= mSurfaceNOAA.getHeight() / 5) {
+                        // Scrolled down event
+                    } else if (event.getY() - mScrollOriginY >= surfaceHeight / 5) {
                         if (mPipelineNavigator.isOpened())
                             mPipelineNavigator.closeLayer(true);
                     }
 
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        new Thread(new Runnable() {
+                    new Thread(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                threadSleep(mAnimationDuration);
-                                if (!mPipelineNavigator.isOpened())
-                                    updatePipelineIndicator("Swipe up to show navigator");
-                            }
-                        }).start();
-                    }
+                        @Override
+                        public void run() {
+                            threadSleep(mAnimationDuration);
+                            if (!mPipelineNavigator.isOpened())
+                                updatePipelineIndicator("Swipe up to show navigator");
+                        }
+                    }).start();
                 }
 
                 // Consume all double-tap and swipe events as second highest priority
@@ -208,7 +210,6 @@ public class PipelineActivity extends Activity {
                     // because viewport mapping happens before multisampling
                     mSurfaceNOAA.onSceneMove(event);
                 }
-
                 return true;
             }
         };
@@ -261,6 +262,17 @@ public class PipelineActivity extends Activity {
     }
 
     private boolean mMultisampled = false;
+
+    private void nextStep() {
+        mSurfaceNOAA.getRenderer().applyNextStep();
+        mSurfaceMSAA.getRenderer().applyNextStep();
+    }
+
+    private void prevStep() {
+        mSurfaceNOAA.getRenderer().undoPreviousStep();
+        mSurfaceMSAA.getRenderer().undoPreviousStep();
+    }
+
     private CrossFader crossFader = new CrossFader();
 
     private class CrossFader implements Runnable {

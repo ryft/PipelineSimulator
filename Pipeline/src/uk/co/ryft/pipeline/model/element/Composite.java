@@ -29,7 +29,7 @@ public class Composite implements Element {
             descriptionMap.put(Type.CYLINDER, "Cylinder");
             descriptionMap.put(Type.CUBOID, "Cuboid");
             descriptionMap.put(Type.CAMERA, "Camera");
-            descriptionMap.put(Type.CUSTOM, "Custom shape");
+            descriptionMap.put(Type.CUSTOM, "Composite Shape");
             mDescriptionMap = Collections.unmodifiableMap(descriptionMap);
         }
 
