@@ -1,8 +1,8 @@
 package uk.co.ryft.pipeline.model;
 
-import java.io.Serializable;
-
 import android.opengl.Matrix;
+
+import java.io.Serializable;
 
 public class Float3 implements Serializable, Cloneable {
 
@@ -30,9 +30,10 @@ public class Float3 implements Serializable, Cloneable {
         return z;
     }
 
+    /* Modifications return new objects */
     public Float3 transform(float[] transformation) {
 
-        float[] v = new float[] { this.x, this.y, this.z, 1 };
+        float[] v = new float[]{this.x, this.y, this.z, 1};
         Matrix.multiplyMV(v, 0, transformation, 0, v, 0);
         return new Float3(v[0], v[1], v[2]);
     }
@@ -44,7 +45,7 @@ public class Float3 implements Serializable, Cloneable {
     // XXX This rotates about the origin.
     public Float3 rotate(float a, float x, float y, float z) {
 
-        float[] v = new float[] { this.x, this.y, this.z, 1 };
+        float[] v = new float[]{this.x, this.y, this.z, 1};
 
         float[] m = new float[16];
         Matrix.setIdentityM(m, 0);
@@ -55,10 +56,9 @@ public class Float3 implements Serializable, Cloneable {
     }
 
     public Float3 translate(float x, float y, float z) {
-        return new Float3(getX() + x, getY() + y, getZ() + z);
+        return plus(new Float3(x, y, z));
     }
 
-    /* Modifications which return new objects */
     public Float3 plus(Float3 v) {
         return new Float3(getX() + v.getX(), getY() + v.getY(), getZ() + v.getZ());
     }
@@ -90,7 +90,7 @@ public class Float3 implements Serializable, Cloneable {
     }
 
     public float[] toArray() {
-        float[] a = { x, y, z };
+        float[] a = {getX(), getY(), getZ()};
         return a;
     }
 
@@ -101,7 +101,20 @@ public class Float3 implements Serializable, Cloneable {
 
     @Override
     public Object clone() {
-        return new Float3(x, y, z);
+        return new Float3(getX(), getY(), getZ());
+    }
+
+    @Override
+    /**
+     * This tests for exact equality which is unrealistic for most uses with floating points numbers.
+     */
+    public boolean equals(Object object) {
+
+        if (object.getClass() != Float3.class)
+            return false;
+
+        Float3 that = (Float3) object;
+        return (this.getX() == that.getX() && this.getY() == that.getY() && this.getZ() == that.getZ());
     }
 
 }

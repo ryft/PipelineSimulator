@@ -142,7 +142,7 @@ public class ShapeFactory {
 
     // XXX Eye is at the origin, focuses along negative Z
     public static Composite buildCamera(float scale) {
-        return buildCamera(scale, Colour.GREY, Colour.WHITE, Colour.BLACK);
+        return buildCamera(scale, Colour.GREY(), Colour.WHITE(), Colour.BLACK());
     }
 
     // XXX Eye is at the origin, focuses along negative Z
@@ -210,9 +210,9 @@ public class ShapeFactory {
         planeFar.add(new Float3(leftFar, bottomFar, -far));
         planeFar.add(new Float3(leftFar, topFar, -far));
 
-        frustum.add(new Primitive(Primitive.Type.GL_LINES, enclosure, Colour.WHITE));
-        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeNear, Colour.WHITE));
-        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeFar, Colour.WHITE));
+        frustum.add(new Primitive(Primitive.Type.GL_LINES, enclosure, Colour.WHITE()));
+        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeNear, Colour.WHITE()));
+        frustum.add(new Primitive(Primitive.Type.GL_LINE_LOOP, planeFar, Colour.WHITE()));
 
         return new Composite(Composite.Type.CUSTOM, frustum);
     }
@@ -236,7 +236,7 @@ public class ShapeFactory {
             lineCoords.add(new Float3(-1, 0, i));
             lineCoords.add(new Float3(1, 0, i));
         }
-        axes.add(new Primitive(Primitive.Type.GL_LINES, lineCoords, Colour.GREY));
+        axes.add(new Primitive(Primitive.Type.GL_LINES, lineCoords, Colour.GREY()));
 
         LinkedList<Float3> points = new LinkedList<Float3>();
         points.add(new Float3(0, 0, 0));
@@ -245,28 +245,28 @@ public class ShapeFactory {
         points.add(new Float3(0, 1, 0));
         points.add(new Float3(0, 0, 0));
         points.add(new Float3(0, 0, 1));
-        axes.add(new Primitive(Primitive.Type.GL_LINES, points, Colour.WHITE));
+        axes.add(new Primitive(Primitive.Type.GL_LINES, points, Colour.WHITE()));
 
         LinkedList<Float3> arrowX = new LinkedList<Float3>();
         arrowX.add(new Float3(0.8f, 0.1f, -0.1f));
         arrowX.add(new Float3(1, 0, 0));
         arrowX.add(new Float3(0.8f, -0.1f, 0.1f));
         arrowX.add(new Float3(0.9f, 0, 0));
-        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowX, Colour.RED));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowX, Colour.RED()));
 
         LinkedList<Float3> arrowY = new LinkedList<Float3>();
         arrowY.add(new Float3(-0.1f, 0.8f, 0.1f));
         arrowY.add(new Float3(0, 1, 0));
         arrowY.add(new Float3(0.1f, 0.8f, -0.1f));
         arrowY.add(new Float3(0, 0.9f, 0));
-        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowY, Colour.GREEN));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowY, Colour.GREEN()));
 
         LinkedList<Float3> arrowZ = new LinkedList<Float3>();
         arrowZ.add(new Float3(0.1f, -0.1f, 0.8f));
         arrowZ.add(new Float3(0, 0, 1));
         arrowZ.add(new Float3(-0.1f, 0.1f, 0.8f));
         arrowZ.add(new Float3(0, 0, 0.9f));
-        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE));
+        axes.add(new Primitive(Primitive.Type.GL_LINE_LOOP, arrowZ, Colour.BLUE()));
 
         return new Composite(Composite.Type.CUSTOM, axes);
     }

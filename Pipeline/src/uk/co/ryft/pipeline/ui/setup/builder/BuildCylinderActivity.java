@@ -23,8 +23,8 @@ public class BuildCylinderActivity extends Activity {
 
     protected Float3 mPointCentre = new Float3(0, 0, 0);
 
-    protected Colour mColourCap = Colour.BLUE;
-    protected Colour mColourBody = Colour.GREEN;
+    protected Colour mColourCap = Colour.BLUE();
+    protected Colour mColourBody = Colour.GREEN();
 
     // Store references to view elements
     protected TextView mTextCentre;

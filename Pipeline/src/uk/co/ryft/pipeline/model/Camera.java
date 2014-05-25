@@ -195,4 +195,24 @@ public class Camera implements Serializable, Cloneable {
         return cloned;
     }
 
+    @Override
+    public boolean equals(Object object) {
+
+        if (object.getClass() != Camera.class)
+            return false;
+
+        Camera that = (Camera) object;
+        boolean equal = true;
+        equal &= this.getEye().equals(that.getEye());
+        equal &= this.getFocus().equals(that.getFocus());
+        equal &= this.getUp().equals(that.getUp());
+        equal &= (this.getLeft() == that.getLeft() && this.getRight() == that.getRight() &&
+                this.getBottom() == that.getBottom() && this.getTop() == that.getTop() &&
+                this.getNear() == that.getNear() && this.getFar() == that.getFar());
+        equal &= this.getScaleFactor() == that.getScaleFactor();
+        equal &= this.getRotation() == that.getRotation();
+
+        return equal;
+    }
+
 }

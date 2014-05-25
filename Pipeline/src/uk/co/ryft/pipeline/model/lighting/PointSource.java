@@ -1,6 +1,6 @@
 package uk.co.ryft.pipeline.model.lighting;
 
-import uk.co.ryft.pipeline.model.PipelineRenderer;
+import uk.co.ryft.pipeline.ui.pipeline.PipelineRenderer;
 import uk.co.ryft.pipeline.model.element.drawable.GL_Primitive;
 import android.opengl.GLES20;
 

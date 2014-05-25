@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import uk.co.ryft.pipeline.model.Float3;
-import uk.co.ryft.pipeline.model.PipelineRenderer;
+import uk.co.ryft.pipeline.ui.pipeline.PipelineRenderer;
 import uk.co.ryft.pipeline.model.lighting.LightingModel;
 
 public class GL_Primitive implements Drawable {

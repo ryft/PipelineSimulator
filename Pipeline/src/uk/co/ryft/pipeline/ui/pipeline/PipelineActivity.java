@@ -32,7 +32,6 @@ import com.slidinglayer.SlidingLayer.OnInteractListener;
 
 import uk.co.ryft.pipeline.R;
 import uk.co.ryft.pipeline.model.Colour;
-import uk.co.ryft.pipeline.model.PipelineRenderer;
 
 public class PipelineActivity extends Activity {
 
@@ -393,13 +392,13 @@ public class PipelineActivity extends Activity {
 
         if (thresholdExceeded) {
             if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_INITIAL && right)
-                mPipelineIndicator.setTextColor(Colour.RED.toArgb());
+                mPipelineIndicator.setTextColor(Colour.RED().toArgb());
             else if (mSurfaceNOAA.getRenderer().getCurrentState() == PipelineRenderer.STEP_FINAL && !right)
-                mPipelineIndicator.setTextColor(Colour.RED.toArgb());
+                mPipelineIndicator.setTextColor(Colour.RED().toArgb());
             else
-                mPipelineIndicator.setTextColor(Colour.GREEN.toArgb());
+                mPipelineIndicator.setTextColor(Colour.GREEN().toArgb());
         } else
-            mPipelineIndicator.setTextColor(Colour.WHITE.toArgb());
+            mPipelineIndicator.setTextColor(Colour.WHITE().toArgb());
 
         if (right) {
             mPipelineIndicator.setGravity(Gravity.LEFT);
@@ -415,7 +414,7 @@ public class PipelineActivity extends Activity {
         Runnable updater = new Runnable() {
             @Override
             public void run() {
-                mPipelineIndicator.setTextColor(Colour.WHITE.toArgb());
+                mPipelineIndicator.setTextColor(Colour.WHITE().toArgb());
                 mPipelineIndicator.setGravity(Gravity.CENTER_HORIZONTAL);
                 mPipelineIndicator.setText(text);
                 mIndicatorCleared = true;

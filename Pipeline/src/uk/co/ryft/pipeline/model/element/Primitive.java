@@ -75,14 +75,14 @@ public class Primitive implements Element {
     public Primitive(Type type) {
         mType = type;
         mVertices = new ArrayList<Float3>();
-        mColour = Colour.WHITE;
+        mColour = Colour.WHITE();
     }
 
     public Primitive(Type type, List<Float3> vertices) {
         mType = type;
         // XXX This is safe because Float3s are immutable.
         mVertices = new ArrayList<Float3>(vertices);
-        mColour = Colour.WHITE;
+        mColour = Colour.WHITE();
     }
 
     public Primitive(Type type, List<Float3> vertices, Colour colour) {
@@ -204,6 +204,16 @@ public class Primitive implements Element {
     @Override
     public Primitive clone() {
         return new Primitive(getType(), getVertices(), getColour());
+    }
+
+    @Override
+    public boolean equals(Object object) {
+
+        if (object.getClass() != Primitive.class)
+            return false;
+
+        Primitive that = (Primitive) object;
+        return this.getType() == that.getType() && this.getVertices().equals(that.getVertices()) && this.getColour().equals(that.getColour());
     }
 
 }
